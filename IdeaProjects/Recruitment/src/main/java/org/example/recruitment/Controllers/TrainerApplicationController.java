@@ -1,6 +1,8 @@
 package org.example.recruitment.Controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.example.recruitment.entities.AdminDecision;
+import org.example.recruitment.entities.TrainerDetails;
 import org.example.recruitment.services.TrainerApplicationService;
 import org.example.recruitment.entities.ApplicationStatus;
 import org.example.recruitment.entities.TrainerApplication;
@@ -58,6 +60,14 @@ public class TrainerApplicationController {
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+    @PostMapping("/{id}/analyze")
+    public TrainerDetails analyze(@PathVariable Long id) {
+        return service.analyzeApplication(id);
+    }
 
+    @PatchMapping("/{id}/decision")
+    public TrainerApplication decision(@PathVariable Long id, @RequestParam AdminDecision decision) {
+        return service.decide(id, decision);
+    }
 
 }

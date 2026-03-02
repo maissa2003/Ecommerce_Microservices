@@ -28,12 +28,31 @@ public class TrainerApplicationService {
     // =========================
 
     // CREATE
-    public TrainerApplication submit(TrainerApplication application) {
-        if (repository.existsByUserId(application.getUserId())) {
-            throw new IllegalStateException("This user already submitted an application.");
-        }
-        application.setStatus(ApplicationStatus.PENDING);
-        return repository.save(application);
+    public TrainerApplication submit(TrainerApplication incoming) {
+
+        return repository.findByUserId(incoming.getUserId())
+                .map(existing -> {
+
+                    // Si déjà existe → on met à jour au lieu de bloquer
+
+                    if (incoming.getCvUrl() != null && !incoming.getCvUrl().isBlank()) {
+                        existing.setCvUrl(incoming.getCvUrl());
+                    }
+
+                    if (incoming.getMotivation() != null && !incoming.getMotivation().isBlank()) {
+                        existing.setMotivation(incoming.getMotivation());
+                    }
+
+                    // On remet en PENDING (resoumission)
+                    existing.setStatus(ApplicationStatus.PENDING);
+
+                    return repository.save(existing);
+                })
+                .orElseGet(() -> {
+                    // Sinon → nouvelle candidature
+                    incoming.setStatus(ApplicationStatus.PENDING);
+                    return repository.save(incoming);
+                });
     }
 
     // UPDATE (Candidate) - only while PENDING
@@ -83,6 +102,10 @@ public class TrainerApplicationService {
             throw new EntityNotFoundException("Application not found: " + id);
         }
         repository.deleteById(id);
+    }
+    // ✅ Nouveau
+    public boolean hasApplication(Long userId) {
+        return repository.existsByUserId(userId);
     }
 
     // =========================
@@ -157,7 +180,7 @@ public class TrainerApplicationService {
         if (decision == AdminDecision.REJECT) {
             app.setStatus(ApplicationStatus.REJECTED);
             return repository.save(app);
-        }
+        }   
 
         // ACCEPT: ensure details exist (generate if missing)
         TrainerDetails details = detailsRepository.findByApplication_Id(applicationId)

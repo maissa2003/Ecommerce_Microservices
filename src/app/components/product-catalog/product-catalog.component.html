@@ -1,0 +1,293 @@
+<div class="product-catalog">
+  <!-- En-tête avec bannière -->
+  <div class="catalog-header">
+    <div class="header-content">
+      <h1>Nos produits</h1>
+      <p>Découvrez notre sélection de produits de qualité</p>
+    </div>
+  </div>
+
+  <div class="catalog-container">
+    <!-- Sidebar des filtres -->
+    <aside class="filters-sidebar">
+      <div class="filters-header">
+        <h3>Filtres</h3>
+        <button class="reset-filters" (click)="resetFilters()">Réinitialiser</button>
+      </div>
+
+      <!-- Recherche -->
+      <div class="filter-section">
+        <label>Recherche</label>
+        <div class="search-input">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input 
+            type="text" 
+            [value]="searchTerm"
+            (input)="onSearch($event)"
+            placeholder="Rechercher un produit...">
+        </div>
+      </div>
+
+      <!-- Catégories -->
+      <div class="filter-section">
+        <label>Catégories</label>
+        <div class="filter-options">
+          <div *ngFor="let category of categories" class="filter-option">
+            <input 
+              type="radio" 
+              [id]="'cat-' + category" 
+              [value]="category" 
+              [checked]="selectedCategory === category"
+              (change)="filterByCategory(category)">
+            <label [for]="'cat-' + category">
+              {{ category === 'all' ? 'Toutes les catégories' : category }}
+              <span class="count">{{ getCategoryCount(category) }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marques -->
+      <div class="filter-section">
+        <label>Marques</label>
+        <div class="filter-options">
+          <div *ngFor="let brand of brands" class="filter-option">
+            <input 
+              type="radio" 
+              [id]="'brand-' + brand" 
+              [value]="brand" 
+              [checked]="selectedBrand === brand"
+              (change)="filterByBrand(brand)">
+            <label [for]="'brand-' + brand">
+              {{ brand === 'all' ? 'Toutes les marques' : brand }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prix -->
+      <div class="filter-section">
+        <label>Prix</label>
+        <div class="filter-options">
+          <div *ngFor="let range of priceRanges" class="filter-option">
+            <input 
+              type="radio" 
+              [id]="'price-' + range.value" 
+              [value]="range.value" 
+              [checked]="selectedPriceRange === range.value"
+              (change)="filterByPrice(range.value)">
+            <label [for]="'price-' + range.value">{{ range.label }}</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Note -->
+      <div class="filter-section">
+        <label>Note minimum</label>
+        <div class="rating-filters">
+          <div *ngFor="let star of [5,4,3,2,1]" class="rating-option" (click)="filterByRating(star)">
+            <div class="stars">
+              <span *ngFor="let s of getStarArray(star)" class="star filled">★</span>
+              <span *ngFor="let s of getStarArray(5-star)" class="star">★</span>
+            </div>
+            <span class="rating-label">{{ star }} étoiles et plus</span>
+            <div class="radio-check" [class.active]="selectedRating === star"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtres supplémentaires -->
+      <div class="filter-section">
+        <label>Disponibilité</label>
+        <div class="filter-option">
+          <input type="checkbox" id="inStock" [(ngModel)]="inStockOnly" (change)="applyFilters()">
+          <label for="inStock">En stock uniquement</label>
+        </div>
+        <div class="filter-option">
+          <input type="checkbox" id="onSale" [(ngModel)]="onSaleOnly" (change)="applyFilters()">
+          <label for="onSale">En promotion uniquement</label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="products-main">
+      <!-- Barre d'outils -->
+      <div class="products-toolbar">
+        <div class="results-info">
+          <span>{{ filteredProducts.length }} produit(s) trouvé(s)</span>
+        </div>
+        
+        <div class="toolbar-right">
+          <div class="sort-select">
+            <select (change)="changeSort($any($event.target).value)" [value]="sortOption">
+              <option *ngFor="let option of sortOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="view-toggle">
+            <button class="view-btn" [class.active]="viewMode === 'grid'" (click)="changeView('grid')">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
+            <button class="view-btn" [class.active]="viewMode === 'list'" (click)="changeView('list')">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aucun produit -->
+      <div *ngIf="filteredProducts.length === 0" class="no-products">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3>Aucun produit trouvé</h3>
+        <p>Essayez de modifier vos filtres ou votre recherche</p>
+        <button class="btn-primary" (click)="resetFilters()">Réinitialiser les filtres</button>
+      </div>
+
+      <!-- Vue grille -->
+      <div *ngIf="viewMode === 'grid' && filteredProducts.length > 0" class="products-grid">
+        <div *ngFor="let product of getPaginatedProducts()" class="product-card">
+          <div class="product-badges">
+            <span *ngIf="product.isNew" class="badge new">Nouveau</span>
+            <span *ngIf="product.isOnSale" class="badge sale">-{{ getDiscountPercent(product) }}%</span>
+          </div>
+          <div class="product-image" (click)="viewProduct(product.id)">
+            <img [src]="product.image" [alt]="product.name">
+            <button class="quick-view" (click)="$event.stopPropagation(); viewProduct(product.id)">
+              Vue rapide
+            </button>
+          </div>
+          <div class="product-info">
+            <h3 (click)="viewProduct(product.id)">{{ product.name }}</h3>
+            <div class="product-rating">
+              <div class="stars">
+                <span *ngFor="let star of getRatingStars(product.rating)" class="star">
+                  {{ star }}
+                </span>
+              </div>
+              <span class="reviews">({{ product.reviews }})</span>
+            </div>
+            <div class="product-price">
+              <span class="current-price">{{ formatPrice(product.price) }}</span>
+              <span *ngIf="product.isOnSale && product.originalPrice" class="old-price">{{ formatPrice(product.originalPrice) }}</span>
+            </div>
+            <button class="add-to-cart" (click)="addToCart(product)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Ajouter au panier
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vue liste -->
+      <div *ngIf="viewMode === 'list' && filteredProducts.length > 0" class="products-list">
+        <div *ngFor="let product of getPaginatedProducts()" class="product-list-item">
+          <div class="list-image" (click)="viewProduct(product.id)">
+            <img [src]="product.image" [alt]="product.name">
+            <div class="list-badges">
+              <span *ngIf="product.isNew" class="badge new">Nouveau</span>
+              <span *ngIf="product.isOnSale" class="badge sale">-{{ getDiscountPercent(product) }}%</span>
+            </div>
+          </div>
+          <div class="list-info">
+            <h3 (click)="viewProduct(product.id)">{{ product.name }}</h3>
+            <div class="product-meta">
+              <span class="brand">{{ product.brand }}</span>
+              <span class="category">{{ product.category }}</span>
+            </div>
+            <div class="product-rating">
+              <div class="stars">
+                <span *ngFor="let star of getRatingStars(product.rating)" class="star">
+                  {{ star }}
+                </span>
+              </div>
+              <span class="reviews">({{ product.reviews }} avis)</span>
+            </div>
+            <p class="product-description">{{ product.description }}</p>
+            <div class="product-price">
+              <span class="current-price">{{ formatPrice(product.price) }}</span>
+              <span *ngIf="product.isOnSale && product.originalPrice" class="old-price">{{ formatPrice(product.originalPrice) }}</span>
+            </div>
+            <div class="product-actions">
+              <button class="add-to-cart" (click)="addToCart(product)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Ajouter au panier
+              </button>
+              <button class="view-details" (click)="viewProduct(product.id)">
+                Voir détails
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="filteredProducts.length > 0" class="pagination">
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        <div class="page-numbers">
+          <button *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="currentPage === page" (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </div>
+        
+        <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Sidebar panier -->
+  <div class="cart-sidebar" [class.open]="showCartSidebar">
+    <div class="cart-header">
+      <h3>Mon panier</h3>
+      <button class="close-cart" (click)="showCartSidebar = false">×</button>
+    </div>
+    <div class="cart-items">
+      <div *ngIf="cartItems.length === 0" class="empty-cart">
+        <p>Votre panier est vide</p>
+      </div>
+      <div *ngFor="let item of cartItems" class="cart-item">
+        <img [src]="item.image" [alt]="item.name">
+        <div class="cart-item-info">
+          <h4>{{ item.name }}</h4>
+          <p>{{ formatPrice(item.price) }}</p>
+          <div class="quantity-control">
+            <button (click)="updateQuantity(item.id, item.quantity - 1)">-</button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="updateQuantity(item.id, item.quantity + 1)">+</button>
+          </div>
+        </div>
+        <button class="remove-item" (click)="removeFromCart(item.id)">×</button>
+      </div>
+    </div>
+    <div class="cart-footer" *ngIf="cartItems.length > 0">
+      <div class="cart-total">
+        <span>Total</span>
+        <span class="total-price">{{ formatPrice(getCartTotal()) }}</span>
+      </div>
+      <button class="btn-primary" (click)="goToCheckout()">Commander</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,399 @@
+<div class="admin-dashboard">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+        </div>
+        <span class="logo-text">Shop<span class="gradient-text">X</span> Admin</span>
+      </div>
+      <button class="collapse-btn" (click)="toggleSidebar()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeTab === 'overview'" (click)="setActiveTab('overview')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        <span>Tableau de bord</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'products'" (click)="setActiveTab('products')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+        <span>Articles</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'orders'" (click)="setActiveTab('orders')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        <span>Commandes</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'settings'" (click)="setActiveTab('settings')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span>Paramètres</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span>Déconnexion</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">
+
+    <header class="content-header">
+      <div class="header-left">
+        <h1>{{ activeTab === 'overview' ? 'Tableau de bord' : activeTab === 'products' ? 'Articles' : activeTab === 'orders' ? 'Commandes' : 'Paramètres' }}</h1>
+        <p>Bienvenue, Administrateur</p>
+      </div>
+      <div class="header-right">
+        <div class="admin-profile">
+          <div class="avatar">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100" alt="Admin">
+          </div>
+          <div class="profile-info">
+            <strong>Admin User</strong>
+            <span>Administrateur</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-body">
+
+      <!-- ===== OVERVIEW ===== -->
+      <div *ngIf="activeTab === 'overview'">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <h3>Articles</h3>
+                <p class="stat-value">{{ products.length }}</p>
+                <span class="stat-change up">En base MySQL</span>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon success">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <h3>Commandes</h3>
+                <p class="stat-value">{{ orders.length }}</p>
+                <span class="stat-change up">Total commandes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ARTICLES ===== -->
+      <div *ngIf="activeTab === 'products'">
+        <div class="data-table-container">
+
+          <div class="table-header">
+            <h2>Articles</h2>
+          </div>
+
+          <div *ngIf="isLoadingProducts" style="text-align:center;padding:40px;">
+            Chargement des articles...
+          </div>
+
+          <table class="data-table" *ngIf="!isLoadingProducts">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Nom</th>
+                <th>Catégorie</th>
+                <th>Marque</th>
+                <th>Prix</th>
+                <th>Stock</th>
+                <th>Note</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of products">
+                <td>{{ product.id }}</td>
+                <td>
+                  <img [src]="product.image" [alt]="product.name"
+                    style="width:50px;height:50px;object-fit:cover;border-radius:8px;">
+                </td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category }}</td>
+                <td>{{ product.brand }}</td>
+                <td>{{ product.price }} €</td>
+                <td>
+                  <span [style.color]="product.stock === 0 ? 'red' : 'green'">{{ product.stock }}</span>
+                </td>
+                <td>{{ product.rating }} ★</td>
+                <td>
+                  <button class="action-btn edit" (click)="openEditProductModal(product)">Modifier</button>
+                  <button class="action-btn delete" (click)="deleteProduct(product)">Supprimer</button>
+                  <button class="action-btn add" (click)="openAddProductModal()">+ Ajouter</button>
+                </td>
+              </tr>
+              <tr *ngIf="products.length === 0">
+                <td colspan="9" style="text-align:center;padding:40px;color:#94a3b8;">
+                  Aucun article
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="9" style="padding:16px 8px;border-top:2px solid #e5e7eb;">
+                  <button class="btn-primary" (click)="openAddProductModal()">
+                    + Ajouter un article
+                  </button>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div *ngIf="!isLoadingProducts && products.length === 0" style="padding:16px 0;">
+            <button class="btn-primary" (click)="openAddProductModal()">
+              + Ajouter un article
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== COMMANDES ===== -->
+      <div *ngIf="activeTab === 'orders'">
+        <div class="data-table-container">
+          <div class="table-header">
+            <h2>Commandes</h2>
+          </div>
+          <div *ngIf="isLoadingOrders" style="text-align:center;padding:40px;">
+            Chargement des commandes...
+          </div>
+          <table class="data-table" *ngIf="!isLoadingOrders">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Client</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orders">
+                <td>{{ order.id }}</td>
+                <td>{{ order.customer }}</td>
+                <td>{{ order.amount }} €</td>
+                <td>
+                  <span class="status-badge" [ngClass]="getStatusColor(order.status)">
+                    {{ getStatusLabel(order.status) }}
+                  </span>
+                </td>
+                <td>{{ order.date }}</td>
+                <td>
+                  <button class="action-btn view" (click)="viewOrderDetails(order.id)">Voir</button>
+                  <button class="action-btn edit" (click)="editOrderStatus(order.id)">Modifier</button>
+                  <button class="action-btn delete" (click)="deleteOrder(order.id)">Supprimer</button>
+                </td>
+              </tr>
+              <tr *ngIf="orders.length === 0">
+                <td colspan="6" style="text-align:center;padding:40px;color:#94a3b8;">
+                  Aucune commande
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== PARAMETRES ===== -->
+      <div *ngIf="activeTab === 'settings'">
+        <div class="settings-container">
+          <div class="settings-card">
+            <h3>Paramètres généraux</h3>
+            <form class="settings-form">
+              <div class="form-group">
+                <label>Nom du site</label>
+                <input type="text" value="ShopX">
+              </div>
+              <div class="form-group">
+                <label>Email de contact</label>
+                <input type="email" value="contact@shopx.com">
+              </div>
+              <div class="form-group">
+                <label>Taux de TVA (%)</label>
+                <input type="number" value="20">
+              </div>
+              <button class="btn-primary" type="button">Enregistrer</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ===== MODAL AJOUTER ARTICLE ===== -->
+<div class="modal-overlay" *ngIf="isAddProductModalOpen">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Ajouter un article</h3>
+      <button class="close-btn" (click)="closeAddProductModal()">×</button>
+    </div>
+    <form [formGroup]="productForm" (ngSubmit)="addProduct()">
+      <div class="form-group">
+        <label>Nom</label>
+        <input type="text" formControlName="name" class="form-control" placeholder="Nom de l'article">
+      </div>
+      <div class="form-group">
+        <label>Prix (€)</label>
+        <input type="number" formControlName="price" class="form-control" placeholder="99.0">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" formControlName="description" class="form-control" placeholder="Description...">
+      </div>
+      <div class="form-group">
+        <label>Catégorie</label>
+        <input type="text" formControlName="category" class="form-control" placeholder="Électronique, Sport...">
+      </div>
+      <div class="form-group">
+        <label>Image URL</label>
+        <input type="text" formControlName="image" class="form-control" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>Stock</label>
+        <input type="number" formControlName="stock" class="form-control" placeholder="10">
+      </div>
+      <div class="form-group">
+        <label>Marque</label>
+        <input type="text" formControlName="brand" class="form-control" placeholder="Nike, Apple...">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeAddProductModal()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="productForm.invalid">Ajouter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== MODAL MODIFIER ARTICLE ===== -->
+<div class="modal-overlay" *ngIf="isEditProductModalOpen">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Modifier l'article</h3>
+      <button class="close-btn" (click)="closeEditProductModal()">×</button>
+    </div>
+    <form [formGroup]="productForm" (ngSubmit)="updateProduct()">
+      <div class="form-group">
+        <label>Nom</label>
+        <input type="text" formControlName="name" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Prix (€)</label>
+        <input type="number" formControlName="price" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" formControlName="description" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Catégorie</label>
+        <input type="text" formControlName="category" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Image URL</label>
+        <input type="text" formControlName="image" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Stock</label>
+        <input type="number" formControlName="stock" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Marque</label>
+        <input type="text" formControlName="brand" class="form-control">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeEditProductModal()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="productForm.invalid">Modifier</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== MODAL VOIR COMMANDE ===== -->
+<div class="modal-overlay" *ngIf="isViewOrderModalOpen && selectedOrder" (click)="closeViewOrderModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Détails commande #{{ selectedOrder.id }}</h2>
+      <button class="close-btn" (click)="closeViewOrderModal()">×</button>
+    </div>
+    <div style="padding:24px;">
+      <p><strong>Statut:</strong>
+        <span class="status-badge" [ngClass]="getStatusColor(selectedOrder.status)">
+          {{ getStatusLabel(selectedOrder.status) }}
+        </span>
+      </p>
+      <p><strong>Total:</strong> {{ selectedOrder.total || 0 }} €</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-outline" (click)="closeViewOrderModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL MODIFIER STATUT COMMANDE ===== -->
+<div class="modal-overlay" *ngIf="isEditOrderModalOpen && selectedOrder" (click)="closeEditOrderModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Modifier statut</h2>
+      <button class="close-btn" (click)="closeEditOrderModal()">×</button>
+    </div>
+    <div style="padding:24px;">
+      <form [formGroup]="orderForm">
+        <div class="form-group">
+          <label>Nouveau statut</label>
+          <select formControlName="status" class="form-control">
+            <option value="PENDING">En attente</option>
+            <option value="CONFIRMED">Confirmée</option>
+            <option value="SHIPPED">Expédiée</option>
+            <option value="DELIVERED">Livrée</option>
+            <option value="CANCELLED">Annulée</option>
+          </select>
+        </div>
+      </form>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-outline" (click)="closeEditOrderModal()">Annuler</button>
+      <button class="btn-primary" (click)="updateOrderStatus()">Mettre à jour</button>
+    </div>
+  </div>
+</div>

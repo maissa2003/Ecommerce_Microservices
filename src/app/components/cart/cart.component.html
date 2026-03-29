@@ -1,0 +1,87 @@
+<div class="customer-container">
+  <div class="customer-header">
+    <div class="header-title">
+      <h1>Mon Panier</h1>
+      <p>Gérez les articles de votre panier</p>
+    </div>
+    <button class="btn-add" (click)="goToOrders()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      Mes Commandes
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="message" style="background:#d1fae5;color:#065f46;padding:12px 20px;border-radius:12px;margin-bottom:20px;font-weight:500;">
+    {{ message }}
+  </div>
+  <div *ngIf="error" style="background:#fee2e2;color:#991b1b;padding:12px 20px;border-radius:12px;margin-bottom:20px;font-weight:500;">
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Chargement du panier...</p>
+  </div>
+
+  <!-- Empty cart -->
+  <div *ngIf="!loading && cart && cart.items.length === 0" class="empty-state">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+    <p>Votre panier est vide</p>
+  </div>
+
+  <!-- Cart Table -->
+  <div *ngIf="!loading && cart && cart.items.length > 0" class="customers-table-container">
+    <div class="table-header">
+      <h2>Articles dans votre panier</h2>
+    </div>
+
+    <div class="table-responsive">
+      <table class="customers-table">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Prix unitaire</th>
+            <th>Quantité</th>
+            <th>Sous-total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of cart.items">
+            <td><strong>{{ item.articleName }}</strong></td>
+            <td>{{ item.price | currency:'EUR':'symbol':'1.2-2' }}</td>
+            <td>
+              <span class="count-badge">{{ item.quantity }}</span>
+            </td>
+            <td><strong>{{ item.price * item.quantity | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
+            <td>
+              <button class="action-btn delete" (click)="removeItem(item.id!)" title="Supprimer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Total & Confirm -->
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:24px;margin-top:24px;padding-top:20px;border-top:1px solid #e2e8f0;">
+      <div style="font-size:20px;font-weight:700;color:#0f172a;">
+        Total : {{ cart.total | currency:'EUR':'symbol':'1.2-2' }}
+      </div>
+      <button class="btn-add" (click)="confirmOrder()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        Confirmer la commande
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,391 @@
+<div class="customer-dashboard">
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="logo" (click)="continueShopping()">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <span class="logo-text">Shop<span class="gradient-text">X</span></span>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Déconnexion
+      </button>
+    </div>
+  </header>
+
+  <div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+      <div class="user-profile">
+        <div class="user-avatar">
+          <div class="avatar-initials">{{ avatarInitials }}</div>
+        </div>
+        <div class="user-info">
+          <h3>{{ user.name }}</h3>
+          <p>{{ user.email }}</p>
+          <span class="member-badge">Client ShopX</span>
+        </div>
+      </div>
+
+      <nav class="dashboard-nav">
+        <a href="#" class="nav-item" [class.active]="activeTab === 'overview'" (click)="setActiveTab('overview'); $event.preventDefault()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span>Tableau de bord</span>
+        </a>
+        <a href="#" class="nav-item" [class.active]="activeTab === 'orders'" (click)="setActiveTab('orders'); $event.preventDefault()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <span>Mes commandes</span>
+          <span class="badge" *ngIf="activeOrders > 0">{{ activeOrders }}</span>
+        </a>
+        <a href="#" class="nav-item" [class.active]="activeTab === 'wishlist'" (click)="setActiveTab('wishlist'); $event.preventDefault()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          <span>Liste de souhaits</span>
+          <span class="badge" *ngIf="wishlist.length > 0">{{ wishlist.length }}</span>
+        </a>
+        <a href="#" class="nav-item" [class.active]="activeTab === 'addresses'" (click)="setActiveTab('addresses'); $event.preventDefault()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Mes adresses</span>
+        </a>
+        <a href="#" class="nav-item" [class.active]="activeTab === 'settings'" (click)="setActiveTab('settings'); $event.preventDefault()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Paramètres</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+
+      <!-- Vue Tableau de bord -->
+      <div *ngIf="activeTab === 'overview'" class="overview-view">
+        <div class="welcome-card">
+          <h1>Bonjour, {{ user.name.split(' ')[0] }} !</h1>
+          <p>Bienvenue dans votre espace client.</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon orders-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+            <div class="stat-info"><h3>Total commandes</h3><p class="stat-value">{{ totalOrders }}</p></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon spent-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="stat-info"><h3>Total dépensé</h3><p class="stat-value">{{ formatPrice(totalSpent) }}</p></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon active-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="stat-info"><h3>Commandes en cours</h3><p class="stat-value">{{ activeOrders }}</p></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon wishlist-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <div class="stat-info"><h3>Liste de souhaits</h3><p class="stat-value">{{ wishlist.length }}</p></div>
+          </div>
+        </div>
+        <div class="recent-orders-card">
+          <div class="card-header">
+            <h3>Commandes récentes</h3>
+            <a href="#" class="view-all" (click)="setActiveTab('orders'); $event.preventDefault()">Voir toutes →</a>
+          </div>
+          <div class="card-body">
+            <div class="order-list">
+              <div class="order-item" *ngFor="let order of orders.slice(0, 3)">
+                <div class="order-info">
+                  <span class="order-id">{{ order.id }}</span>
+                  <span class="order-date">{{ order.date | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="order-details">
+                  <span class="order-total">{{ formatPrice(order.total) }}</span>
+                  <span class="order-status" [class]="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vue Commandes -->
+      <div *ngIf="activeTab === 'orders'" class="orders-view">
+        <div class="page-header"><h2>Mes commandes</h2><p>Historique complet de vos achats</p></div>
+        <div class="orders-list">
+          <div class="order-card" *ngFor="let order of orders">
+            <div class="order-header">
+              <div class="order-header-left">
+                <span class="order-number">{{ order.id }}</span>
+                <span class="order-date">{{ order.date | date:'dd MMMM yyyy' }}</span>
+              </div>
+              <span class="order-status" [class]="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+            </div>
+            <div class="order-body">
+              <div class="order-info-grid">
+                <div class="info-item"><label>Total</label><span class="value">{{ formatPrice(order.total) }}</span></div>
+                <div class="info-item"><label>Articles</label><span class="value">{{ order.items }} article(s)</span></div>
+                <div class="info-item" *ngIf="order.tracking"><label>Suivi</label><span class="value tracking">{{ order.tracking }}</span></div>
+              </div>
+            </div>
+            <div class="order-footer">
+              <button class="btn-outline" (click)="viewOrderDetails(order.id)">Voir détails</button>
+              <button class="btn-outline" *ngIf="order.status === 'delivered'" (click)="reorder(order.id)">Commander à nouveau</button>
+              <button class="btn-outline danger" *ngIf="order.status === 'processing'" (click)="cancelOrder(order.id)">Annuler</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vue Wishlist -->
+      <div *ngIf="activeTab === 'wishlist'" class="wishlist-view">
+        <div class="page-header"><h2>Ma liste de souhaits</h2><p>Vos produits favoris</p></div>
+        <div *ngIf="wishlist.length === 0" class="empty-state">
+          <p>Votre liste de souhaits est vide</p>
+          <button class="btn-primary" (click)="continueShopping()">Découvrir nos produits</button>
+        </div>
+        <div class="wishlist-grid" *ngIf="wishlist.length > 0">
+          <div class="wishlist-item" *ngFor="let item of wishlist">
+            <div class="item-image">
+              <img [src]="item.image" [alt]="item.name">
+              <button class="remove-btn" (click)="removeFromWishlist(item.id)">×</button>
+            </div>
+            <div class="item-info">
+              <h4>{{ item.name }}</h4>
+              <span class="category">{{ item.category }}</span>
+              <span class="price">{{ formatPrice(item.price) }}</span>
+              <button class="btn-add-cart" (click)="addToCart(item)">Ajouter au panier</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vue Adresses -->
+      <div *ngIf="activeTab === 'addresses'" class="addresses-view">
+        <div class="page-header">
+          <h2>Mes adresses</h2>
+          <button class="btn-add" (click)="openAddAddressModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Ajouter une adresse
+          </button>
+        </div>
+        <div class="addresses-grid">
+          <div class="address-card" *ngFor="let address of addresses">
+            <div class="address-badge" *ngIf="address.isDefault">Défaut</div>
+            <div class="address-icon">{{ getAddressIcon(address.type) }}</div>
+            <div class="address-content">
+              <h4>{{ address.name }}</h4>
+              <p>{{ address.address }}</p>
+              <p>{{ address.postalCode }} {{ address.city }}</p>
+              <p>{{ address.country }}</p>
+            </div>
+            <div class="address-actions">
+              <button class="action-btn edit"    (click)="openEditAddressModal(address)">Modifier</button>
+              <button class="action-btn delete"  (click)="deleteAddress(address.id)">Supprimer</button>
+              <button class="action-btn default" *ngIf="!address.isDefault" (click)="setDefaultAddress(address.id)">Par défaut</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vue Paramètres -->
+      <div *ngIf="activeTab === 'settings'" class="settings-view">
+        <div class="page-header"><h2>Paramètres du compte</h2></div>
+
+        <!-- ✅ Informations personnelles -->
+        <div class="settings-card">
+          <h3>Informations personnelles</h3>
+
+          <!-- Messages succès / erreur profil -->
+          <div class="alert alert-success" *ngIf="profileSuccess">✅ {{ profileSuccess }}</div>
+          <div class="alert alert-error"   *ngIf="profileError">❌ {{ profileError }}</div>
+
+          <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+            <div class="form-group">
+              <label>Nom complet</label>
+              <input type="text" formControlName="name">
+              <div class="error-msg" *ngIf="profileForm.get('name')?.invalid && profileForm.get('name')?.touched">
+                Minimum 2 caractères
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" formControlName="email">
+              <div class="error-msg" *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
+                Email invalide
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Téléphone <span class="optional">(optionnel)</span></label>
+              <input type="tel" formControlName="phone" placeholder="+216 XX XXX XXX">
+            </div>
+            <!-- ✅ Spinner pendant la sauvegarde -->
+            <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || isSavingProfile">
+              <span *ngIf="!isSavingProfile">Mettre à jour</span>
+              <div *ngIf="isSavingProfile" class="spinner"></div>
+            </button>
+          </form>
+        </div>
+
+        <!-- ✅ Changer le mot de passe -->
+        <div class="settings-card">
+          <h3>Changer le mot de passe</h3>
+
+          <!-- Messages succès / erreur mot de passe -->
+          <div class="alert alert-success" *ngIf="passwordSuccess">✅ {{ passwordSuccess }}</div>
+          <div class="alert alert-error"   *ngIf="passwordError">❌ {{ passwordError }}</div>
+
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+            <div class="form-group">
+              <label>Mot de passe actuel</label>
+              <input type="password" formControlName="currentPassword">
+              <div class="error-msg" *ngIf="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched">
+                Champ requis
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nouveau mot de passe</label>
+              <input type="password" formControlName="newPassword">
+              <div class="error-msg" *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
+                Minimum 6 caractères
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Confirmer le mot de passe</label>
+              <input type="password" formControlName="confirmPassword">
+              <div class="error-msg" *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched">
+                Les mots de passe ne correspondent pas
+              </div>
+            </div>
+            <button type="submit" class="btn-primary" [disabled]="passwordForm.invalid || isSavingPassword">
+              <span *ngIf="!isSavingPassword">Changer le mot de passe</span>
+              <div *ngIf="isSavingPassword" class="spinner"></div>
+            </button>
+          </form>
+        </div>
+
+        <!-- Moyens de paiement -->
+        <div class="settings-card">
+          <div class="card-header">
+            <h3>Moyens de paiement</h3>
+            <button class="btn-add-small" (click)="openAddPaymentModal()">+ Ajouter</button>
+          </div>
+          <div class="payment-methods">
+            <div class="payment-item" *ngFor="let payment of paymentMethods">
+              <div class="payment-info">
+                <span class="payment-icon">{{ getPaymentIcon(payment.type) }}</span>
+                <div class="payment-details">
+                  <span class="payment-type">
+                    {{ payment.type === 'card' ? payment.brand + ' se terminant par ' + payment.last4 : payment.email }}
+                  </span>
+                  <span class="payment-default" *ngIf="payment.isDefault">Par défaut</span>
+                </div>
+              </div>
+              <div class="payment-actions">
+                <button class="action-btn delete"  (click)="deletePaymentMethod(payment.id)">Supprimer</button>
+                <button class="action-btn default" *ngIf="!payment.isDefault" (click)="setDefaultPayment(payment.id)">Par défaut</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal Ajouter Adresse -->
+<div class="modal-overlay" *ngIf="isAddAddressModalOpen" (click)="closeAddAddressModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Ajouter une adresse</h3>
+      <button class="close-btn" (click)="closeAddAddressModal()">×</button>
+    </div>
+    <form [formGroup]="addressForm" (ngSubmit)="addAddress()">
+      <div class="form-group">
+        <label>Type</label>
+        <select formControlName="type">
+          <option value="home">Domicile</option>
+          <option value="work">Travail</option>
+          <option value="other">Autre</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Nom complet</label><input type="text" formControlName="name"></div>
+      <div class="form-group"><label>Adresse</label><input type="text" formControlName="address"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Code postal</label><input type="text" formControlName="postalCode"></div>
+        <div class="form-group"><label>Ville</label><input type="text" formControlName="city"></div>
+      </div>
+      <div class="form-group"><label>Pays</label><input type="text" formControlName="country"></div>
+      <div class="form-group checkbox">
+        <input type="checkbox" formControlName="isDefault" id="isDefaultAddress">
+        <label for="isDefaultAddress">Adresse par défaut</label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeAddAddressModal()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="addressForm.invalid">Ajouter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Modifier Adresse -->
+<div class="modal-overlay" *ngIf="isEditAddressModalOpen && selectedAddress" (click)="closeEditAddressModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Modifier l'adresse</h3>
+      <button class="close-btn" (click)="closeEditAddressModal()">×</button>
+    </div>
+    <form [formGroup]="addressForm" (ngSubmit)="updateAddress()">
+      <div class="form-group">
+        <label>Type</label>
+        <select formControlName="type">
+          <option value="home">Domicile</option>
+          <option value="work">Travail</option>
+          <option value="other">Autre</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Nom complet</label><input type="text" formControlName="name"></div>
+      <div class="form-group"><label>Adresse</label><input type="text" formControlName="address"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Code postal</label><input type="text" formControlName="postalCode"></div>
+        <div class="form-group"><label>Ville</label><input type="text" formControlName="city"></div>
+      </div>
+      <div class="form-group"><label>Pays</label><input type="text" formControlName="country"></div>
+      <div class="form-group checkbox">
+        <input type="checkbox" formControlName="isDefault" id="editIsDefaultAddress">
+        <label for="editIsDefaultAddress">Adresse par défaut</label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeEditAddressModal()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="addressForm.invalid">Modifier</button>
+      </div>
+    </form>
+  </div>
+</div>

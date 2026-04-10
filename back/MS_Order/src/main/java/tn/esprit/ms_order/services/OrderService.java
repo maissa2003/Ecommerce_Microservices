@@ -6,6 +6,7 @@ import tn.esprit.ms_order.entities.Order;
 import tn.esprit.ms_order.entities.OrderItem;
 import tn.esprit.ms_order.entities.OrderStatus;
 import tn.esprit.ms_order.repositories.OrderRepository;
+import tn.esprit.ms_order.repositories.PromoCodeRepository;
 
 import java.util.List;
 

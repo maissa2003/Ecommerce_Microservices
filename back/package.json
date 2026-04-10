@@ -1,0 +1,13 @@
+{
+  "name": "rabbitmq-test",
+  "version": "1.0.0",
+  "description": "RabbitMQ test application",
+  "main": "rabbitmq_test.js",
+  "scripts": {
+    "send": "node rabbitmq_test.js",
+    "install": "npm install amqplib readline"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.9"
+  }
+}

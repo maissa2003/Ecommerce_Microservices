@@ -12,6 +12,8 @@ import { OrderHistoryComponent } from './components/order-history/order-history.
 import { OrderDetailComponent } from './components/order-detail/order-detail.component';
 import { CategoryComponent } from './components/category/category.component';
 import { ArticleCatalogComponent } from './components/article-catalog/article-catalog.component';
+import { FeedbackComponent } from './components/feedback/feedback.component';
+import { FeedbackAdminComponent } from './components/feedback-admin/feedback-admin.component';
 
 
 const routes: Routes = [
@@ -50,6 +52,15 @@ const routes: Routes = [
   { path: 'cart', component: CartComponent },
   { path: 'orders', component: OrderHistoryComponent },
   { path: 'orders/:id', component: OrderDetailComponent },
+  
+  // Routes pour les avis/feedback
+  { path: 'feedback', component: FeedbackComponent },
+  { path: 'avis', component: FeedbackComponent },
+  { path: 'reviews', component: FeedbackComponent },
+  { path: 'admin/feedback', component: FeedbackAdminComponent },
+  { path: 'admin/avis', component: FeedbackAdminComponent },
+  { path: 'admin/reviews', component: FeedbackAdminComponent },
+  
   // Redirection pour les routes non trouvées
   { path: '**', redirectTo: '' },
   

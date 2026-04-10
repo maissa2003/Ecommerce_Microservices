@@ -23,7 +23,7 @@ export interface Article {
 export class ArticleService {
 
   // Use gateway base URL for unified routing
-  private apiUrl = 'http://localhost:8080/api/articles';
+  private apiUrl = 'http://localhost:8088/api/articles';
 
   constructor(private http: HttpClient) { }
 

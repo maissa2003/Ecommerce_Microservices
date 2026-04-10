@@ -1,0 +1,123 @@
+<div class="feedback-admin">
+
+  <!-- En-tête -->
+  <div class="admin-page-header">
+    <div class="header-left">
+      <h2>💬 Gestion des Feedbacks</h2>
+      <p>Modérez les avis clients de la plateforme</p>
+    </div>
+    <button class="btn-refresh" (click)="loadAll(); loadPending()">
+      🔄 Actualiser
+    </button>
+  </div>
+
+  <!-- Alertes -->
+  <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- Statistiques rapides -->
+  <div class="stats-row">
+    <div class="stat-card stat-total">
+      <span class="stat-value">{{ allFeedbacks.length }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-card stat-pending">
+      <span class="stat-value">{{ pendingFeedbacks.length }}</span>
+      <span class="stat-label">⏳ En attente</span>
+    </div>
+    <div class="stat-card stat-approved">
+      <span class="stat-value">{{ countByStatus('APPROVED') }}</span>
+      <span class="stat-label">✅ Approuvés</span>
+    </div>
+    <div class="stat-card stat-rejected">
+      <span class="stat-value">{{ countByStatus('REJECTED') }}</span>
+      <span class="stat-label">❌ Rejetés</span>
+    </div>
+  </div>
+
+  <!-- Filtres + Recherche -->
+  <div class="filters-bar">
+    <div class="tab-group">
+      <button class="tab-btn" [class.active]="activeTab === 'pending'"  (click)="switchTab('pending')">
+        En attente <span class="badge">{{ pendingFeedbacks.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'all'"      (click)="switchTab('all')">Tous</button>
+      <button class="tab-btn" [class.active]="activeTab === 'approved'" (click)="switchTab('approved')">Approuvés</button>
+      <button class="tab-btn" [class.active]="activeTab === 'rejected'" (click)="switchTab('rejected')">Rejetés</button>
+    </div>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Rechercher..." (input)="onSearch($event)" [value]="searchTerm">
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <div class="loading-row" *ngIf="isLoading">
+    <div class="skeleton-row" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <!-- Aucun résultat -->
+  <div class="empty-state" *ngIf="!isLoading && filteredFeedbacks.length === 0">
+    <span>📭</span>
+    <p>Aucun feedback dans cette catégorie.</p>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-wrapper" *ngIf="!isLoading && filteredFeedbacks.length > 0">
+    <table class="feedback-table">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Article</th>
+          <th>Utilisateur</th>
+          <th>Note</th>
+          <th>Commentaire</th>
+          <th>Statut</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let fb of filteredFeedbacks">
+          <td class="col-id">{{ fb.id }}</td>
+          <td class="col-article">Art. #{{ fb.articleId }}</td>
+          <td class="col-user">User #{{ fb.userId }}</td>
+          <td class="col-rating">
+            <div class="stars-inline">
+              <span *ngFor="let s of getStars(fb.rating)" class="star-xs">{{ s }}</span>
+            </div>
+            <span class="rating-num">{{ fb.rating }}/5</span>
+          </td>
+          <td class="col-comment">
+            <span class="comment-preview" [title]="fb.comment">{{ fb.comment }}</span>
+          </td>
+          <td class="col-status">
+            <span class="badge-status" [ngClass]="getStatusClass(fb.status)">
+              {{ getStatusLabel(fb.status) }}
+            </span>
+          </td>
+          <td class="col-date">{{ formatDate(fb.createdAt) }}</td>
+          <td class="col-actions">
+            <div class="action-buttons">
+              <button
+                class="btn-approve"
+                *ngIf="fb.status !== 'APPROVED'"
+                (click)="approve(fb.id!)"
+                title="Approuver">✅</button>
+              <button
+                class="btn-reject"
+                *ngIf="fb.status !== 'REJECTED'"
+                (click)="reject(fb.id!)"
+                title="Rejeter">❌</button>
+              <button
+                class="btn-delete"
+                (click)="delete(fb.id!)"
+                title="Supprimer">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

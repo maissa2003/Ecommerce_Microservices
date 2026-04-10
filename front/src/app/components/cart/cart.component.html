@@ -58,13 +58,17 @@
         <tbody>
           <tr *ngFor="let item of cart.items">
             <td><strong>{{ item.articleName }}</strong></td>
-            <td>{{ item.price | currency:'EUR':'symbol':'1.2-2' }}</td>
+            <td>{{ getConvertedItemPrice(item.price) | currency:checkoutData.selectedCurrency:'symbol':'1.2-2' }}</td>
             <td>
               <span class="count-badge">{{ item.quantity }}</span>
             </td>
-            <td><strong>{{ item.price * item.quantity | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
+            <td><strong>{{ getConvertedItemSubtotal(item) | currency:checkoutData.selectedCurrency:'symbol':'1.2-2' }}</strong></td>
             <td>
-
+              <button class="btn-delete" (click)="removeItem(item.id!)" title="Supprimer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -75,7 +79,7 @@
     <div *ngIf="!showCheckoutForm"
       style="display:flex;justify-content:flex-end;align-items:center;gap:24px;margin-top:24px;padding-top:20px;border-top:1px solid #e2e8f0;">
       <div style="font-size:20px;font-weight:700;color:#0f172a;">
-        Total : {{ getDisplayedTotal() | currency:'EUR':'symbol':'1.2-2' }}
+        Total : {{ getConvertedTotal() | currency:checkoutData.selectedCurrency:'symbol':'1.2-2' }}
       </div>
       <button class="btn-add" (click)="showCheckoutForm = true">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,8 +113,25 @@
       </div>
       <div style="margin-bottom:24px;">
         <label style="display:block;margin-bottom:8px;font-weight:600;font-size:14px;color:#475569;">Téléphone</label>
-        <input type="tel" [(ngModel)]="checkoutData.telephone" placeholder="+33 6 00 00 00 00"
-          style="width:100%;padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;">
+        <div style="display:flex;gap:8px;">
+          <select [(ngModel)]="checkoutData.countryCode" 
+                  style="padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;min-width:120px;">
+            <option *ngFor="let country of countries" [value]="country.code">
+              {{ country.flag }} {{ country.code }}
+            </option>
+          </select>
+          <input type="tel" [(ngModel)]="checkoutData.telephone" placeholder="Numéro de téléphone"
+                 style="flex:1;padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;">
+        </div>
+      </div>
+      <div style="margin-bottom:24px;border-top:1px dashed #cbd5e1;padding-top:20px;">
+        <label style="display:block;margin-bottom:8px;font-weight:600;font-size:14px;color:#475569;">Devise</label>
+        <select [(ngModel)]="checkoutData.selectedCurrency" 
+                style="width:100%;padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;">
+          <option *ngFor="let currency of currencies" [value]="currency.code">
+            {{ currency.name }} ({{ currency.symbol }})
+          </option>
+        </select>
       </div>
       <div style="margin-bottom:24px;border-top:1px dashed #cbd5e1;padding-top:20px;">
         <label style="display:block;margin-bottom:8px;font-weight:600;font-size:14px;color:#8854c0;">Code Promo (Optionnel)</label>
@@ -123,8 +144,8 @@
         <button class="" (click)="showCheckoutForm = false"
           style="background:transparent;border:none;color:#64748b;font-weight:600;cursor:pointer;padding:10px 20px;">Annuler</button>
         <div style="display:flex;align-items:center;gap:20px;">
-          <div style="font-size:20px;font-weight:700;color:#0f172a;">Total : {{ getDisplayedTotal() |
-            currency:'EUR':'symbol':'1.2-2' }}</div>
+          <div style="font-size:20px;font-weight:700;color:#0f172a;">Total : {{ getConvertedTotal() |
+            currency:checkoutData.selectedCurrency:'symbol':'1.2-2' }}</div>
           <button class="btn-add" (click)="confirmOrder()">Valider ma commande</button>
         </div>
       </div>

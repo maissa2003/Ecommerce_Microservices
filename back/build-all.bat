@@ -39,6 +39,13 @@ call mvn clean package -DskipTests
 if %errorlevel% neq 0 ( echo FAILED: ms-article & exit /b 1 )
 
 echo ========================================
+echo Building MS_Feedback...
+echo ========================================
+cd /d "%ROOT%\MS_Feedback"
+call mvn clean package -DskipTests
+if %errorlevel% neq 0 ( echo FAILED: MS_Feedback & exit /b 1 )
+
+echo ========================================
 echo Building API Gateway...
 echo ========================================
 cd /d "%ROOT%\ApiGatewayWeb"

@@ -18,7 +18,7 @@ export interface PromoCode {
 })
 export class PromoCodeService {
 
-  private baseUrl = 'http://localhost:8080/api/promos';
+  private baseUrl = 'http://localhost:8088/api/promos';
 
   constructor(private http: HttpClient) { }
 

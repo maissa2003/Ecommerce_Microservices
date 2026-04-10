@@ -20,8 +20,8 @@ import { OrderDetailComponent } from './components/order-detail/order-detail.com
 import { CategoryComponent } from './components/category/category.component';
 import { OrderManagementComponent } from './components/order-management/order-management.component';
 import { ArticleCatalogComponent } from './components/article-catalog/article-catalog.component';
-import { AuthInterceptor } from './auth.interceptor';
-
+import { FeedbackComponent } from './components/feedback/feedback.component';
+import { FeedbackAdminComponent } from './components/feedback-admin/feedback-admin.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -38,21 +38,18 @@ import { AuthInterceptor } from './auth.interceptor';
     CategoryComponent,
     OrderManagementComponent,
     ArticleCatalogComponent,
+    FeedbackComponent,
+    FeedbackAdminComponent,
   ],
   imports: [
     BrowserModule,
+    CommonModule,
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule
   ],
-  providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
-  ],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

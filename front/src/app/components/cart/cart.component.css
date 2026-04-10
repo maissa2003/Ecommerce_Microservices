@@ -8,3 +8,33 @@
   font-weight: 600;
   color: #0f172a;
 }
+
+/* Delete button styles */
+.btn-delete {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+  background-color: #dc2626;
+  transform: scale(1.05);
+}
+
+.btn-delete svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Table action column */
+.customers-table td:last-child {
+  text-align: center;
+  width: 80px;
+}

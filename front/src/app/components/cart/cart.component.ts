@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { OrderService, Order } from '../../services/order.service';
+import { OrderService, Order, Country } from '../../services/order.service';
 
 @Component({
   selector: 'app-cart',
@@ -20,14 +20,44 @@ export class CartComponent implements OnInit {
     nom: '',
     prenom: '',
     adresse: '',
-    telephone: ''
+    telephone: '',
+    selectedCurrency: 'EUR',
+    countryCode: '+33'
   };
   promoCodeInput = '';
+
+  // Currency configuration
+  currencies = [
+    { code: 'EUR', symbol: '€', name: 'Euro' },
+    { code: 'USD', symbol: '$', name: 'Dollar' },
+    { code: 'TND', symbol: 'DT', name: 'Dinar' }
+  ];
+
+  // Country codes for phone numbers - loaded from backend
+  countries: Country[] = [];
 
   constructor(private orderService: OrderService, private router: Router) { }
 
   ngOnInit(): void {
     this.loadCart();
+    this.loadCountries();
+  }
+
+  loadCountries(): void {
+    this.orderService.getActiveCountries().subscribe({
+      next: (countries) => {
+        this.countries = countries;
+      },
+      error: (err) => {
+        console.error('Failed to load countries', err);
+        // Fallback to default countries if API fails
+        this.countries = [
+          { id: 1, code: '+216', flag: '🇹🇳', name: 'Tunisia', isoCode: 'TN', region: 'Africa', active: true },
+          { id: 2, code: '+33', flag: '🇫🇷', name: 'France', isoCode: 'FR', region: 'Europe', active: true },
+          { id: 3, code: '+1', flag: '🇺🇸', name: 'USA', isoCode: 'US', region: 'North America', active: true }
+        ];
+      }
+    });
   }
 
   loadCart(): void {
@@ -67,6 +97,64 @@ export class CartComponent implements OnInit {
     return this.cart.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
   }
 
+  // Currency conversion methods
+  getCurrencySymbol(): string {
+    const currency = this.currencies.find(c => c.code === this.checkoutData.selectedCurrency);
+    return currency ? currency.symbol : '€';
+  }
+
+  /**
+   * Convert price from EUR to selected currency
+   * Backend stores prices in EUR, this converts to user's selected currency
+   */
+  convertPrice(priceInEur: number): number {
+    if (!priceInEur) return 0;
+    
+    switch (this.checkoutData.selectedCurrency) {
+      case 'USD':
+        return priceInEur * 1.08; // 1 EUR = 1.08 USD
+      case 'TND':
+        return priceInEur * 3.35; // 1 EUR = 3.35 TND
+      case 'EUR':
+      default:
+        return priceInEur;
+    }
+  }
+
+  /**
+   * Get converted price for an individual item
+   */
+  getConvertedItemPrice(price: number): number {
+    return this.convertPrice(price);
+  }
+
+  /**
+   * Get converted subtotal for an item (price * quantity)
+   */
+  getConvertedItemSubtotal(item: any): number {
+    const convertedPrice = this.convertPrice(item.price);
+    return convertedPrice * item.quantity;
+  }
+
+  /**
+   * Get the converted cart total
+   */
+  getConvertedTotal(): number {
+    if (!this.cart?.items) return 0;
+    
+    // Calculate total from items with converted prices
+    return this.cart.items.reduce((sum, item) => {
+      return sum + this.getConvertedItemSubtotal(item);
+    }, 0);
+  }
+
+  /**
+   * Legacy method - kept for compatibility but uses converted total
+   */
+  convertCurrency(amount: number): number {
+    return this.convertPrice(amount);
+  }
+
   getDisplayedTotal(): number {
     // Prefer backend total if provided, otherwise compute from items.
     const apiTotal = this.cart?.total;
@@ -95,7 +183,7 @@ export class CartComponent implements OnInit {
         this.message = 'Commande confirmée avec succès !';
         this.error = '';
         this.showCheckoutForm = false; // reset form
-        this.checkoutData = { nom: '', prenom: '', adresse: '', telephone: '' };
+        this.checkoutData = { nom: '', prenom: '', adresse: '', telephone: '', selectedCurrency: 'EUR', countryCode: '+33' };
         this.promoCodeInput = '';
         this.loadCart();
       },

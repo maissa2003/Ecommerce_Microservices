@@ -27,6 +27,14 @@ services:
     container_name: config-server
     ports:
       - "8888:8888"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
+      - EUREKA_CLIENT_FETCH_REGISTRY=true
+      - EUREKA_INSTANCE_HOSTNAME=config-server
+    depends_on:
+      eureka:
+        condition: service_started
 
   ms-order:
     build: ./MS_Order
@@ -38,6 +46,9 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
+      - EUREKA_CLIENT_FETCH_REGISTRY=true
+      - EUREKA_INSTANCE_HOSTNAME=ms-order
     depends_on:
       mysql:
         condition: service_healthy
@@ -84,13 +95,44 @@ services:
       config-server:
         condition: service_started
 
+  ms-feedback:
+    build: ./MS_Feedback
+    container_name: ms-feedback
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_feedback?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka:
+        condition: service_started
+      config-server:
+        condition: service_started
+
+  manage-users:
+    build: ./ManageUsers
+    container_name: manage-users
+    ports:
+      - "8089:8089"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+    depends_on:
+      eureka:
+        condition: service_started
+      config-server:
+        condition: service_started
+
   api-gateway:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     build: ./ApiGatewayWeb
     container_name: api-gateway
     ports:
-      - "8080:8080"
+      - "8088:8088"
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
     depends_on:

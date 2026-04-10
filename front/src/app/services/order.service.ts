@@ -22,13 +22,24 @@ export interface Order {
   updatedAt?: string;
 }
 
+export interface Country {
+  id: number;
+  code: string;
+  name: string;
+  flag: string;
+  isoCode: string;
+  region: string;
+  active: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
 
   // API Gateway routes to MS_ORDER on port 8080
-  private baseUrl = 'http://localhost:8080/api/orders';
+  private baseUrl = 'http://localhost:8088/api/orders';
+  private countryUrl = 'http://localhost:8088/api/countries';
 
   constructor(private http: HttpClient) {}
 
@@ -96,6 +107,23 @@ export class OrderService {
   // Backend accepts: CART, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
   normalizeBackendStatus(status: string): string {
     return (status || '').toUpperCase().trim();
+  }
+
+  // ==================== COUNTRY API ====================
+
+  // Get all active countries (for phone dropdown)
+  getActiveCountries(): Observable<Country[]> {
+    return this.http.get<Country[]>(`${this.countryUrl}/active`);
+  }
+
+  // Get all countries
+  getAllCountries(): Observable<Country[]> {
+    return this.http.get<Country[]>(`${this.countryUrl}`);
+  }
+
+  // Get country by code
+  getCountryByCode(code: string): Observable<Country> {
+    return this.http.get<Country>(`${this.countryUrl}/code/${code}`);
   }
   
 }

@@ -1,0 +1,326 @@
+<div class="order-management-container">
+  <div class="header">
+    <h2>Gestion des Commandes</h2>
+    <button class="btn btn-primary" (click)="openAddOrderModal()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        />
+      </svg>
+      Nouvelle Commande
+    </button>
+  </div>
+
+  <div class="orders-table">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID Commande</th>
+          <th>Client</th>
+          <th>Email</th>
+          <th>Montant</th>
+          <th>Statut</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders">
+          <td>{{ order.id }}</td>
+          <td>{{ order.customer }}</td>
+          <td>{{ order.email }}</td>
+          <td>{{ order.amount | currency: "EUR":"symbol":"1.2-2" }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusColor(order.status)">
+              {{ getStatusLabel(order.status) }}
+            </span>
+          </td>
+          <td>{{ order.date }}</td>
+          <td class="actions">
+            <button
+              class="btn btn-sm btn-info"
+              (click)="openEditOrderModal(order)"
+              title="Modifier"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+            </button>
+            <button
+              class="btn btn-sm btn-danger"
+              (click)="deleteOrder(order)"
+              title="Supprimer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="orders.length === 0">
+          <td colspan="7" class="text-center">
+            Aucune commande trouvée. Créez votre première commande.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Order Modal -->
+<div
+  class="modal"
+  [class.show]="isAddOrderModalOpen"
+  *ngIf="isAddOrderModalOpen"
+>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Nouvelle Commande</h3>
+      <button class="close-btn" (click)="closeAddOrderModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="orderForm" class="order-form">
+        <div class="form-group">
+          <label>Client:</label>
+          <input
+            type="text"
+            formControlName="customer"
+            class="form-control"
+            placeholder="Nom du client"
+          />
+        </div>
+        <div class="form-group">
+          <label>Email:</label>
+          <input
+            type="email"
+            formControlName="email"
+            class="form-control"
+            placeholder="email@exemple.com"
+          />
+        </div>
+        <div class="form-group">
+          <label>Statut:</label>
+          <select formControlName="status" class="form-control">
+            <option value="pending">En attente</option>
+            <option value="processing">En cours</option>
+            <option value="completed">Terminée</option>
+            <option value="cancelled">Annulée</option>
+          </select>
+        </div>
+      </form>
+
+      <div class="items-section">
+        <h4>Articles</h4>
+        <form [formGroup]="itemForm" class="item-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>ID Article:</label>
+              <input
+                type="number"
+                formControlName="articleId"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label>Nom Article:</label>
+              <input
+                type="text"
+                formControlName="articleName"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label>Prix:</label>
+              <input
+                type="number"
+                step="0.01"
+                formControlName="price"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label>Quantité:</label>
+              <input
+                type="number"
+                formControlName="quantity"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="addItemToOrder()"
+              >
+                Ajouter Article
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="current-items">
+          <h5>Articles dans la commande:</h5>
+          <ul class="items-list">
+            <li *ngFor="let item of currentOrderItems; let i = index">
+              {{ item.articleName }} - {{ item.quantity }} x
+              {{ item.price | currency: "EUR":"symbol":"1.2-2" }} =
+              {{
+                item.quantity * item.price | currency: "EUR":"symbol":"1.2-2"
+              }}
+              <button class="remove-item-btn" (click)="removeItemFromOrder(i)">
+                ×
+              </button>
+            </li>
+          </ul>
+          <p *ngIf="currentOrderItems.length === 0">Aucun article ajouté</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeAddOrderModal()">
+        Annuler
+      </button>
+      <button class="btn btn-primary" (click)="createOrder()">
+        Créer Commande
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Order Modal -->
+<div
+  class="modal"
+  [class.show]="isEditOrderModalOpen"
+  *ngIf="isEditOrderModalOpen"
+>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Modifier Commande</h3>
+      <button class="close-btn" (click)="closeEditOrderModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="orderForm" class="order-form">
+        <div class="form-group">
+          <label>Client:</label>
+          <input type="text" formControlName="customer" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" formControlName="email" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Statut:</label>
+          <select formControlName="status" class="form-control">
+            <option value="pending">En attente</option>
+            <option value="processing">En cours</option>
+            <option value="completed">Terminée</option>
+            <option value="cancelled">Annulée</option>
+          </select>
+        </div>
+      </form>
+
+      <div class="items-section">
+        <h4>Articles</h4>
+        <form [formGroup]="itemForm" class="item-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>ID Article:</label>
+              <input
+                type="number"
+                formControlName="articleId"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label>Nom Article:</label>
+              <input
+                type="text"
+                formControlName="articleName"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label>Prix:</label>
+              <input
+                type="number"
+                step="0.01"
+                formControlName="price"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label>Quantité:</label>
+              <input
+                type="number"
+                formControlName="quantity"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="addItemToOrder()"
+              >
+                Ajouter Article
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="current-items">
+          <h5>Articles dans la commande:</h5>
+          <ul class="items-list">
+            <li *ngFor="let item of currentOrderItems; let i = index">
+              {{ item.articleName }} - {{ item.quantity }} x
+              {{ item.price | currency: "EUR":"symbol":"1.2-2" }} =
+              {{
+                item.quantity * item.price | currency: "EUR":"symbol":"1.2-2"
+              }}
+              <button class="remove-item-btn" (click)="removeItemFromOrder(i)">
+                ×
+              </button>
+            </li>
+          </ul>
+          <p *ngIf="currentOrderItems.length === 0">Aucun article ajouté</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeEditOrderModal()">
+        Annuler
+      </button>
+      <button class="btn btn-primary" (click)="updateOrder()">
+        Mettre à Jour
+      </button>
+    </div>
+  </div>
+</div>

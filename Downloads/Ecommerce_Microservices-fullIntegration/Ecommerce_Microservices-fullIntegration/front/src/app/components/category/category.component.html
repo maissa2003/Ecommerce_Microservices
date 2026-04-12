@@ -1,0 +1,68 @@
+<div class="category-container">
+  <h2 class="title">Category Management</h2>
+
+  <!-- Messages -->
+  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- Form -->
+  <div class="form-card">
+    <h3>{{ isEditing ? "Edit Category" : "Add New Category" }}</h3>
+    <div class="form-group">
+      <input
+        type="text"
+        placeholder="Category Name"
+        [(ngModel)]="selectedCategory.name"
+        class="input-field"
+      />
+    </div>
+    <div class="form-group">
+      <input
+        type="text"
+        placeholder="Description"
+        [(ngModel)]="selectedCategory.description"
+        class="input-field"
+      />
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" (click)="save()">
+        {{ isEditing ? "Update" : "Add" }}
+      </button>
+      <button class="btn btn-secondary" (click)="reset()" *ngIf="isEditing">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let category of categories">
+          <td>{{ category.id }}</td>
+          <td>{{ category.name }}</td>
+          <td>{{ category.description }}</td>
+          <td class="actions">
+            <button class="btn btn-edit" (click)="selectForEdit(category)">
+              Edit
+            </button>
+            <button class="btn btn-delete" (click)="delete(category.id!)">
+              Delete
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="categories.length === 0">
+          <td colspan="4" class="empty">No categories found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

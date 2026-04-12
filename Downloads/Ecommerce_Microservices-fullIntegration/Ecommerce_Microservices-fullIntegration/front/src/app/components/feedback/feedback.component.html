@@ -1,0 +1,210 @@
+<section class="feedback-section">
+  <!-- En-tête résumé des avis -->
+  <div class="feedback-header">
+    <h2 class="feedback-title">
+      <span class="title-icon">💬</span>
+      Avis clients
+      <span class="feedback-count" *ngIf="stats.totalApproved > 0"
+        >({{ stats.totalApproved }})</span
+      >
+    </h2>
+
+    <!-- Résumé global -->
+    <div class="rating-summary" *ngIf="feedbacks.length > 0">
+      <div class="rating-big">
+        <span class="big-number">{{
+          stats.averageRating | number: "1.1-1"
+        }}</span>
+        <span class="big-max">/5</span>
+      </div>
+      <div class="rating-details">
+        <div class="stars-display">
+          <span
+            *ngFor="let star of getStars(stats.averageRating)"
+            class="star-lg"
+            >{{ star }}</span
+          >
+        </div>
+        <p class="total-reviews">
+          Basé sur {{ stats.totalApproved }} avis vérifiés
+        </p>
+        <div class="rating-bars">
+          <div *ngFor="let s of [5, 4, 3, 2, 1]" class="rating-bar-row">
+            <span class="bar-label">{{ s }}★</span>
+            <div class="bar-track">
+              <div
+                class="bar-fill"
+                [style.width.%]="getRatingDistribution(s)"
+              ></div>
+            </div>
+            <span class="bar-pct">{{ getRatingDistribution(s) }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aucun avis -->
+    <div class="no-reviews" *ngIf="feedbacks.length === 0 && !isLoading">
+      <span class="no-reviews-icon">⭐</span>
+      <p>Aucun avis pour le moment. Soyez le premier à donner votre avis !</p>
+    </div>
+
+    <!-- Bouton écrire un avis -->
+    <button class="btn-write-review" (click)="showForm = !showForm">
+      {{ showForm ? "✕ Annuler" : "✏️ Écrire un avis" }}
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+  <div class="alert alert-error" *ngIf="errorMessage && !showForm">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Formulaire de soumission -->
+  <div class="feedback-form-wrapper" *ngIf="showForm">
+    <div class="feedback-form-card">
+      <h3>Votre avis</h3>
+
+      <!-- Étoiles interactives -->
+      <div class="star-picker">
+        <label>Note *</label>
+        <div class="stars-interactive">
+          <span
+            *ngFor="let i of [1, 2, 3, 4, 5]"
+            class="star-pick"
+            [class.active]="i <= (hoveredRating || currentRating)"
+            (mouseenter)="hoveredRating = i"
+            (mouseleave)="hoveredRating = 0"
+            (click)="setRating(i)"
+            >★</span
+          >
+        </div>
+        <span class="rating-label-text" *ngIf="hoveredRating || currentRating">
+          {{ getRatingLabel(hoveredRating || currentRating) }}
+        </span>
+      </div>
+
+      <!-- Commentaire -->
+      <div class="form-group" [formGroup]="feedbackForm">
+        <label
+          >Commentaire *
+          <span class="char-count">{{ commentLength }}/1000</span></label
+        >
+        <textarea
+          formControlName="comment"
+          placeholder="Partagez votre expérience avec cet article..."
+          rows="4"
+          maxlength="1000"
+        ></textarea>
+        <div
+          class="field-error"
+          *ngIf="
+            feedbackForm.get('comment')?.touched &&
+            feedbackForm.get('comment')?.invalid
+          "
+        >
+          Le commentaire doit contenir au moins 5 caractères.
+        </div>
+      </div>
+
+      <div class="alert alert-error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="showForm = false">Annuler</button>
+        <button
+          class="btn-submit"
+          (click)="submitFeedback()"
+          [disabled]="isSubmitting"
+        >
+          <span *ngIf="!isSubmitting">Publier mon avis</span>
+          <span *ngIf="isSubmitting" class="spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chargement -->
+  <div class="loading-feedbacks" *ngIf="isLoading">
+    <div class="skeleton" *ngFor="let i of [1, 2, 3]"></div>
+  </div>
+
+  <!-- Liste des feedbacks -->
+  <div class="feedbacks-list" *ngIf="!isLoading && feedbacks.length > 0">
+    <div class="feedback-card" *ngFor="let feedback of feedbacks">
+      <!-- Mode lecture -->
+      <ng-container *ngIf="editingFeedback?.id !== feedback.id">
+        <div class="feedback-card-header">
+          <div class="user-info">
+            <div class="avatar">{{ getAvatarInitials(feedback.userId) }}</div>
+            <div class="user-meta">
+              <span class="user-name">Utilisateur #{{ feedback.userId }}</span>
+              <span class="feedback-date">{{
+                formatDate(feedback.createdAt)
+              }}</span>
+            </div>
+          </div>
+          <div class="feedback-rating-stars">
+            <span
+              *ngFor="let star of getStars(feedback.rating)"
+              class="star-sm"
+              >{{ star }}</span
+            >
+          </div>
+        </div>
+        <p class="feedback-comment">{{ feedback.comment }}</p>
+        <div class="feedback-actions" *ngIf="feedback.userId === userId">
+          <button class="btn-action edit" (click)="startEdit(feedback)">
+            ✏️ Modifier
+          </button>
+          <button
+            class="btn-action delete"
+            (click)="deleteFeedback(feedback.id!)"
+          >
+            🗑️ Supprimer
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- Mode édition -->
+      <ng-container *ngIf="editingFeedback?.id === feedback.id">
+        <div class="edit-mode" [formGroup]="editForm">
+          <h4>Modifier votre avis</h4>
+          <div class="star-picker">
+            <div class="stars-interactive">
+              <span
+                *ngFor="let i of [1, 2, 3, 4, 5]"
+                class="star-pick"
+                [class.active]="i <= (hoveredEditRating || currentEditRating)"
+                (mouseenter)="hoveredEditRating = i"
+                (mouseleave)="hoveredEditRating = 0"
+                (click)="setEditRating(i)"
+                >★</span
+              >
+            </div>
+          </div>
+          <textarea
+            formControlName="comment"
+            rows="3"
+            maxlength="1000"
+            placeholder="Votre commentaire..."
+          ></textarea>
+          <div class="form-actions">
+            <button class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+            <button
+              class="btn-submit"
+              (click)="saveEdit()"
+              [disabled]="isSubmitting"
+            >
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</section>

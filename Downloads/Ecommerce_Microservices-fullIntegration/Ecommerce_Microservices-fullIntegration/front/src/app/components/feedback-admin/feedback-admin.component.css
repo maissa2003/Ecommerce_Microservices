@@ -1,0 +1,380 @@
+/* ═══════════════════════════════════════════════
+   FEEDBACK ADMIN — cohérent avec admin-dashboard
+   ═══════════════════════════════════════════════ */
+
+.feedback-admin {
+  padding: 0;
+}
+
+/* ─── Header ─────────────────────────────────── */
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-left h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px;
+}
+
+.header-left p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.btn-refresh {
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #4b5563;
+}
+
+.btn-refresh:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+/* ─── Alerts ──────────────────────────────────── */
+.alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.alert-success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+.alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+/* ─── Stats cards ─────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid transparent;
+}
+
+.stat-total {
+  border-left-color: #6366f1;
+}
+.stat-pending {
+  border-left-color: #f59e0b;
+}
+.stat-approved {
+  border-left-color: #10b981;
+}
+.stat-rejected {
+  border-left-color: #ef4444;
+}
+
+.stat-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* ─── Barre filtres ───────────────────────────── */
+.filters-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tab-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+}
+
+.tab-btn .badge {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 1px 7px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tab-btn:not(.active) .badge {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 14px;
+}
+
+.search-box input {
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 12px 8px 32px;
+  font-size: 14px;
+  width: 220px;
+  transition: border-color 0.2s;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+/* ─── Skeleton ────────────────────────────────── */
+.skeleton-row {
+  height: 52px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e5e5e5 50%, #f0f0f0 75%);
+  background-size: 200%;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ─── Empty state ─────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: #9ca3af;
+}
+
+.empty-state span {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+.empty-state p {
+  font-size: 15px;
+}
+
+/* ─── Tableau ─────────────────────────────────── */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.feedback-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.feedback-table thead {
+  background: linear-gradient(135deg, #f8faff, #ede9fe);
+}
+
+.feedback-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.feedback-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s;
+}
+
+.feedback-table tbody tr:last-child {
+  border-bottom: none;
+}
+.feedback-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.feedback-table td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.col-id {
+  color: #9ca3af;
+  font-size: 12px;
+}
+.col-article,
+.col-user {
+  font-weight: 600;
+  color: #6366f1;
+}
+
+.col-rating {
+  white-space: nowrap;
+}
+
+.stars-inline {
+  display: flex;
+  gap: 1px;
+}
+.star-xs {
+  font-size: 13px;
+  color: #f59e0b;
+}
+.rating-num {
+  font-size: 11px;
+  color: #9ca3af;
+  display: block;
+}
+
+.col-comment {
+  max-width: 200px;
+}
+
+.comment-preview {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  color: #4b5563;
+}
+
+/* Badges de statut */
+.badge-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+.badge-approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+.badge-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Boutons d'action */
+.action-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-approve,
+.btn-reject,
+.btn-delete {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-approve:hover {
+  background: #d1fae5;
+  border-color: #10b981;
+}
+.btn-reject:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+.btn-delete:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+/* ─── Responsive ──────────────────────────────── */
+@media (max-width: 768px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-box input {
+    width: 100%;
+  }
+  .admin-page-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

@@ -1,0 +1,780 @@
+<div class="customer-container">
+  <!-- En-tête -->
+  <div class="customer-header">
+    <div class="header-title">
+      <h1>Gestion des clients</h1>
+      <p>Gérez votre base de clients et leurs informations</p>
+    </div>
+    <button class="btn-add" (click)="openAddModal()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        />
+      </svg>
+      Ajouter un client
+    </button>
+  </div>
+
+  <!-- Statistiques rapides -->
+  <div class="stats-cards">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+          />
+        </svg>
+      </div>
+      <div class="stat-info">
+        <h3>Total clients</h3>
+        <p class="stat-value">{{ totalCustomers }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon active">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <div class="stat-info">
+        <h3>Clients actifs</h3>
+        <p class="stat-value">{{ activeCustomers }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orders">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+          />
+        </svg>
+      </div>
+      <div class="stat-info">
+        <h3>Commandes totales</h3>
+        <p class="stat-value">{{ totalOrders }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon revenue">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <div class="stat-info">
+        <h3>CA total</h3>
+        <p class="stat-value">{{ formatPrice(totalRevenue) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtres et recherche -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+      <input
+        type="text"
+        placeholder="Rechercher par nom, email, téléphone ou ville..."
+        (input)="onSearch($event)"
+        [value]="searchTerm"
+      />
+    </div>
+
+    <div class="filter-group">
+      <select
+        (change)="filterByStatus($any($event.target).value)"
+        [value]="selectedStatus"
+      >
+        <option value="all">Tous les statuts</option>
+        <option value="active">Actifs</option>
+        <option value="inactive">Inactifs</option>
+      </select>
+
+      <select
+        (change)="sortBy($any($event.target).value)"
+        [value]="selectedSort"
+      >
+        <option value="name-asc">Nom (A-Z)</option>
+        <option value="name-desc">Nom (Z-A)</option>
+        <option value="orders-desc">Plus de commandes</option>
+        <option value="total-desc">Plus dépensé</option>
+        <option value="date-desc">Plus récent</option>
+      </select>
+
+      <button class="btn-reset" (click)="resetFilters()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        Réinitialiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Tableau des clients -->
+  <div class="customers-table-container">
+    <div class="table-header">
+      <h2>Liste des clients</h2>
+      <div class="items-per-page">
+        <span>Afficher :</span>
+        <select (change)="changeItemsPerPage($event)">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Chargement des clients...</p>
+    </div>
+
+    <div
+      *ngIf="!isLoading && filteredCustomers.length === 0"
+      class="empty-state"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+        />
+      </svg>
+      <p>Aucun client trouvé</p>
+      <button class="btn-add" (click)="resetFilters()">
+        Réinitialiser les filtres
+      </button>
+    </div>
+
+    <div
+      *ngIf="!isLoading && filteredCustomers.length > 0"
+      class="table-responsive"
+    >
+      <table class="customers-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Contact</th>
+            <th>Localisation</th>
+            <th>Commandes</th>
+            <th>Total dépensé</th>
+            <th>Statut</th>
+            <th>Inscription</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let customer of getPaginatedCustomers()">
+            <td class="customer-info">
+              <div class="customer-avatar">
+                <img
+                  [src]="
+                    customer.avatar ||
+                    'https://ui-avatars.com/api/?background=8b5cf6&color=fff&name=' +
+                      customer.name.split(' ')[0] +
+                      '+' +
+                      customer.name.split(' ')[1]
+                  "
+                  [alt]="customer.name"
+                />
+              </div>
+              <div class="customer-details">
+                <strong>{{ customer.name }}</strong>
+                <span
+                  >ID: #CUST-{{ customer.id.toString().padStart(4, "0") }}</span
+                >
+              </div>
+            </td>
+            <td class="contact-info">
+              <div class="email">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  width="14"
+                  height="14"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                {{ customer.email }}
+              </div>
+              <div class="phone">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  width="14"
+                  height="14"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                  />
+                </svg>
+                {{ customer.phone }}
+              </div>
+            </td>
+            <td class="location">
+              <div class="address">{{ customer.address }}</div>
+              <div class="city">{{ customer.city }}</div>
+            </td>
+            <td class="orders-count">
+              <span class="count-badge">{{ customer.orders }}</span>
+            </td>
+            <td class="total-spent">
+              <strong>{{ formatPrice(customer.totalSpent) }}</strong>
+            </td>
+            <td>
+              <span
+                class="status-badge"
+                [class]="getStatusClass(customer.status)"
+              >
+                {{ getStatusLabel(customer.status) }}
+              </span>
+            </td>
+            <td class="registration-date">
+              {{ customer.registrationDate | date: "dd/MM/yyyy" }}
+            </td>
+            <td class="actions">
+              <button
+                class="action-btn view"
+                (click)="openViewModal(customer)"
+                title="Voir détails"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+              </button>
+              <button
+                class="action-btn edit"
+                (click)="openEditModal(customer)"
+                title="Modifier"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+              </button>
+              <button
+                class="action-btn delete"
+                (click)="deleteCustomer(customer.id)"
+                title="Supprimer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </button>
+              <button
+                class="action-btn orders"
+                (click)="viewCustomerOrders(customer.id)"
+                title="Voir commandes"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="!isLoading && filteredCustomers.length > 0" class="pagination">
+      <button
+        class="page-btn"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          class="page-number"
+          [class.active]="currentPage === page"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+      </div>
+
+      <button
+        class="page-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(currentPage + 1)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </button>
+
+      <div class="pagination-info">
+        Affichage de {{ getStartRange() }} à {{ getEndRange() }} sur
+        {{ filteredCustomers.length }} clients
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ajouter Client -->
+<div class="modal-overlay" *ngIf="isAddModalOpen" (click)="closeAddModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Ajouter un client</h3>
+      <button class="close-btn" (click)="closeAddModal()">×</button>
+    </div>
+    <form [formGroup]="customerForm" (ngSubmit)="addCustomer()">
+      <div class="form-group">
+        <label>Nom complet *</label>
+        <input type="text" formControlName="name" placeholder="Jean Dupont" />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('name')?.invalid &&
+            customerForm.get('name')?.touched
+          "
+        >
+          Le nom est requis (minimum 2 caractères)
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email *</label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="client@email.com"
+        />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('email')?.invalid &&
+            customerForm.get('email')?.touched
+          "
+        >
+          Email valide requis
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Téléphone *</label>
+        <input
+          type="tel"
+          formControlName="phone"
+          placeholder="+33 6 12 34 56 78"
+        />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('phone')?.invalid &&
+            customerForm.get('phone')?.touched
+          "
+        >
+          Numéro de téléphone valide requis (10+ caractères)
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Adresse *</label>
+        <input
+          type="text"
+          formControlName="address"
+          placeholder="15 Rue de Paris"
+        />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('address')?.invalid &&
+            customerForm.get('address')?.touched
+          "
+        >
+          L'adresse est requise
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Ville *</label>
+        <input type="text" formControlName="city" placeholder="Paris" />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('city')?.invalid &&
+            customerForm.get('city')?.touched
+          "
+        >
+          La ville est requise
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Statut</label>
+        <select formControlName="status">
+          <option value="active">Actif</option>
+          <option value="inactive">Inactif</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeAddModal()">
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="customerForm.invalid"
+        >
+          Ajouter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Modifier Client -->
+<div class="modal-overlay" *ngIf="isEditModalOpen" (click)="closeEditModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Modifier le client</h3>
+      <button class="close-btn" (click)="closeEditModal()">×</button>
+    </div>
+    <form [formGroup]="customerForm" (ngSubmit)="updateCustomer()">
+      <div class="form-group">
+        <label>Nom complet *</label>
+        <input type="text" formControlName="name" />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('name')?.invalid &&
+            customerForm.get('name')?.touched
+          "
+        >
+          Le nom est requis (minimum 2 caractères)
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" formControlName="email" />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('email')?.invalid &&
+            customerForm.get('email')?.touched
+          "
+        >
+          Email valide requis
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Téléphone *</label>
+        <input type="tel" formControlName="phone" />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('phone')?.invalid &&
+            customerForm.get('phone')?.touched
+          "
+        >
+          Numéro de téléphone valide requis
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Adresse *</label>
+        <input type="text" formControlName="address" />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('address')?.invalid &&
+            customerForm.get('address')?.touched
+          "
+        >
+          L'adresse est requise
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Ville *</label>
+        <input type="text" formControlName="city" />
+        <div
+          class="error-msg"
+          *ngIf="
+            customerForm.get('city')?.invalid &&
+            customerForm.get('city')?.touched
+          "
+        >
+          La ville est requise
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Statut</label>
+        <select formControlName="status">
+          <option value="active">Actif</option>
+          <option value="inactive">Inactif</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeEditModal()">
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="customerForm.invalid"
+        >
+          Modifier
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Visualisation Client -->
+<div
+  class="modal-overlay"
+  *ngIf="isViewModalOpen && selectedCustomer"
+  (click)="closeViewModal()"
+>
+  <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Détails du client</h3>
+      <button class="close-btn" (click)="closeViewModal()">×</button>
+    </div>
+    <div class="customer-profile">
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <img
+            [src]="
+              selectedCustomer.avatar ||
+              'https://ui-avatars.com/api/?background=8b5cf6&color=fff&size=120&name=' +
+                selectedCustomer.name.split(' ')[0] +
+                '+' +
+                selectedCustomer.name.split(' ')[1]
+            "
+            [alt]="selectedCustomer.name"
+          />
+        </div>
+        <div class="profile-info">
+          <h2>{{ selectedCustomer.name }}</h2>
+          <span
+            class="status-badge"
+            [class]="getStatusClass(selectedCustomer.status)"
+          >
+            {{ getStatusLabel(selectedCustomer.status) }}
+          </span>
+          <p>
+            Client depuis le
+            {{ selectedCustomer.registrationDate | date: "dd MMMM yyyy" }}
+          </p>
+        </div>
+      </div>
+
+      <div class="profile-details">
+        <div class="detail-section">
+          <h4>Informations de contact</h4>
+          <div class="detail-row">
+            <span class="detail-label">Email :</span>
+            <span class="detail-value">{{ selectedCustomer.email }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Téléphone :</span>
+            <span class="detail-value">{{ selectedCustomer.phone }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Adresse</h4>
+          <div class="detail-row">
+            <span class="detail-value"
+              >{{ selectedCustomer.address }}, {{ selectedCustomer.city }}</span
+            >
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Activité</h4>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Commandes</span>
+              <span class="stat-number">{{ selectedCustomer.orders }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Total dépensé</span>
+              <span class="stat-number">{{
+                formatPrice(selectedCustomer.totalSpent)
+              }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Dernière visite</span>
+              <span class="stat-number">{{
+                selectedCustomer.lastVisit | date: "dd/MM/yyyy"
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeViewModal()">Fermer</button>
+        <button
+          class="btn-primary"
+          (click)="viewCustomerOrders(selectedCustomer.id); closeViewModal()"
+        >
+          Voir les commandes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

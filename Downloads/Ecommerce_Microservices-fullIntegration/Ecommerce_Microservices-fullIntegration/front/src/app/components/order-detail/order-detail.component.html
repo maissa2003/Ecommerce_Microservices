@@ -1,0 +1,113 @@
+<div class="customer-container">
+  <div class="customer-header">
+    <div class="header-title">
+      <h1>Détail de la commande</h1>
+      <p *ngIf="order">Commande #ORD-{{ order.id }}</p>
+    </div>
+    <button class="btn-add" (click)="goBack()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+      Retour aux commandes
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <div *ngIf="!loading && order" class="customers-table-container">
+    <!-- Order Info -->
+    <div
+      style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;"
+    >
+      <div
+        class="stat-card"
+        style="display:flex;flex-direction:column;gap:4px;"
+      >
+        <span style="font-size:13px;color:#64748b;">N° Commande</span>
+        <strong style="color:#8b5cf6;font-size:18px;"
+          >#ORD-{{ order.id }}</strong
+        >
+      </div>
+      <div
+        class="stat-card"
+        style="display:flex;flex-direction:column;gap:4px;"
+      >
+        <span style="font-size:13px;color:#64748b;">Date</span>
+        <strong>{{ order.createdAt | date: "dd/MM/yyyy HH:mm" }}</strong>
+      </div>
+      <div
+        class="stat-card"
+        style="display:flex;flex-direction:column;gap:4px;"
+      >
+        <span style="font-size:13px;color:#64748b;">Statut</span>
+        <span class="status-badge" [class]="getStatusColor(order.status)">
+          {{ getStatusLabel(order.status) }}
+        </span>
+      </div>
+      <div
+        class="stat-card"
+        style="display:flex;flex-direction:column;gap:4px;"
+      >
+        <span style="font-size:13px;color:#64748b;">Total</span>
+        <strong style="font-size:20px;color:#0f172a;">{{
+          order.total | currency: "EUR":"symbol":"1.2-2"
+        }}</strong>
+      </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="table-header">
+      <h2>Articles commandés</h2>
+    </div>
+    <div class="table-responsive">
+      <table class="customers-table">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Prix unitaire</th>
+            <th>Quantité</th>
+            <th>Sous-total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of order.items">
+            <td>
+              <strong>{{ item.articleName }}</strong>
+            </td>
+            <td>{{ item.price | currency: "EUR":"symbol":"1.2-2" }}</td>
+            <td>
+              <span class="count-badge">{{ item.quantity }}</span>
+            </td>
+            <td>
+              <strong>{{
+                item.price * item.quantity | currency: "EUR":"symbol":"1.2-2"
+              }}</strong>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Total -->
+    <div
+      style="display:flex;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0;"
+    >
+      <strong style="font-size:20px;color:#0f172a;">
+        Total : {{ order.total | currency: "EUR":"symbol":"1.2-2" }}
+      </strong>
+    </div>
+  </div>
+</div>

@@ -107,7 +107,7 @@ export class LandingPageComponent implements OnInit {
   }
 
   onShopNow(): void {
-    this.router.navigate(['/produits']);
+    this.router.navigate(['/signin']);
   }
 
   onLearnMore(): void {

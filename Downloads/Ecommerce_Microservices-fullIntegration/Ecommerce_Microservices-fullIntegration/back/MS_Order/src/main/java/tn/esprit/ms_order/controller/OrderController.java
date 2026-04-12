@@ -45,6 +45,11 @@ public class OrderController {
         return ResponseEntity.ok(orderService.confirmOrder(userId, promoCode));
     }
 
+    @PostMapping("/cart/{userId}/apply-promo")
+    public ResponseEntity<Order> applyPromo(@PathVariable Long userId, @RequestParam String code) {
+        return ResponseEntity.ok(orderService.applyPromoCode(userId, code));
+    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Order>> getByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(orderService.getOrdersByUser(userId));

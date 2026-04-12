@@ -20,7 +20,7 @@ public class CountryService {
     /**
      * Initialize countries data on startup
      */
-    // @PostConstruct - Temporarily disabled for testing
+    @PostConstruct
     public void initializeCountries() {
         log.info("🌍 Checking countries data...");
 

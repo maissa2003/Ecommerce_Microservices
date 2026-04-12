@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ArticleService, Article } from '../../services/article.service';
 import { OrderService } from '../../services/order.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-article-catalog',
@@ -53,7 +54,8 @@ export class ArticleCatalogComponent implements OnInit {
     public router: Router,
     private fb: FormBuilder,
     private articleService: ArticleService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private authService: AuthService
   ) {
     this.searchForm = this.fb.group({
       search: ['']
@@ -239,11 +241,11 @@ export class ArticleCatalogComponent implements OnInit {
     this.showCartSidebar = true;
 
     // Sync with backend order service
-    // Always add 1 more unit in backend as well
+    const userId = this.authService.getUserId();
     this.orderService
-      .addToCart(1, article.id, article.name, article.price, 1)
+      .addToCart(userId, article.id, article.name, article.price, 1)
       .subscribe({
-        next: () => console.log('Added to backend cart'),
+        next: () => console.log('Added to backend cart for user', userId),
         error: (err: any) => console.error('Failed to add to backend', err)
       });
   }

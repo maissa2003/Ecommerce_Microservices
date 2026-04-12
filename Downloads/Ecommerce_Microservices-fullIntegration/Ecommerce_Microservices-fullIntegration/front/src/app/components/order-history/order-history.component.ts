@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { OrderService, Order } from '../../services/order.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-order-history',
@@ -12,9 +13,18 @@ export class OrderHistoryComponent implements OnInit {
   userId = 1;
   loading = false;
 
-  constructor(private orderService: OrderService, private router: Router) {}
+  constructor(
+    private orderService: OrderService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    this.userId = this.authService.getUserId();
+    this.loadOrders();
+  }
+
+  loadOrders(): void {
     this.loading = true;
     this.orderService.getOrdersByUser(this.userId).subscribe({
       next: data => {

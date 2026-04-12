@@ -22,6 +22,8 @@ import { OrderManagementComponent } from './components/order-management/order-ma
 import { ArticleCatalogComponent } from './components/article-catalog/article-catalog.component';
 import { FeedbackComponent } from './components/feedback/feedback.component';
 import { FeedbackAdminComponent } from './components/feedback-admin/feedback-admin.component';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -49,7 +51,9 @@ import { FeedbackAdminComponent } from './components/feedback-admin/feedback-adm
     HttpClientModule,
     ReactiveFormsModule
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

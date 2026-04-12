@@ -1,5 +1,4 @@
 <div class="signin-page">
-  <!-- Section visuelle avec image de fond -->
   <div class="signin-visual">
     <img
       src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80"
@@ -25,30 +24,18 @@
         </div>
         <span class="brand-name">Shop<span class="gradient-text">X</span></span>
       </div>
-
       <div class="visual-tagline">
         <h2>Retrouvez l'élégance<br />à chaque clic</h2>
         <p>Plus de 10 000 clients nous font confiance chaque jour</p>
       </div>
-
       <div class="visual-stats">
-        <div class="vs-item">
-          <strong>10k+</strong>
-          <span>Clients</span>
-        </div>
-        <div class="vs-item">
-          <strong>500+</strong>
-          <span>Produits</span>
-        </div>
-        <div class="vs-item">
-          <strong>24/7</strong>
-          <span>Support</span>
-        </div>
+        <div class="vs-item"><strong>10k+</strong><span>Clients</span></div>
+        <div class="vs-item"><strong>500+</strong><span>Produits</span></div>
+        <div class="vs-item"><strong>24/7</strong><span>Support</span></div>
       </div>
     </div>
   </div>
 
-  <!-- Panneau du formulaire de connexion -->
   <div class="signin-form-panel">
     <button class="back-btn" (click)="navigateToHome()">
       <svg
@@ -92,6 +79,7 @@
       </div>
 
       <form [formGroup]="signinForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <!-- Email -->
         <div
           class="field"
           [class.has-error]="
@@ -117,7 +105,7 @@
             <input
               type="email"
               formControlName="email"
-              placeholder="votre@email.com"
+              placeholder="votre&#64;email.com"
               autocomplete="email"
             />
           </div>
@@ -152,6 +140,7 @@
           </div>
         </div>
 
+        <!-- Mot de passe -->
         <div
           class="field"
           [class.has-error]="
@@ -253,6 +242,7 @@
           </div>
         </div>
 
+        <!-- Remember me -->
         <div class="form-row">
           <label class="checkbox-label">
             <input type="checkbox" formControlName="rememberMe" />
@@ -267,6 +257,7 @@
           >
         </div>
 
+        <!-- Erreur API -->
         <div
           class="error-msg"
           *ngIf="errorMessage"
@@ -290,18 +281,22 @@
           {{ errorMessage }}
         </div>
 
-        <button
-          type="submit"
-          class="btn-submit"
-          [disabled]="signinForm.invalid || isLoading"
-        >
+        <!-- ✅ Bouton toujours cliquable — la validation se fait dans onSubmit() -->
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
           <span *ngIf="!isLoading">Se connecter</span>
           <div *ngIf="isLoading" class="spinner"></div>
         </button>
 
-        <div class="divider">
-          <span>ou continuez avec</span>
-        </div>
+        <!-- Bouton test rapide -->
+        <button
+          type="button"
+          (click)="fillTestCredentials()"
+          style="width:100%;margin-top:8px;padding:10px;border:1.5px dashed #6366f1;border-radius:8px;background:transparent;color:#6366f1;font-size:13px;cursor:pointer;"
+        >
+          Remplir avec compte test (test&#64;test.com)
+        </button>
+
+        <div class="divider"><span>ou continuez avec</span></div>
 
         <div class="social-btns">
           <button type="button" class="social-btn" (click)="signInWithGoogle()">

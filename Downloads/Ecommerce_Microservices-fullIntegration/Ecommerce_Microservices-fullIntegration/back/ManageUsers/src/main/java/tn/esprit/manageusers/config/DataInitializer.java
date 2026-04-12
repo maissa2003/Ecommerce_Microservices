@@ -8,49 +8,36 @@ import tn.esprit.manageusers.entities.Role;
 import tn.esprit.manageusers.entities.Utilisateur;
 import tn.esprit.manageusers.repositories.UtilisateurRepository;
 
-/**
- * Data Initialization Configuration
- * Automatically inserts default test users into the database on application startup
- */
 @Configuration
 public class DataInitializer {
 
-    /**
-     * Initialize database with default users
-     * - Admin user with ADMIN role
-     * - Customer user with CUSTOMER role
-     *
-     * Passwords are encoded using BCrypt for security
-     */
     @Bean
     CommandLineRunner init(UtilisateurRepository repo, PasswordEncoder passwordEncoder) {
         return args -> {
-            // Clear existing data
-            repo.deleteAll();
 
-            // Create and save Admin user
-            Utilisateur admin = Utilisateur.builder()
-                    .nom("Admin")
-                    .email("admin@gmail.com")
-                    .password(passwordEncoder.encode("1234"))  // Password: 1234 (encoded)
-                    .role(Role.ADMIN)
-                    .build();
-            repo.save(admin);
-            System.out.println("✅ Admin user created: admin@gmail.com");
+            upsert(repo, passwordEncoder, "Admin", "admin@gmail.com", "12345678", Role.ADMIN);
+            upsert(repo, passwordEncoder, "Client", "client@gmail.com", "12345678", Role.CUSTOMER);
+            upsert(repo, passwordEncoder, "Souhe", "souhe@gmail.com", "12345678", Role.CUSTOMER);
+            upsert(repo, passwordEncoder, "User Test", "user@gmail.com", "password123", Role.CUSTOMER);
 
-            // Create and save Customer user
-            Utilisateur customer = Utilisateur.builder()
-                    .nom("Client")
-                    .email("client@gmail.com")
-                    .password(passwordEncoder.encode("1234"))  // Password: 1234 (encoded)
-                    .role(Role.CUSTOMER)
-                    .build();
-            repo.save(customer);
-            System.out.println("✅ Customer user created: client@gmail.com");
-
-            // Log total users
-            long totalUsers = repo.count();
-            System.out.println("📊 Total users initialized: " + totalUsers);
+            System.out.println("✅ All users initialized with correct BCrypt passwords");
+            System.out.println("📊 Total users: " + repo.count());
         };
+    }
+
+    // Creates user if not exists, always updates password to ensure BCrypt encoding
+    private void upsert(UtilisateurRepository repo, PasswordEncoder encoder,
+            String nom, String email, String rawPassword, Role role) {
+
+        Utilisateur user = repo.findByEmail(email)
+                .orElseGet(() -> Utilisateur.builder().nom(nom).email(email).role(role).build());
+
+        // Always re-encode password — ensures it's always BCrypt on startup
+        user.setPassword(encoder.encode(rawPassword));
+        user.setRole(role);
+        user.setNom(nom);
+
+        repo.save(user);
+        System.out.println("✅ User ready: " + email);
     }
 }

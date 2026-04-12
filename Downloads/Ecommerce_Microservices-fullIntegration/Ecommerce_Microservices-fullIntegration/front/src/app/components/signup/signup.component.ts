@@ -7,6 +7,7 @@ import {
   AbstractControl,
   ValidationErrors
 } from '@angular/forms';
+import { AuthService } from '../../services/auth.service'; // ← importé le service d'authentification
 
 @Component({
   selector: 'app-signup',
@@ -20,36 +21,34 @@ export class SignupComponent implements OnInit {
   showConfirmPassword = false;
   errorMessage = '';
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private authService: AuthService
+  ) {
     this.signupForm = this.fb.group(
       {
-        fullName: ['', [Validators.required, Validators.minLength(3)]],
+        nom: ['', [Validators.required, Validators.minLength(2)]], // ← only nom, no prenom
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, Validators.minLength(8)]],
         confirmPassword: ['', [Validators.required]],
         acceptTerms: [false, [Validators.requiredTrue]],
         receiveNewsletter: [false]
       },
-      {
-        validators: this.passwordMatchValidator
-      }
+      { validators: this.passwordMatchValidator }
     );
   }
 
   ngOnInit(): void {
-    // Initialisation
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/']);
+    }
   }
 
-  // Validateur personnalisé pour vérifier que les mots de passe correspondent
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-    const password = control.get('password');
-    const confirmPassword = control.get('confirmPassword');
-
-    if (
-      password &&
-      confirmPassword &&
-      password.value !== confirmPassword.value
-    ) {
+    const pw = control.get('password');
+    const cpw = control.get('confirmPassword');
+    if (pw && cpw && pw.value !== cpw.value) {
       return { passwordMismatch: true };
     }
     return null;
@@ -57,71 +56,48 @@ export class SignupComponent implements OnInit {
 
   onSubmit(): void {
     if (this.signupForm.invalid) {
-      // Marquer tous les champs comme touchés pour afficher les erreurs
-      Object.keys(this.signupForm.controls).forEach(key => {
-        this.signupForm.get(key)?.markAsTouched();
-      });
+      Object.keys(this.signupForm.controls).forEach(key =>
+        this.signupForm.get(key)?.markAsTouched()
+      );
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    const {
-      fullName,
-      email,
-      password,
-      receiveNewsletter
-    } = this.signupForm.value;
+    const { nom, email, password } = this.signupForm.value; // ← no prenom
 
-    // Simuler une requête API d'inscription
-    setTimeout(() => {
-      // Simulation d'inscription réussie
-      if (email !== 'existing@example.com') {
-        // Sauvegarder les informations utilisateur
-        localStorage.setItem('userName', fullName);
-        localStorage.setItem('userEmail', email);
-
-        // Sauvegarder le token d'authentification
-        localStorage.setItem('authToken', 'fake-jwt-token');
-
-        // Rediriger vers la page d'accueil
-        this.router.navigate(['/']);
-      } else {
-        this.errorMessage = 'Cet email est déjà utilisé';
+    this.authService.register({ nom, email, password }).subscribe({
+      next: () => this.router.navigate(['/']),
+      error: (err: any) => {
+        this.errorMessage =
+          err.status === 400
+            ? 'Cet email est déjà utilisé'
+            : 'Une erreur est survenue. Veuillez réessayer.';
+        this.isLoading = false;
+      },
+      complete: () => {
+        this.isLoading = false;
       }
-      this.isLoading = false;
-    }, 1500);
+    });
   }
 
-  togglePasswordVisibility(): void {
+  togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
-
-  toggleConfirmPasswordVisibility(): void {
+  toggleConfirmPasswordVisibility() {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
-
-  navigateToSignIn(): void {
+  navigateToSignIn() {
     this.router.navigate(['/signin']);
   }
-
-  navigateToHome(): void {
+  navigateToHome() {
     this.router.navigate(['/']);
   }
-
-  forgotPassword(): void {
-    console.log('Forgot password clicked');
-    this.router.navigate(['/forgot-password']);
-  }
-
-  signUpWithGoogle(): void {
+  signUpWithGoogle() {
     console.log('Sign up with Google');
-    // Logique d'inscription Google
   }
-
-  signUpWithApple(): void {
+  signUpWithApple() {
     console.log('Sign up with Apple');
-    // Logique d'inscription Apple
   }
 }

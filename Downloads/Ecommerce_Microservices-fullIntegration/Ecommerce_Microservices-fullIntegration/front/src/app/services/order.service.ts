@@ -103,6 +103,16 @@ export class OrderService {
     );
   }
 
+  // Apply promo code to cart (preview)
+  applyPromoCode(userId: number, code: string): Observable<Order> {
+    const params = new HttpParams().set('code', code);
+    return this.http.post<Order>(
+      `${this.baseUrl}/cart/${userId}/apply-promo`,
+      {},
+      { params }
+    );
+  }
+
   // Update order status
   updateStatus(orderId: number, status: string): Observable<Order> {
     const params = new HttpParams().set('status', status);

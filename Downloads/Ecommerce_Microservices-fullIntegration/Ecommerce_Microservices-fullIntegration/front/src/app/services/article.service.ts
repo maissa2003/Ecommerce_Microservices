@@ -55,6 +55,6 @@ export class ArticleService {
     formData.append('file', file);
     return this.http
       .post<{ url: string }>(`${this.apiUrl}/upload`, formData)
-      .pipe(map(response => 'http://localhost:8080' + response.url));
+      .pipe(map(response => 'http://localhost:8088' + response.url));
   }
 }

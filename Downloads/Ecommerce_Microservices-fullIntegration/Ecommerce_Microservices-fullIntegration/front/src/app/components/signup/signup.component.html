@@ -1,5 +1,4 @@
 <div class="signup-page">
-  <!-- Section visuelle avec image de fond -->
   <div class="signup-visual">
     <img
       src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80"
@@ -25,32 +24,20 @@
         </div>
         <span class="brand-name">Shop<span class="gradient-text">X</span></span>
       </div>
-
       <div class="visual-tagline">
         <h2>Rejoignez l'aventure<br />ShopX dès aujourd'hui</h2>
         <p>
           Créez votre compte et découvrez des milliers de produits exceptionnels
         </p>
       </div>
-
       <div class="visual-stats">
-        <div class="vs-item">
-          <strong>10k+</strong>
-          <span>Clients</span>
-        </div>
-        <div class="vs-item">
-          <strong>500+</strong>
-          <span>Produits</span>
-        </div>
-        <div class="vs-item">
-          <strong>24/7</strong>
-          <span>Support</span>
-        </div>
+        <div class="vs-item"><strong>10k+</strong><span>Clients</span></div>
+        <div class="vs-item"><strong>500+</strong><span>Produits</span></div>
+        <div class="vs-item"><strong>24/7</strong><span>Support</span></div>
       </div>
     </div>
   </div>
 
-  <!-- Panneau du formulaire d'inscription -->
   <div class="signup-form-panel">
     <button class="back-btn" (click)="navigateToHome()">
       <svg
@@ -94,12 +81,11 @@
       </div>
 
       <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="auth-form">
-        <!-- Nom complet -->
+        <!-- Nom -->
         <div
           class="field"
           [class.has-error]="
-            signupForm.get('fullName')?.invalid &&
-            signupForm.get('fullName')?.touched
+            signupForm.get('nom')?.invalid && signupForm.get('nom')?.touched
           "
         >
           <label>Nom complet</label>
@@ -120,7 +106,7 @@
             </svg>
             <input
               type="text"
-              formControlName="fullName"
+              formControlName="nom"
               placeholder="Jean Dupont"
               autocomplete="name"
             />
@@ -128,8 +114,7 @@
           <div
             class="error-msg"
             *ngIf="
-              signupForm.get('fullName')?.invalid &&
-              signupForm.get('fullName')?.touched
+              signupForm.get('nom')?.invalid && signupForm.get('nom')?.touched
             "
           >
             <svg
@@ -147,11 +132,11 @@
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span *ngIf="signupForm.get('fullName')?.errors?.['required']"
+            <span *ngIf="signupForm.get('nom')?.errors?.['required']"
               >Nom requis</span
             >
-            <span *ngIf="signupForm.get('fullName')?.errors?.['minlength']"
-              >Minimum 3 caractères</span
+            <span *ngIf="signupForm.get('nom')?.errors?.['minlength']"
+              >Minimum 2 caractères</span
             >
           </div>
         </div>
@@ -182,7 +167,7 @@
             <input
               type="email"
               formControlName="email"
-              placeholder="votre@email.com"
+              placeholder="votre&#64;email.com"
               autocomplete="email"
             />
           </div>
@@ -317,15 +302,6 @@
               >Minimum 8 caractères</span
             >
           </div>
-          <div
-            class="password-hint"
-            *ngIf="
-              !signupForm.get('password')?.valid &&
-              signupForm.get('password')?.touched
-            "
-          >
-            <span>Le mot de passe doit contenir au moins 8 caractères</span>
-          </div>
         </div>
 
         <!-- Confirmation mot de passe -->
@@ -425,7 +401,7 @@
           </div>
         </div>
 
-        <!-- Options supplémentaires -->
+        <!-- Newsletter -->
         <div class="form-row">
           <label class="checkbox-label">
             <input type="checkbox" formControlName="receiveNewsletter" />
@@ -434,6 +410,7 @@
           </label>
         </div>
 
+        <!-- Conditions générales -->
         <div class="form-row">
           <label class="checkbox-label terms">
             <input type="checkbox" formControlName="acceptTerms" />
@@ -476,6 +453,7 @@
           Vous devez accepter les conditions pour continuer
         </div>
 
+        <!-- Erreur API -->
         <div
           class="error-msg"
           *ngIf="errorMessage"
@@ -499,18 +477,13 @@
           {{ errorMessage }}
         </div>
 
-        <button
-          type="submit"
-          class="btn-submit"
-          [disabled]="signupForm.invalid || isLoading"
-        >
+        <!-- ✅ Bouton toujours cliquable — la validation se fait dans onSubmit() -->
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
           <span *ngIf="!isLoading">Créer mon compte</span>
           <div *ngIf="isLoading" class="spinner"></div>
         </button>
 
-        <div class="divider">
-          <span>ou inscrivez-vous avec</span>
-        </div>
+        <div class="divider"><span>ou inscrivez-vous avec</span></div>
 
         <div class="social-btns">
           <button type="button" class="social-btn" (click)="signUpWithGoogle()">

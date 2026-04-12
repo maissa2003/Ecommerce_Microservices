@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { OrderService, Order, Country } from '../../services/order.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-cart',
@@ -35,9 +36,14 @@ export class CartComponent implements OnInit {
   // Country codes for phone numbers - loaded from backend
   countries: Country[] = [];
 
-  constructor(private orderService: OrderService, private router: Router) {}
+  constructor(
+    private orderService: OrderService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    this.userId = this.authService.getUserId();
     this.loadCart();
     this.loadCountries();
   }
@@ -103,7 +109,7 @@ export class CartComponent implements OnInit {
           updatedAt: new Date().toISOString()
         } as any;
         this.error =
-          'Erreur lors du chargement du panier. Vérifiez que le backend est démarré (localhost:8080).';
+          'Erreur lors du chargement du panier. Vérifiez que le backend est démarré (localhost:8088).';
         this.loading = false;
       }
     });
@@ -168,13 +174,45 @@ export class CartComponent implements OnInit {
   /**
    * Get the converted cart total
    */
+  /**
+   * Get the converted cart total (including discounts)
+   */
   getConvertedTotal(): number {
     if (!this.cart?.items) return 0;
 
-    // Calculate total from items with converted prices
-    return this.cart.items.reduce((sum, item) => {
+    // Subtotal from items
+    const subtotal = this.cart.items.reduce((sum, item) => {
       return sum + this.getConvertedItemSubtotal(item);
     }, 0);
+
+    // Discount (converted)
+    const discount = this.convertPrice(this.cart.discountAmount || 0);
+
+    return Math.max(0, subtotal - discount);
+  }
+
+  applyPromo(): void {
+    if (!this.promoCodeInput.trim()) {
+      this.error = 'Veuillez saisir un code promo.';
+      return;
+    }
+
+    this.orderService
+      .applyPromoCode(this.userId, this.promoCodeInput)
+      .subscribe({
+        next: updatedCart => {
+          this.cart = updatedCart;
+          this.message = 'Code promo appliqué !';
+          this.error = '';
+          setTimeout(() => (this.message = ''), 3000);
+        },
+        error: err => {
+          console.error('Promo apply failed', err);
+          this.error =
+            err.error?.message || 'Erreur lors de l’application du code promo.';
+          this.message = '';
+        }
+      });
   }
 
   /**
@@ -182,6 +220,13 @@ export class CartComponent implements OnInit {
    */
   convertCurrency(amount: number): number {
     return this.convertPrice(amount);
+  }
+
+  getSelectedCountryFlag(): string {
+    const country = this.countries.find(
+      c => c.code === this.checkoutData.countryCode
+    );
+    return country ? country.flag : '🌍';
   }
 
   getDisplayedTotal(): number {

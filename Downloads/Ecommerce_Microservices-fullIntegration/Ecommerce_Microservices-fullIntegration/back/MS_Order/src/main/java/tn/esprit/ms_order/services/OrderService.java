@@ -61,6 +61,46 @@ public class OrderService {
         return orderRepository.save(cart);
     }
 
+    public Order applyPromoCode(Long userId, String promoCodeStr) {
+        Order cart = orderRepository
+                .findByUserIdAndStatus(userId, OrderStatus.CART)
+                .orElseThrow(() -> new RuntimeException("No active cart found for user: " + userId));
+
+        if (cart.getItems().isEmpty())
+            throw new RuntimeException("Cart is empty");
+
+        if (promoCodeStr == null || promoCodeStr.trim().isEmpty()) {
+            cart.setPromoCode(null);
+            cart.setDiscountAmount(0.0);
+            return orderRepository.save(cart);
+        }
+
+        tn.esprit.ms_order.entities.PromoCode pc = promoCodeRepository.findByCode(promoCodeStr)
+                .orElseThrow(() -> new RuntimeException("Code promo invalide."));
+
+        if (!pc.getActive() || pc.getExpiryDate().isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("Ce code promo est expiré ou inactif.");
+        }
+        if (pc.getCurrentUsages() >= pc.getMaxUsages()) {
+            throw new RuntimeException("La limite d'utilisation de ce code est atteinte.");
+        }
+
+        double subTotal = cart.getItems().stream()
+                .mapToDouble(i -> i.getPrice() * i.getQuantity())
+                .sum();
+
+        double discount = 0.0;
+        if (pc.getDiscountType() == tn.esprit.ms_order.entities.DiscountType.PERCENTAGE) {
+            discount = subTotal * (pc.getValue() / 100.0);
+        } else {
+            discount = pc.getValue();
+        }
+
+        cart.setPromoCode(pc);
+        cart.setDiscountAmount(discount);
+        return orderRepository.save(cart);
+    }
+
     public Order confirmOrder(Long userId, String promoCodeStr) {
         Order cart = orderRepository
                 .findByUserIdAndStatus(userId, OrderStatus.CART)
@@ -69,35 +109,20 @@ public class OrderService {
         if (cart.getItems().isEmpty())
             throw new RuntimeException("Cart is empty");
 
+        // If a code is provided at confirmation, apply it (or re-apply it)
         if (promoCodeStr != null && !promoCodeStr.trim().isEmpty()) {
-            tn.esprit.ms_order.entities.PromoCode pc = promoCodeRepository.findByCode(promoCodeStr)
-                    .orElseThrow(() -> new RuntimeException("Invalid promo code."));
-            
-            if (!pc.getActive() || pc.getExpiryDate().isBefore(java.time.LocalDateTime.now())) {
-                throw new RuntimeException("Promo code expired or inactive.");
-            }
-            if (pc.getCurrentUsages() >= pc.getMaxUsages()) {
-                throw new RuntimeException("Promo code usage limit reached.");
-            }
+            applyPromoCode(userId, promoCodeStr);
+            // Refresh cart after application to get the updated promoCode entity
+            cart = orderRepository.findById(cart.getId()).get();
+        }
 
-            double subTotal = cart.getItems().stream()
-                    .mapToDouble(i -> i.getPrice() * i.getQuantity())
-                    .sum();
-            
-            double discount = 0.0;
-            if (pc.getDiscountType() == tn.esprit.ms_order.entities.DiscountType.PERCENTAGE) {
-                discount = subTotal * (pc.getValue() / 100.0);
-            } else {
-                discount = pc.getValue();
-            }
-
-            cart.setPromoCode(pc);
-            cart.setDiscountAmount(discount);
+        // Increment usage count ONLY at confirmation
+        if (cart.getPromoCode() != null) {
+            tn.esprit.ms_order.entities.PromoCode pc = cart.getPromoCode();
             pc.setCurrentUsages(pc.getCurrentUsages() + 1);
             promoCodeRepository.save(pc);
         }
 
-        // Later: call articleClient.reduceStock() for each item
         cart.setStatus(OrderStatus.CONFIRMED);
         return orderRepository.save(cart);
     }

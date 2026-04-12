@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthResponse {
-    private String token;
-    private UserDTO user;   // ← was Utilisateur (entity), never expose passwords!
+public class UserDTO {
+    private Long id;
+    private String nom;
+    private String email;
+    private String role;
 }

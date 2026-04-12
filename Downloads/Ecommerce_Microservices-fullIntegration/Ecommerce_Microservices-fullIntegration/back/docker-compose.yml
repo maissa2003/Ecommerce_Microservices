@@ -119,6 +119,9 @@ services:
       - "8089:8089"
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    volumes:
+      - manage_users_data:/data
     depends_on:
       eureka:
         condition: service_started
@@ -143,3 +146,4 @@ services:
 volumes:
   mysql_data:
   article_uploads:
+  manage_users_data:

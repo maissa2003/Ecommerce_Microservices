@@ -98,8 +98,8 @@ public class SecurityConfig {
                         // ✅ Permit H2 console access (development only)
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        // ✅ Permit authentication endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // ✅ Permit authentication endpoints and error page
+                        .requestMatchers("/api/auth/**", "/error").permitAll()
 
                         // ✅ Protect user management endpoints - ADMIN & CUSTOMER roles
                         .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "CUSTOMER")

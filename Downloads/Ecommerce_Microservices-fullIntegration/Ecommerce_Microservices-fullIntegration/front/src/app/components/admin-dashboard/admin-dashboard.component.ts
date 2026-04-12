@@ -5,6 +5,8 @@ import { OrderService, Order as ApiOrder } from '../../services/order.service';
 import { CategoryService, Category } from '../../services/category.service';
 import { ArticleService, Article } from '../../services/article.service';
 import { PromoCodeService, PromoCode } from '../../services/promo-code.service';
+import { UserService, Utilisateur } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 
 interface StatCard {
   title: string;
@@ -78,9 +80,21 @@ export class AdminDashboardComponent implements OnInit {
   newOrderAmount = 0;
   editOrderAmount = 0;
 
+  // User management
+  users: Utilisateur[] = [];
+  filteredUsers: Utilisateur[] = [];
+  isLoadingUsers = false;
+  searchTermUsers = '';
+  isAddUserModalOpen = false;
+  isEditUserModalOpen = false;
+  selectedUser: Utilisateur | null = null;
+  userMessage = '';
+  userError = '';
+
   // Forms
   productForm: FormGroup;
   orderForm: FormGroup;
+  userForm: FormGroup;
 
   // Category properties
   categories: AdminCategory[] = [];
@@ -206,7 +220,9 @@ export class AdminDashboardComponent implements OnInit {
     private orderService: OrderService,
     private categoryService: CategoryService,
     private articleService: ArticleService,
-    private promoCodeService: PromoCodeService
+    private promoCodeService: PromoCodeService,
+    private userService: UserService,
+    private authService: AuthService
   ) {
     this.productForm = this.fb.group({
       name: ['', Validators.required],
@@ -225,13 +241,25 @@ export class AdminDashboardComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       status: ['pending', Validators.required]
     });
+
+    this.userForm = this.fb.group({
+      nom: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      role: ['CUSTOMER', Validators.required]
+    });
   }
 
   ngOnInit(): void {
-    localStorage.setItem('isAdmin', 'true');
-    localStorage.setItem('authToken', 'demo-token');
+    // Only admins should access this
+    if (!localStorage.getItem('authToken') && !this.authService.isAdmin()) {
+      this.router.navigate(['/signin']);
+      return;
+    }
+
     this.loadProducts();
     this.loadCategories();
+    this.loadUsers(); // Load users initially so stats are correct
   }
 
   toggleSidebar(): void {
@@ -242,6 +270,7 @@ export class AdminDashboardComponent implements OnInit {
     this.activeTab = tab;
     if (tab === 'orders') this.loadOrders();
     if (tab === 'promos') this.loadPromos();
+    if (tab === 'customers') this.loadUsers();
   }
 
   logout(): void {
@@ -411,8 +440,13 @@ export class AdminDashboardComponent implements OnInit {
       next: (data: ApiOrder[]) => {
         this.apiOrders = data;
         this.orders = data.map((apiOrder: ApiOrder) => {
-          let enrichedCustomer = `Utilisateur ${apiOrder.userId}`;
-          let enrichedEmail = `user${apiOrder.userId}@example.com`;
+          const user = this.users.find(u => u.id === apiOrder.userId);
+          let enrichedCustomer = user
+            ? user.nom
+            : `Utilisateur ${apiOrder.userId}`;
+          let enrichedEmail = user
+            ? user.email
+            : `user${apiOrder.userId}@example.com`;
           let enrichedAddress = undefined;
           let enrichedPhone = undefined;
 
@@ -551,7 +585,11 @@ export class AdminDashboardComponent implements OnInit {
       if (apiOrder) {
         this.selectedOrder = apiOrder;
         this.isEditOrderModalOpen = true;
-        this.orderForm.patchValue({ status: apiOrder.status });
+        this.orderForm.patchValue({
+          status: apiOrder.status,
+          customer: localOrder.customer,
+          email: localOrder.email
+        });
         return;
       }
     }
@@ -576,31 +614,60 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   updateOrderStatus(): void {
-    if (!this.selectedOrder || !this.orderForm.valid) return;
+    if (!this.selectedOrder) return;
+
+    const isApiOrder = this.selectedOrder.id && this.selectedOrder.id !== 0;
+
+    // For API orders, we only strictly care about the status being selected.
+    // We check the specific controls to avoid being blocked by hidden customer/email fields.
+    if (isApiOrder) {
+      if (this.orderForm.get('status')?.invalid) {
+        alert('Veuillez sélectionner un statut valide.');
+        return;
+      }
+    } else {
+      // For local/mock orders, all fields are required.
+      if (this.orderForm.invalid) {
+        alert('Veuillez remplir tous les champs obligatoires.');
+        return;
+      }
+    }
+
     const newStatus = this.orderService.normalizeBackendStatus(
       this.orderForm.value.status
     );
+
+    if (!newStatus) {
+      alert('Veuillez sélectionner un statut valide.');
+      return;
+    }
+
     const orderId = this.selectedOrder.id;
 
-    if (orderId && orderId !== 0) {
+    if (isApiOrder) {
       // API order
       this.orderService.updateStatus(orderId, newStatus).subscribe({
         next: updatedOrder => {
           const apiIndex = this.apiOrders.findIndex(o => o.id === orderId);
           if (apiIndex !== -1) this.apiOrders[apiIndex] = updatedOrder;
+
           const uiIndex = this.orders.findIndex(o => o.apiId === orderId);
-          if (uiIndex !== -1)
+          if (uiIndex !== -1) {
             this.orders[uiIndex].status = updatedOrder.status as any;
+          }
+
           this.closeEditOrderModal();
-          alert('Statut mis à jour !');
+          alert('Statut de la commande mis à jour avec succès !');
         },
         error: err => {
           console.error('Error updating order status:', err);
-          this.closeEditOrderModal();
+          const msg =
+            err.error?.message || 'Erreur lors de la mise à jour du statut.';
+          alert(msg);
         }
       });
     } else if (this._editingLocalOrderId) {
-      // Local-only order
+      // Local-only order (Mock)
       const uiIndex = this.orders.findIndex(
         o => o.id === this._editingLocalOrderId
       );
@@ -615,7 +682,7 @@ export class AdminDashboardComponent implements OnInit {
       }
       this._editingLocalOrderId = null;
       this.closeEditOrderModal();
-      alert('Commande mise à jour !');
+      alert('Commande locale mise à jour !');
     }
   }
 
@@ -801,10 +868,163 @@ export class AdminDashboardComponent implements OnInit {
         this.promoError = null;
       },
       error: err => {
-        this.promoError = 'Erreur lors du chargement des codes promos.';
-        console.error(err);
+        this.promoError = 'Failed to load promo codes';
+        console.error('Error loading promos:', err);
       }
     });
+  }
+
+  // ===== USERS (UserService) =====
+
+  loadUsers(): void {
+    this.isLoadingUsers = true;
+    this.userError = '';
+    this.userService.getAllUsers().subscribe({
+      next: data => {
+        this.users = data;
+        this.filteredUsers = data;
+        this.isLoadingUsers = false;
+      },
+      error: err => {
+        console.error('Error loading users:', err);
+        this.userError = 'Erreur lors du chargement des utilisateurs';
+        this.isLoadingUsers = false;
+      }
+    });
+  }
+
+  filterUsers(): void {
+    const term = (this.searchTermUsers || '').toLowerCase();
+    this.filteredUsers = this.users.filter(
+      u =>
+        u.nom.toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term)
+    );
+  }
+
+  openAddUserModal(): void {
+    this.isAddUserModalOpen = true;
+    this.userMessage = '';
+    this.userError = '';
+    this.userForm.reset({
+      nom: '',
+      email: '',
+      password: '',
+      role: 'CUSTOMER'
+    });
+    this.userForm
+      .get('password')
+      ?.setValidators([Validators.required, Validators.minLength(4)]);
+    this.userForm.get('password')?.updateValueAndValidity();
+  }
+
+  closeAddUserModal(): void {
+    this.isAddUserModalOpen = false;
+    this.userForm.reset();
+  }
+
+  openEditUserModal(user: Utilisateur): void {
+    this.selectedUser = user;
+    this.isEditUserModalOpen = true;
+    this.userMessage = '';
+    this.userError = '';
+
+    this.userForm.patchValue({
+      nom: user.nom,
+      email: user.email,
+      password: '',
+      role: user.role
+    });
+
+    this.userForm.get('password')?.clearValidators();
+    this.userForm.get('password')?.updateValueAndValidity();
+  }
+
+  closeEditUserModal(): void {
+    this.isEditUserModalOpen = false;
+    this.selectedUser = null;
+    this.userForm.reset();
+  }
+
+  addUser(): void {
+    if (this.userForm.invalid) {
+      Object.keys(this.userForm.controls).forEach(k => {
+        this.userForm.get(k)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.userService.createUser(this.userForm.value).subscribe({
+      next: created => {
+        this.users.push(created);
+        this.filterUsers();
+        this.userMessage = 'Utilisateur créé avec succès !';
+        this.closeAddUserModal();
+        setTimeout(() => (this.userMessage = ''), 3000);
+      },
+      error: err => {
+        console.error(err);
+        this.userError = 'Erreur lors de la création';
+      }
+    });
+  }
+
+  updateUser(): void {
+    if (!this.selectedUser || !this.selectedUser.id) return;
+    if (this.userForm.invalid && !this.userForm.get('password')?.value) {
+      // Password can be empty for update
+    }
+
+    const updated: any = {
+      nom: this.userForm.value.nom,
+      email: this.userForm.value.email,
+      role: this.userForm.value.role
+    };
+
+    if (this.userForm.value.password) {
+      updated.password = this.userForm.value.password;
+    }
+
+    this.userService.updateUser(this.selectedUser.id, updated).subscribe({
+      next: user => {
+        const idx = this.users.findIndex(u => u.id === user.id);
+        if (idx !== -1) this.users[idx] = user;
+        this.filterUsers();
+        this.userMessage = 'Utilisateur modifié avec succès !';
+        this.closeEditUserModal();
+        setTimeout(() => (this.userMessage = ''), 3000);
+      },
+      error: err => {
+        console.error(err);
+        this.userError = 'Erreur lors de la modification';
+      }
+    });
+  }
+
+  deleteUser(userId: number | undefined): void {
+    if (!userId) return;
+    if (confirm('Supprimer cet utilisateur ?')) {
+      this.userService.deleteUser(userId).subscribe({
+        next: () => {
+          this.users = this.users.filter(u => u.id !== userId);
+          this.filterUsers();
+          this.userMessage = 'Utilisateur supprimé !';
+          setTimeout(() => (this.userMessage = ''), 3000);
+        },
+        error: err => {
+          console.error(err);
+          this.userError = 'Erreur lors de la suppression';
+        }
+      });
+    }
+  }
+
+  getRoleLabel(role: string): string {
+    return role === 'ADMIN' ? 'Administrateur' : 'Client';
+  }
+
+  getRoleBadgeColor(role: string): string {
+    return role === 'ADMIN' ? 'danger' : 'info';
   }
 
   selectPromoForEdit(promo: PromoCode): void {

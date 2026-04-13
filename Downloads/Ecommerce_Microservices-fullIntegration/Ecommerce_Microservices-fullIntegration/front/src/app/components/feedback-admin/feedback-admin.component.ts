@@ -17,12 +17,30 @@ export class FeedbackAdminComponent implements OnInit {
   errorMessage = '';
   searchTerm = '';
 
+  // ✅ Filtre par date
+  dateFilter: 'all' | 'today' | '7days' | '30days' = 'all';
+
+  // ✅ Bulk actions
+  selectedIds: Set<number> = new Set();
+  selectAll = false;
+
+  // ✅ Note admin
+  editingNoteId: number | null = null;
+  adminNoteText = '';
+
+  // ✅ Stats globales
+  globalStats: any = null;
+  showStats = false;
+
   constructor(private feedbackService: FeedbackService) {}
 
   ngOnInit(): void {
     this.loadAll();
     this.loadPending();
+    this.loadGlobalStats();
   }
+
+  // ─── Chargement ─────────────────────────────────────────────────────────────
 
   loadAll(): void {
     this.isLoading = true;
@@ -47,13 +65,47 @@ export class FeedbackAdminComponent implements OnInit {
     });
   }
 
-  applyFilter(): void {
-    let source = this.allFeedbacks;
+  // ✅ Stats globales
+  loadGlobalStats(): void {
+    this.feedbackService.getGlobalStats().subscribe({
+      next: data => {
+        this.globalStats = data;
+      },
+      error: () => {}
+    });
+  }
 
-    if (this.activeTab !== 'all') {
+  // ─── Filtres ────────────────────────────────────────────────────────────────
+
+  applyFilter(): void {
+    let source = [...this.allFeedbacks];
+
+    // Filtre par onglet statut
+    if (this.activeTab === 'pending') {
+      source = source.filter(
+        f => !f.status || f.status?.toLowerCase() === 'pending'
+      );
+    } else if (this.activeTab !== 'all') {
       source = source.filter(f => f.status?.toLowerCase() === this.activeTab);
     }
 
+    // ✅ Filtre par date
+    if (this.dateFilter !== 'all') {
+      const now = new Date();
+      const cutoff = new Date();
+      if (this.dateFilter === 'today') {
+        cutoff.setHours(0, 0, 0, 0);
+      } else if (this.dateFilter === '7days') {
+        cutoff.setDate(now.getDate() - 7);
+      } else if (this.dateFilter === '30days') {
+        cutoff.setDate(now.getDate() - 30);
+      }
+      source = source.filter(
+        f => f.createdAt && new Date(f.createdAt) >= cutoff
+      );
+    }
+
+    // Filtre par recherche texte
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase();
       source = source.filter(
@@ -65,6 +117,9 @@ export class FeedbackAdminComponent implements OnInit {
     }
 
     this.filteredFeedbacks = source;
+    // Reset sélection après filtre
+    this.selectedIds.clear();
+    this.selectAll = false;
   }
 
   switchTab(tab: 'all' | 'pending' | 'approved' | 'rejected'): void {
@@ -77,12 +132,21 @@ export class FeedbackAdminComponent implements OnInit {
     this.applyFilter();
   }
 
+  // ✅ Filtre date
+  setDateFilter(filter: 'all' | 'today' | '7days' | '30days'): void {
+    this.dateFilter = filter;
+    this.applyFilter();
+  }
+
+  // ─── Actions individuelles ──────────────────────────────────────────────────
+
   approve(id: number): void {
     this.feedbackService.approve(id).subscribe({
       next: () => {
         this.showSuccess('Feedback approuvé ✅');
         this.loadAll();
         this.loadPending();
+        this.loadGlobalStats();
       },
       error: () => this.showError("Erreur lors de l'approbation")
     });
@@ -94,6 +158,7 @@ export class FeedbackAdminComponent implements OnInit {
         this.showSuccess('Feedback rejeté');
         this.loadAll();
         this.loadPending();
+        this.loadGlobalStats();
       },
       error: () => this.showError('Erreur lors du rejet')
     });
@@ -106,10 +171,157 @@ export class FeedbackAdminComponent implements OnInit {
         this.showSuccess('Feedback supprimé');
         this.loadAll();
         this.loadPending();
+        this.loadGlobalStats();
       },
       error: () => this.showError('Erreur lors de la suppression')
     });
   }
+
+  // ─── ✅ Actions en lot (Bulk) ────────────────────────────────────────────────
+
+  toggleSelectAll(): void {
+    this.selectAll = !this.selectAll;
+    if (this.selectAll) {
+      this.filteredFeedbacks.forEach(f => this.selectedIds.add(f.id!));
+    } else {
+      this.selectedIds.clear();
+    }
+  }
+
+  toggleSelect(id: number): void {
+    if (this.selectedIds.has(id)) {
+      this.selectedIds.delete(id);
+    } else {
+      this.selectedIds.add(id);
+    }
+    this.selectAll = this.selectedIds.size === this.filteredFeedbacks.length;
+  }
+
+  isSelected(id: number): boolean {
+    return this.selectedIds.has(id);
+  }
+
+  get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+
+  bulkApprove(): void {
+    if (this.selectedIds.size === 0) return;
+    const ids = Array.from(this.selectedIds) as number[];
+    this.feedbackService.bulkApprove(ids).subscribe({
+      next: (res: any) => {
+        this.showSuccess(`✅ ${res.approved} feedback(s) approuvés`);
+        this.selectedIds.clear();
+        this.loadAll();
+        this.loadPending();
+        this.loadGlobalStats();
+      },
+      error: () => this.showError("Erreur lors de l'approbation en lot")
+    });
+  }
+
+  bulkReject(): void {
+    if (this.selectedIds.size === 0) return;
+    const ids = Array.from(this.selectedIds) as number[];
+    this.feedbackService.bulkReject(ids).subscribe({
+      next: (res: any) => {
+        this.showSuccess(`❌ ${res.rejected} feedback(s) rejetés`);
+        this.selectedIds.clear();
+        this.loadAll();
+        this.loadPending();
+        this.loadGlobalStats();
+      },
+      error: () => this.showError('Erreur lors du rejet en lot')
+    });
+  }
+
+  bulkDelete(): void {
+    if (this.selectedIds.size === 0) return;
+    if (
+      !confirm(
+        `Supprimer définitivement ${this.selectedIds.size} feedback(s) ?`
+      )
+    )
+      return;
+    const ids = Array.from(this.selectedIds) as number[];
+    this.feedbackService.bulkDelete(ids).subscribe({
+      next: (res: any) => {
+        this.showSuccess(`🗑️ ${res.deleted} feedback(s) supprimés`);
+        this.selectedIds.clear();
+        this.loadAll();
+        this.loadPending();
+        this.loadGlobalStats();
+      },
+      error: () => this.showError('Erreur lors de la suppression en lot')
+    });
+  }
+
+  // ─── ✅ Note admin ────────────────────────────────────────────────────────────
+
+  startEditNote(fb: Feedback): void {
+    this.editingNoteId = fb.id!;
+    this.adminNoteText = fb.adminNote || '';
+  }
+
+  cancelEditNote(): void {
+    this.editingNoteId = null;
+    this.adminNoteText = '';
+  }
+
+  saveAdminNote(id: number): void {
+    this.feedbackService.addAdminNote(id, this.adminNoteText).subscribe({
+      next: (updated: Feedback) => {
+        const idx = this.allFeedbacks.findIndex(f => f.id === id);
+        if (idx !== -1) this.allFeedbacks[idx].adminNote = updated.adminNote;
+        this.applyFilter();
+        this.editingNoteId = null;
+        this.showSuccess('Note enregistrée 📝');
+      },
+      error: () => this.showError('Erreur lors de la sauvegarde de la note')
+    });
+  }
+
+  // ─── ✅ Export CSV ────────────────────────────────────────────────────────────
+
+  exportCSV(): void {
+    const headers = [
+      'ID',
+      'Article',
+      'Utilisateur',
+      'Note',
+      'Commentaire',
+      'Statut',
+      'Note Admin',
+      'Date'
+    ];
+    const rows = this.filteredFeedbacks.map(fb => [
+      fb.id,
+      `Art. #${fb.articleId}`,
+      `User #${fb.userId}`,
+      fb.rating,
+      `"${(fb.comment || '').replace(/"/g, '""')}"`,
+      this.getStatusLabel(fb.status),
+      `"${(fb.adminNote || '').replace(/"/g, '""')}"`,
+      this.formatDate(fb.createdAt)
+    ]);
+
+    const csvContent = [headers.join(';'), ...rows.map(r => r.join(';'))].join(
+      '\n'
+    );
+    const bom = '\uFEFF'; // UTF-8 BOM pour Excel
+    const blob = new Blob([bom + csvContent], {
+      type: 'text/csv;charset=utf-8;'
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `feedbacks_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    this.showSuccess('📥 Export CSV téléchargé');
+  }
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────────
 
   getStars(rating: number): string[] {
     return Array.from({ length: 5 }, (_, i) => (i < rating ? '★' : '☆'));
@@ -148,6 +360,14 @@ export class FeedbackAdminComponent implements OnInit {
 
   countByStatus(status: string): number {
     return this.allFeedbacks.filter(f => f.status === status).length;
+  }
+
+  getRatingBarWidth(star: number): number {
+    if (!this.globalStats?.ratingDistribution) return 0;
+    const total = this.globalStats.approved || 1;
+    return Math.round(
+      (this.globalStats.ratingDistribution[star] / total) * 100
+    );
   }
 
   private showSuccess(msg: string): void {

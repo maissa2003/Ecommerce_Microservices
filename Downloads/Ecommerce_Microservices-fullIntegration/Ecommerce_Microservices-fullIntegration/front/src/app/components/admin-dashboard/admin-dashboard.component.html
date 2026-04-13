@@ -140,7 +140,11 @@
         </svg>
         <span>Commandes</span>
       </button>
-      <button class="nav-item" routerLink="/admin/feedback">
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'feedback'"
+        (click)="setActiveTab('feedback')"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -240,6 +244,8 @@
               ? "Codes Promo"
               : activeTab === "orders"
               ? "Commandes"
+              : activeTab === "feedback"
+              ? "Avis Clients"
               : activeTab === "customers"
               ? "Utilisateurs"
               : "Paramètres"
@@ -965,6 +971,10 @@
           </table>
         </div>
       </div>
+      <!-- ===== AVIS CLIENTS ===== -->
+      <div *ngIf="activeTab === 'feedback'">
+        <app-feedback-admin></app-feedback-admin>
+      </div>
 
       <!-- ===== UTILISATEURS ===== -->
       <div *ngIf="activeTab === 'customers'">
@@ -1119,12 +1129,12 @@
       <div class="form-group">
         <label>Catégorie</label>
         <select
-          formControlName="category"
+          formControlName="categoryId"
           class="form-control"
           [ngStyle]="{ appearance: 'auto' }"
         >
           <option value="" disabled selected>Sélectionnez une catégorie</option>
-          <option *ngFor="let cat of categories" [value]="cat.name">{{
+          <option *ngFor="let cat of categories" [value]="cat.id">{{
             cat.name
           }}</option>
         </select>
@@ -1228,12 +1238,12 @@
       <div class="form-group">
         <label>Catégorie</label>
         <select
-          formControlName="category"
+          formControlName="categoryId"
           class="form-control"
           [ngStyle]="{ appearance: 'auto' }"
         >
           <option value="" disabled selected>Sélectionnez une catégorie</option>
-          <option *ngFor="let cat of categories" [value]="cat.name">{{
+          <option *ngFor="let cat of categories" [value]="cat.id">{{
             cat.name
           }}</option>
         </select>

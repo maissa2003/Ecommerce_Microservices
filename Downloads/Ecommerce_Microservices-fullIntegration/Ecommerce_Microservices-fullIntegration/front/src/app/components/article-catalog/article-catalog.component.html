@@ -147,7 +147,6 @@
         <div class="results-info">
           <span>{{ filteredArticles.length }} article(s) trouvé(s)</span>
         </div>
-
         <div class="toolbar-right">
           <div class="sort-select">
             <select
@@ -159,7 +158,6 @@
               </option>
             </select>
           </div>
-
           <div class="view-toggle">
             <button
               class="view-btn"
@@ -252,9 +250,8 @@
                 <span
                   *ngFor="let star of getRatingStars(article.rating)"
                   class="star"
+                  >{{ star }}</span
                 >
-                  {{ star }}
-                </span>
               </div>
               <span class="reviews">({{ article.reviews }})</span>
             </div>
@@ -269,26 +266,35 @@
                 {{ article.stock > 0 ? "En stock" : "Rupture" }}
               </span>
             </div>
-            <button
-              class="add-to-cart"
-              (click)="addToCart(article)"
-              [disabled]="article.stock === 0"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            <div class="product-actions-row">
+              <button
+                class="add-to-cart"
+                (click)="addToCart(article)"
+                [disabled]="article.stock === 0"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              Ajouter au panier
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                Ajouter au panier
+              </button>
+              <button
+                class="btn-feedback"
+                (click)="openFeedback(article)"
+                title="Laisser un avis"
+              >
+                💬 Avis
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -316,9 +322,8 @@
                 <span
                   *ngFor="let star of getRatingStars(article.rating)"
                   class="star"
+                  >{{ star }}</span
                 >
-                  {{ star }}
-                </span>
               </div>
               <span class="reviews">({{ article.reviews }} avis)</span>
             </div>
@@ -362,6 +367,13 @@
               <button class="view-details" (click)="viewArticle(article.id)">
                 Voir détails
               </button>
+              <button
+                class="btn-feedback"
+                (click)="openFeedback(article)"
+                title="Laisser un avis"
+              >
+                💬 Avis
+              </button>
             </div>
           </div>
         </div>
@@ -388,7 +400,6 @@
             />
           </svg>
         </button>
-
         <div class="page-numbers">
           <button
             *ngFor="let page of getPageNumbers()"
@@ -399,7 +410,6 @@
             {{ page }}
           </button>
         </div>
-
         <button
           class="page-btn"
           [disabled]="currentPage === totalPages"
@@ -457,6 +467,27 @@
         <span class="total-price">{{ formatPrice(getCartTotal()) }}</span>
       </div>
       <button class="btn-primary" (click)="goToCheckout()">Commander</button>
+    </div>
+  </div>
+
+  <!-- Modal Feedback -->
+  <div
+    class="feedback-modal-overlay"
+    *ngIf="showFeedbackModal"
+    (click)="closeFeedback()"
+  >
+    <div class="feedback-modal-content" (click)="$event.stopPropagation()">
+      <div class="feedback-modal-header">
+        <h3>💬 Avis sur : {{ selectedArticleForFeedback?.name }}</h3>
+        <button class="close-modal" (click)="closeFeedback()">×</button>
+      </div>
+      <div class="feedback-modal-body">
+        <app-feedback
+          [articleId]="selectedArticleForFeedback!.id"
+          [userId]="currentUserId"
+        >
+        </app-feedback>
+      </div>
     </div>
   </div>
 </div>

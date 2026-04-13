@@ -1,22 +1,39 @@
 <div class="feedback-admin">
-  <!-- En-tête -->
+  <!-- ─── En-tête ──────────────────────────────────────────────────────────── -->
   <div class="admin-page-header">
     <div class="header-left">
       <h2>💬 Gestion des Feedbacks</h2>
       <p>Modérez les avis clients de la plateforme</p>
     </div>
-    <button class="btn-refresh" (click)="loadAll(); loadPending()">
-      🔄 Actualiser
-    </button>
+    <div class="header-actions">
+      <!-- ✅ Export CSV -->
+      <button
+        class="btn-export"
+        (click)="exportCSV()"
+        title="Exporter la vue actuelle"
+      >
+        📥 Export CSV
+      </button>
+      <!-- ✅ Toggle Stats -->
+      <button class="btn-stats-toggle" (click)="showStats = !showStats">
+        {{ showStats ? "📊 Masquer stats" : "📊 Voir stats" }}
+      </button>
+      <button
+        class="btn-refresh"
+        (click)="loadAll(); loadPending(); loadGlobalStats()"
+      >
+        🔄 Actualiser
+      </button>
+    </div>
   </div>
 
-  <!-- Alertes -->
+  <!-- ─── Alertes ──────────────────────────────────────────────────────────── -->
   <div class="alert alert-success" *ngIf="successMessage">
     {{ successMessage }}
   </div>
   <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
 
-  <!-- Statistiques rapides -->
+  <!-- ─── Statistiques rapides (KPIs) ─────────────────────────────────────── -->
   <div class="stats-row">
     <div class="stat-card stat-total">
       <span class="stat-value">{{ allFeedbacks.length }}</span>
@@ -36,8 +53,68 @@
     </div>
   </div>
 
-  <!-- Filtres + Recherche -->
+  <!-- ─── ✅ Dashboard analytique (toggle) ────────────────────────────────── -->
+  <div class="analytics-panel" *ngIf="showStats && globalStats">
+    <div class="analytics-header">
+      <h3>📊 Analyse globale des avis</h3>
+      <span class="avg-badge"
+        >Note moyenne :
+        <strong
+          >{{ globalStats.averageRating | number: "1.1-1" }} / 5</strong
+        ></span
+      >
+    </div>
+    <div class="analytics-body">
+      <!-- Graphique distribution notes -->
+      <div class="rating-chart">
+        <h4>Distribution des notes (avis approuvés)</h4>
+        <div *ngFor="let star of [5, 4, 3, 2, 1]" class="chart-row">
+          <span class="chart-label">{{ star }} ★</span>
+          <div class="chart-track">
+            <div
+              class="chart-bar"
+              [class.bar-5]="star === 5"
+              [class.bar-4]="star === 4"
+              [class.bar-3]="star === 3"
+              [class.bar-2]="star === 2"
+              [class.bar-1]="star === 1"
+              [style.width.%]="getRatingBarWidth(star)"
+            ></div>
+          </div>
+          <span class="chart-count">{{
+            globalStats.ratingDistribution[star]
+          }}</span>
+        </div>
+      </div>
+      <!-- Mini KPIs détaillés -->
+      <div class="mini-kpis">
+        <div class="mini-kpi">
+          <span class="mkpi-icon">📝</span>
+          <span class="mkpi-value">{{ globalStats.total }}</span>
+          <span class="mkpi-label">Total soumis</span>
+        </div>
+        <div class="mini-kpi">
+          <span class="mkpi-icon">✅</span>
+          <span class="mkpi-value">{{ globalStats.approved }}</span>
+          <span class="mkpi-label">Publiés</span>
+        </div>
+        <div class="mini-kpi">
+          <span class="mkpi-icon">❌</span>
+          <span class="mkpi-value">{{ globalStats.rejected }}</span>
+          <span class="mkpi-label">Rejetés</span>
+        </div>
+        <div class="mini-kpi">
+          <span class="mkpi-icon">⏳</span>
+          <span class="mkpi-value">{{ globalStats.pending }}</span>
+          <span class="mkpi-label">En attente</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Filtres ──────────────────────────────────────────────────────────── -->
   <div class="filters-bar">
+    <!-- Onglets statut -->
     <div class="tab-group">
       <button
         class="tab-btn"
@@ -68,33 +145,96 @@
         Rejetés
       </button>
     </div>
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input
-        type="text"
-        placeholder="Rechercher..."
-        (input)="onSearch($event)"
-        [value]="searchTerm"
-      />
+    <div class="filters-right">
+      <!-- ✅ Filtre par date -->
+      <div class="date-filter-group">
+        <button
+          class="date-btn"
+          [class.active]="dateFilter === 'all'"
+          (click)="setDateFilter('all')"
+        >
+          Tout
+        </button>
+        <button
+          class="date-btn"
+          [class.active]="dateFilter === 'today'"
+          (click)="setDateFilter('today')"
+        >
+          Aujourd'hui
+        </button>
+        <button
+          class="date-btn"
+          [class.active]="dateFilter === '7days'"
+          (click)="setDateFilter('7days')"
+        >
+          7 jours
+        </button>
+        <button
+          class="date-btn"
+          [class.active]="dateFilter === '30days'"
+          (click)="setDateFilter('30days')"
+        >
+          30 jours
+        </button>
+      </div>
+      <!-- Recherche -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          placeholder="Rechercher..."
+          (input)="onSearch($event)"
+          [value]="searchTerm"
+        />
+      </div>
     </div>
   </div>
 
-  <!-- Loader -->
+  <!-- ─── ✅ Barre d'actions en lot (Bulk) ─────────────────────────────────── -->
+  <div class="bulk-bar" *ngIf="selectedCount > 0">
+    <span class="bulk-info">{{ selectedCount }} sélectionné(s)</span>
+    <button class="bulk-btn bulk-approve" (click)="bulkApprove()">
+      ✅ Approuver tout
+    </button>
+    <button class="bulk-btn bulk-reject" (click)="bulkReject()">
+      ❌ Rejeter tout
+    </button>
+    <button class="bulk-btn bulk-delete" (click)="bulkDelete()">
+      🗑️ Supprimer tout
+    </button>
+    <button
+      class="bulk-btn bulk-cancel"
+      (click)="selectedIds.clear(); selectAll = false"
+    >
+      ✕ Annuler
+    </button>
+  </div>
+
+  <!-- ─── Loader ───────────────────────────────────────────────────────────── -->
   <div class="loading-row" *ngIf="isLoading">
     <div class="skeleton-row" *ngFor="let i of [1, 2, 3]"></div>
   </div>
 
-  <!-- Aucun résultat -->
+  <!-- ─── Aucun résultat ───────────────────────────────────────────────────── -->
   <div class="empty-state" *ngIf="!isLoading && filteredFeedbacks.length === 0">
     <span>📭</span>
     <p>Aucun feedback dans cette catégorie.</p>
   </div>
 
-  <!-- Tableau -->
+  <!-- ─── Tableau ──────────────────────────────────────────────────────────── -->
   <div class="table-wrapper" *ngIf="!isLoading && filteredFeedbacks.length > 0">
     <table class="feedback-table">
       <thead>
         <tr>
+          <!-- ✅ Checkbox select all -->
+          <th class="col-check">
+            <input
+              type="checkbox"
+              [checked]="selectAll"
+              (change)="toggleSelectAll()"
+              title="Tout sélectionner"
+            />
+          </th>
           <th>#ID</th>
           <th>Article</th>
           <th>Utilisateur</th>
@@ -106,10 +246,23 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let fb of filteredFeedbacks">
+        <tr
+          *ngFor="let fb of filteredFeedbacks"
+          [class.row-selected]="isSelected(fb.id!)"
+        >
+          <!-- ✅ Checkbox individuel -->
+          <td class="col-check">
+            <input
+              type="checkbox"
+              [checked]="isSelected(fb.id!)"
+              (change)="toggleSelect(fb.id!)"
+            />
+          </td>
+
           <td class="col-id">{{ fb.id }}</td>
           <td class="col-article">Art. #{{ fb.articleId }}</td>
           <td class="col-user">User #{{ fb.userId }}</td>
+
           <td class="col-rating">
             <div class="stars-inline">
               <span *ngFor="let s of getStars(fb.rating)" class="star-xs">{{
@@ -118,17 +271,59 @@
             </div>
             <span class="rating-num">{{ fb.rating }}/5</span>
           </td>
+
           <td class="col-comment">
+            <!-- Commentaire + note admin en dessous -->
             <span class="comment-preview" [title]="fb.comment">{{
               fb.comment
             }}</span>
+
+            <!-- ✅ Note admin (mode lecture) -->
+            <div
+              class="admin-note-display"
+              *ngIf="fb.adminNote && editingNoteId !== fb.id"
+            >
+              <span class="note-label">📝 Note admin :</span>
+              <span class="note-text">{{ fb.adminNote }}</span>
+              <button class="note-edit-btn" (click)="startEditNote(fb)">
+                ✏️
+              </button>
+            </div>
+            <!-- ✅ Note admin (mode édition) -->
+            <div class="admin-note-edit" *ngIf="editingNoteId === fb.id">
+              <textarea
+                [(ngModel)]="adminNoteText"
+                rows="2"
+                placeholder="Ajouter une note interne..."
+                maxlength="500"
+              ></textarea>
+              <div class="note-actions">
+                <button class="note-save-btn" (click)="saveAdminNote(fb.id!)">
+                  💾 Enregistrer
+                </button>
+                <button class="note-cancel-btn" (click)="cancelEditNote()">
+                  Annuler
+                </button>
+              </div>
+            </div>
+            <!-- Bouton ajouter note si pas encore de note -->
+            <button
+              class="add-note-btn"
+              *ngIf="!fb.adminNote && editingNoteId !== fb.id"
+              (click)="startEditNote(fb)"
+            >
+              + Note admin
+            </button>
           </td>
+
           <td class="col-status">
             <span class="badge-status" [ngClass]="getStatusClass(fb.status)">
               {{ getStatusLabel(fb.status) }}
             </span>
           </td>
+
           <td class="col-date">{{ formatDate(fb.createdAt) }}</td>
+
           <td class="col-actions">
             <div class="action-buttons">
               <button
@@ -159,5 +354,11 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Compteur résultats -->
+  <div class="results-footer" *ngIf="filteredFeedbacks.length > 0">
+    {{ filteredFeedbacks.length }} résultat(s) affiché(s)
+    <span *ngIf="selectedCount > 0"> · {{ selectedCount }} sélectionné(s)</span>
   </div>
 </div>

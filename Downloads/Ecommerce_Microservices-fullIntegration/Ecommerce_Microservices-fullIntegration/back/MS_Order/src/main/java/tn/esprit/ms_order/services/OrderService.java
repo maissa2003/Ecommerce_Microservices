@@ -1,23 +1,29 @@
 package tn.esprit.ms_order.services;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import tn.esprit.ms_order.entities.Order;
-import tn.esprit.ms_order.entities.OrderItem;
-import tn.esprit.ms_order.entities.OrderStatus;
+import tn.esprit.ms_order.config.RabbitMQConfig;
+import tn.esprit.ms_order.entities.*;
+import tn.esprit.ms_order.events.OrderConfirmedEvent;
 import tn.esprit.ms_order.repositories.OrderRepository;
 import tn.esprit.ms_order.repositories.PromoCodeRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final tn.esprit.ms_order.repositories.PromoCodeRepository promoCodeRepository;
-    public OrderService(OrderRepository orderRepository, tn.esprit.ms_order.repositories.PromoCodeRepository promoCodeRepository) {
+    private final PromoCodeRepository promoCodeRepository;
+    private final RabbitTemplate rabbitTemplate; // ← AJOUT
+
+    public OrderService(OrderRepository orderRepository,
+                        PromoCodeRepository promoCodeRepository,
+                        RabbitTemplate rabbitTemplate) { // ← AJOUT
         this.orderRepository = orderRepository;
         this.promoCodeRepository = promoCodeRepository;
+        this.rabbitTemplate = rabbitTemplate; // ← AJOUT
     }
 
     public Order getOrCreateCart(Long userId) {
@@ -35,7 +41,6 @@ public class OrderService {
                            String articleName, Double price, int quantity) {
         Order cart = getOrCreateCart(userId);
 
-        // Check if article already in cart, just update quantity
         cart.getItems().stream()
                 .filter(i -> i.getArticleId().equals(articleId))
                 .findFirst()
@@ -75,7 +80,7 @@ public class OrderService {
             return orderRepository.save(cart);
         }
 
-        tn.esprit.ms_order.entities.PromoCode pc = promoCodeRepository.findByCode(promoCodeStr)
+        PromoCode pc = promoCodeRepository.findByCode(promoCodeStr)
                 .orElseThrow(() -> new RuntimeException("Code promo invalide."));
 
         if (!pc.getActive() || pc.getExpiryDate().isBefore(java.time.LocalDateTime.now())) {
@@ -90,7 +95,7 @@ public class OrderService {
                 .sum();
 
         double discount = 0.0;
-        if (pc.getDiscountType() == tn.esprit.ms_order.entities.DiscountType.PERCENTAGE) {
+        if (pc.getDiscountType() == DiscountType.PERCENTAGE) {
             discount = subTotal * (pc.getValue() / 100.0);
         } else {
             discount = pc.getValue();
@@ -109,26 +114,46 @@ public class OrderService {
         if (cart.getItems().isEmpty())
             throw new RuntimeException("Cart is empty");
 
-        // If a code is provided at confirmation, apply it (or re-apply it)
         if (promoCodeStr != null && !promoCodeStr.trim().isEmpty()) {
             applyPromoCode(userId, promoCodeStr);
-            // Refresh cart after application to get the updated promoCode entity
             cart = orderRepository.findById(cart.getId()).get();
         }
 
-        // Increment usage count ONLY at confirmation
         if (cart.getPromoCode() != null) {
-            tn.esprit.ms_order.entities.PromoCode pc = cart.getPromoCode();
+            PromoCode pc = cart.getPromoCode();
             pc.setCurrentUsages(pc.getCurrentUsages() + 1);
             promoCodeRepository.save(pc);
         }
 
         cart.setStatus(OrderStatus.CONFIRMED);
-        return orderRepository.save(cart);
+        Order confirmed = orderRepository.save(cart);
+
+        // ── AJOUT : Publier l'event RabbitMQ ─────────────────────────
+        List<OrderConfirmedEvent.OrderItemEvent> itemEvents = confirmed.getItems()
+                .stream()
+                .map(i -> new OrderConfirmedEvent.OrderItemEvent(
+                        i.getArticleId(),
+                        i.getQuantity()
+                ))
+                .collect(Collectors.toList());
+
+        OrderConfirmedEvent event = new OrderConfirmedEvent(
+                confirmed.getId(),
+                confirmed.getUserId(),
+                itemEvents
+        );
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.ROUTING_KEY,
+                event
+        );
+        // ─────────────────────────────────────────────────────────────
+
+        return confirmed;
     }
 
     public List<Order> getOrdersByUser(Long userId) {
-        // Hide the active cart from the "orders history" view
         return orderRepository.findByUserIdAndStatusNot(userId, OrderStatus.CART);
     }
 
@@ -144,15 +169,13 @@ public class OrderService {
     }
 
     public void deleteOrder(Long orderId) {
-        // Admin "delete" should work for any status.
-        // Cascade + orphanRemoval will delete items as well.
         if (!orderRepository.existsById(orderId)) {
             throw new RuntimeException("Order not found: " + orderId);
         }
         orderRepository.deleteById(orderId);
     }
+
     public List<Order> getAllOrders() {
-        // Hide CART from the admin orders table
         return orderRepository.findByStatusNot(OrderStatus.CART);
-}
+    }
 }

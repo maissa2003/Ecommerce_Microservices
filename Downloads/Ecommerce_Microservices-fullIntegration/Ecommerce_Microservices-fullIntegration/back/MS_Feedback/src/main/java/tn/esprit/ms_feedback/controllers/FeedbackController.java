@@ -83,7 +83,47 @@ public class FeedbackController {
         return ResponseEntity.ok(feedbackService.reject(id));
     }
 
-    // ─── Statistiques ───────────────────────────────────────────────────────────
+    // ─── ✅ NOUVEAU : Note interne admin ────────────────────────────────────────
+
+    @PatchMapping("/{id}/admin-note")
+    public ResponseEntity<FeedbackDTO> addAdminNote(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        String note = body.getOrDefault("adminNote", "");
+        return ResponseEntity.ok(feedbackService.addAdminNote(id, note));
+    }
+
+    // ─── ✅ NOUVEAU : Actions en lot (bulk) ──────────────────────────────────────
+
+    @PostMapping("/bulk/approve")
+    public ResponseEntity<Map<String, Object>> bulkApprove(@RequestBody Map<String, List<Long>> body) {
+        List<Long> ids = body.get("ids");
+        int count = feedbackService.bulkApprove(ids);
+        return ResponseEntity.ok(Map.of("approved", count, "ids", ids));
+    }
+
+    @PostMapping("/bulk/reject")
+    public ResponseEntity<Map<String, Object>> bulkReject(@RequestBody Map<String, List<Long>> body) {
+        List<Long> ids = body.get("ids");
+        int count = feedbackService.bulkReject(ids);
+        return ResponseEntity.ok(Map.of("rejected", count, "ids", ids));
+    }
+
+    @PostMapping("/bulk/delete")
+    public ResponseEntity<Map<String, Object>> bulkDelete(@RequestBody Map<String, List<Long>> body) {
+        List<Long> ids = body.get("ids");
+        int count = feedbackService.bulkDelete(ids);
+        return ResponseEntity.ok(Map.of("deleted", count));
+    }
+
+    // ─── ✅ NOUVEAU : Statistiques globales admin ────────────────────────────────
+
+    @GetMapping("/admin/global-stats")
+    public ResponseEntity<Map<String, Object>> getGlobalStats() {
+        return ResponseEntity.ok(feedbackService.getGlobalStats());
+    }
+
+    // ─── Statistiques par article ────────────────────────────────────────────────
 
     @GetMapping("/article/{articleId}/stats")
     public ResponseEntity<Map<String, Object>> getStats(@PathVariable Long articleId) {

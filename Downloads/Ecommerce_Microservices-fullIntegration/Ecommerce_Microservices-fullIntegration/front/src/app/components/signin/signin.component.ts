@@ -27,10 +27,7 @@ export class SigninComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.authService.isLoggedIn()) {
-      this.redirectByRole();
-      return;
-    }
+    // Ne pas rediriger automatiquement — laisser l'utilisateur voir le formulaire
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
       this.signinForm.patchValue({ email: savedEmail, rememberMe: true });
@@ -57,6 +54,12 @@ export class SigninComponent implements OnInit {
         } else {
           localStorage.removeItem('rememberedEmail');
         }
+
+        // Debug — à supprimer après vérification
+        console.log('Token:', this.authService.getToken());
+        console.log('Role:', this.authService.getRole());
+        console.log('isAdmin:', this.authService.isAdmin());
+
         this.redirectByRole();
       },
       error: (err: any) => {
@@ -74,7 +77,10 @@ export class SigninComponent implements OnInit {
   }
 
   private redirectByRole(): void {
-    if (this.authService.isAdmin()) {
+    const role = this.authService.getRole();
+    console.log('Redirecting with role:', role);
+
+    if (role === 'ADMIN' || role === 'ROLE_ADMIN' || role === 'admin') {
       this.router.navigate(['/admin']);
     } else {
       this.router.navigate(['/produits']);
@@ -91,18 +97,23 @@ export class SigninComponent implements OnInit {
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
+
   navigateToSignUp(): void {
     this.router.navigate(['/signup']);
   }
+
   navigateToHome(): void {
     this.router.navigate(['/']);
   }
+
   forgotPassword(): void {
     this.router.navigate(['/forgot-password']);
   }
+
   signInWithGoogle(): void {
     console.log('Sign in with Google');
   }
+
   signInWithApple(): void {
     console.log('Sign in with Apple');
   }

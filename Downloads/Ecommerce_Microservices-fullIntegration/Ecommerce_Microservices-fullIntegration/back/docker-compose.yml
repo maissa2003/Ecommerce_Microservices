@@ -15,6 +15,24 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 10
+      start_period: 60s
+
   eureka:
     build: ./EurekaServerWeb
     container_name: eureka
@@ -48,6 +66,10 @@ services:
       - EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
       - EUREKA_CLIENT_FETCH_REGISTRY=true
       - EUREKA_INSTANCE_HOSTNAME=ms-order
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     depends_on:
       mysql:
         condition: service_healthy
@@ -55,6 +77,8 @@ services:
         condition: service_started
       config-server:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   ms-category:
     build: ./MS_Category
@@ -84,6 +108,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     volumes:
       - article_uploads:/app/uploads
     depends_on:
@@ -93,6 +121,8 @@ services:
         condition: service_started
       config-server:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   ms-feedback:
     build: ./MS_Feedback
@@ -147,3 +177,4 @@ volumes:
   mysql_data:
   article_uploads:
   manage_users_data:
+  rabbitmq_data:

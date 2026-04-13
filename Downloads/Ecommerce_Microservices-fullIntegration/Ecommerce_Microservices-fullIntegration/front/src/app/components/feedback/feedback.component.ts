@@ -5,6 +5,7 @@ import {
   OnChanges,
   SimpleChanges
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
   FeedbackService,
@@ -19,7 +20,7 @@ import {
 })
 export class FeedbackComponent implements OnInit, OnChanges {
   @Input() articleId!: number;
-  @Input() userId: number = 1; // En prod, à récupérer depuis le service d'auth
+  @Input() userId: number = 1;
 
   feedbacks: Feedback[] = [];
   stats: FeedbackStats = { articleId: 0, averageRating: 0, totalApproved: 0 };
@@ -39,7 +40,8 @@ export class FeedbackComponent implements OnInit, OnChanges {
 
   constructor(
     private feedbackService: FeedbackService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private route: ActivatedRoute
   ) {
     this.feedbackForm = this.fb.group({
       rating: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
@@ -67,6 +69,21 @@ export class FeedbackComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
+    // Permet d'utiliser le composant en standalone via /feedback?articleId=5
+    if (!this.articleId) {
+      const id = this.route.snapshot.queryParamMap.get('articleId');
+      if (id) this.articleId = +id;
+    }
+
+    // Récupérer le vrai userId depuis localStorage
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        if (parsed?.id) this.userId = parsed.id;
+      } catch {}
+    }
+
     if (this.articleId) {
       this.loadFeedbacks();
       this.loadStats();
@@ -123,11 +140,13 @@ export class FeedbackComponent implements OnInit, OnChanges {
 
     this.feedbackService.create(newFeedback).subscribe({
       next: () => {
-        this.successMessage =
-          '✅ Votre avis a été soumis et est en attente de modération.';
+        this.successMessage = '✅ Votre avis a été soumis...';
         this.feedbackForm.reset({ rating: 0, comment: '' });
+        this.currentRating; // reset via setRating(0)
         this.showForm = false;
         this.isSubmitting = false;
+        this.loadFeedbacks(); // 👈 ajouter
+        this.loadStats(); // 👈 ajouter
         setTimeout(() => (this.successMessage = ''), 5000);
       },
       error: err => {

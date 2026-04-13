@@ -19,11 +19,9 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // L'ID de l'article concerné (référence vers MS_Article)
     @Column(nullable = false)
     private Long articleId;
 
-    // L'ID de l'utilisateur qui poste le feedback
     @Column(nullable = false)
     private Long userId;
 
@@ -40,6 +38,10 @@ public class Feedback {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FeedbackStatus status;
+
+    // ✅ NOUVEAU : Note interne de l'admin (visible uniquement côté admin)
+    @Column(length = 500)
+    private String adminNote;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

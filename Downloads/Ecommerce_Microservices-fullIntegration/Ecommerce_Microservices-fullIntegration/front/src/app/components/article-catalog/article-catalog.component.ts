@@ -50,6 +50,11 @@ export class ArticleCatalogComponent implements OnInit {
 
   searchForm: FormGroup;
 
+  // ─── Feedback ───────────────────────────────────────────────────────────────
+  selectedArticleForFeedback: Article | null = null;
+  showFeedbackModal = false;
+  currentUserId: number = 1;
+
   constructor(
     public router: Router,
     private fb: FormBuilder,
@@ -64,6 +69,15 @@ export class ArticleCatalogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadArticles();
+
+    // Récupérer le vrai userId depuis localStorage
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        if (parsed?.id) this.currentUserId = parsed.id;
+      } catch {}
+    }
   }
 
   loadArticles(): void {
@@ -240,7 +254,6 @@ export class ArticleCatalogComponent implements OnInit {
     }
     this.showCartSidebar = true;
 
-    // Sync with backend order service
     const userId = this.authService.getUserId();
     this.orderService
       .addToCart(userId, article.id, article.name, article.price, 1)
@@ -301,5 +314,17 @@ export class ArticleCatalogComponent implements OnInit {
       stars.push('☆');
     }
     return stars;
+  }
+
+  // ─── Feedback ───────────────────────────────────────────────────────────────
+
+  openFeedback(article: Article): void {
+    this.selectedArticleForFeedback = article;
+    this.showFeedbackModal = true;
+  }
+
+  closeFeedback(): void {
+    this.selectedArticleForFeedback = null;
+    this.showFeedbackModal = false;
   }
 }

@@ -12,7 +12,6 @@ export interface Category {
   providedIn: 'root'
 })
 export class CategoryService {
-  // API Gateway routes to MS_CATEGORY on port 8080
   private apiUrl = 'http://localhost:8088/api/categories';
 
   constructor(private http: HttpClient) {}

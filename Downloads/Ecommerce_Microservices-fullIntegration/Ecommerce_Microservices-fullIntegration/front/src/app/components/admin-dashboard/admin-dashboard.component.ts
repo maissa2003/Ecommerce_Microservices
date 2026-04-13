@@ -228,7 +228,8 @@ export class AdminDashboardComponent implements OnInit {
       name: ['', Validators.required],
       price: ['', [Validators.required, Validators.min(0)]],
       description: ['', Validators.required],
-      category: ['', Validators.required],
+      // ← categoryId (number) au lieu de category (string)
+      categoryId: ['', Validators.required],
       image: ['', Validators.required],
       stock: ['', [Validators.required, Validators.min(0)]],
       brand: ['', Validators.required],
@@ -251,7 +252,6 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Only admins should access this
     if (!localStorage.getItem('authToken') && !this.authService.isAdmin()) {
       this.router.navigate(['/signin']);
       return;
@@ -259,7 +259,7 @@ export class AdminDashboardComponent implements OnInit {
 
     this.loadProducts();
     this.loadCategories();
-    this.loadUsers(); // Load users initially so stats are correct
+    this.loadUsers();
   }
 
   toggleSidebar(): void {
@@ -309,11 +309,17 @@ export class AdminDashboardComponent implements OnInit {
     this.selectedProduct = product;
     this.isEditProductModalOpen = true;
     this.imagePreviewEdit = product.image || null;
+
+    // Retrouver la catégorie correspondante par nom pour préremplir le select
+    const matchedCategory = this.categories.find(
+      c => c.name === product.category
+    );
+
     this.productForm.patchValue({
       name: product.name,
       price: product.price,
       description: product.description,
-      category: product.category,
+      categoryId: matchedCategory?.id ?? '',
       image: product.image,
       stock: product.stock,
       brand: product.brand,
@@ -333,7 +339,6 @@ export class AdminDashboardComponent implements OnInit {
     if (!input.files || input.files.length === 0) return;
     const file = input.files[0];
 
-    // Show local preview immediately
     const reader = new FileReader();
     reader.onload = e => {
       if (mode === 'add') {
@@ -344,7 +349,6 @@ export class AdminDashboardComponent implements OnInit {
     };
     reader.readAsDataURL(file);
 
-    // Upload to backend
     this.isUploadingImage = true;
     this.articleService.uploadImage(file).subscribe({
       next: url => {
@@ -363,7 +367,21 @@ export class AdminDashboardComponent implements OnInit {
 
   addProduct(): void {
     if (this.productForm.valid) {
-      this.articleService.createArticle(this.productForm.value).subscribe({
+      const formValue = this.productForm.value;
+
+      const payload: any = {
+        name: formValue.name,
+        price: formValue.price,
+        description: formValue.description,
+        categoryId: Number(formValue.categoryId),
+        image: formValue.image,
+        stock: formValue.stock,
+        brand: formValue.brand,
+        rating: formValue.rating ?? 0,
+        reviews: formValue.reviews ?? 0
+      };
+
+      this.articleService.createArticle(payload).subscribe({
         next: newArticle => {
           this.products.push(newArticle);
           this.closeAddProductModal();
@@ -376,8 +394,22 @@ export class AdminDashboardComponent implements OnInit {
 
   updateProduct(): void {
     if (this.productForm.valid && this.selectedProduct) {
+      const formValue = this.productForm.value;
+
+      const payload: any = {
+        name: formValue.name,
+        price: formValue.price,
+        description: formValue.description,
+        categoryId: Number(formValue.categoryId),
+        image: formValue.image,
+        stock: formValue.stock,
+        brand: formValue.brand,
+        rating: formValue.rating ?? 0,
+        reviews: formValue.reviews ?? 0
+      };
+
       this.articleService
-        .updateArticle(this.selectedProduct.id, this.productForm.value)
+        .updateArticle(this.selectedProduct.id, payload)
         .subscribe({
           next: updated => {
             const index = this.products.findIndex(
@@ -416,13 +448,11 @@ export class AdminDashboardComponent implements OnInit {
     if (saved) {
       try {
         const localOrders: AdminOrder[] = JSON.parse(saved);
-        // Migrate old colliding local orders
         localOrders.forEach(o => {
           if (!o.id.startsWith('ORD-LOCAL-')) {
             o.id = `ORD-LOCAL-${o.id.replace('ORD-', '')}`;
           }
         });
-        // Prepend locals
         this.orders = [
           ...localOrders,
           ...this.orders.filter(o => o.apiId != null)
@@ -450,23 +480,19 @@ export class AdminDashboardComponent implements OnInit {
           let enrichedAddress = undefined;
           let enrichedPhone = undefined;
 
-          // Check if checkout details were stored in localStorage
           const savedInfoStr = localStorage.getItem(
             `order_info_${apiOrder.id}`
           );
           if (savedInfoStr) {
             try {
               const info = JSON.parse(savedInfoStr);
-              if (info.nom || info.prenom) {
+              if (info.nom || info.prenom)
                 enrichedCustomer = `${info.nom} ${info.prenom}`.trim();
-              }
               if (info.telephone) {
-                enrichedEmail = info.telephone; // show phone in the contact column
+                enrichedEmail = info.telephone;
                 enrichedPhone = info.telephone;
               }
-              if (info.adresse) {
-                enrichedAddress = info.adresse;
-              }
+              if (info.adresse) enrichedAddress = info.adresse;
             } catch (e) {
               console.error('Error parsing order info', e);
             }
@@ -504,8 +530,8 @@ export class AdminDashboardComponent implements OnInit {
   getFilteredOrders(): AdminOrder[] {
     const term = (this.orderSearchTerm || '').trim().toLowerCase();
     if (!term) return this.orders;
-    return this.orders.filter(o => {
-      return (
+    return this.orders.filter(
+      o =>
         (o.id || '').toLowerCase().includes(term) ||
         (o.customer || '').toLowerCase().includes(term) ||
         (o.email || '').toLowerCase().includes(term) ||
@@ -514,8 +540,7 @@ export class AdminDashboardComponent implements OnInit {
           .toLowerCase()
           .includes(term) ||
         (o.date || '').toLowerCase().includes(term)
-      );
-    });
+    );
   }
 
   getOrderStats() {
@@ -541,16 +566,13 @@ export class AdminDashboardComponent implements OnInit {
 
   viewOrderDetails(orderIdRaw: string | number): void {
     const orderId = String(orderIdRaw);
-    // First check in local orders list
     const localOrder = this.orders.find(o => o.id === orderId);
     if (!localOrder) return;
 
     if (localOrder.apiId != null) {
-      // Has a backend order — show from apiOrders
       const apiOrder = this.apiOrders.find(o => o.id === localOrder.apiId);
       if (apiOrder) {
         this.selectedOrder = apiOrder;
-        // Temporarily attach our enriched data for the modal to use
         (this.selectedOrder as any).customerName = localOrder.customer;
         (this.selectedOrder as any).address = localOrder.address;
         (this.selectedOrder as any).phone = localOrder.phone;
@@ -559,7 +581,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     }
 
-    // Local-only order: build a synthetic ApiOrder to display
     this.selectedOrder = {
       id: localOrder.apiId ?? 0,
       userId: 0,
@@ -594,7 +615,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     }
 
-    // Local-only: open modal with local status
     this.selectedOrder = {
       id: localOrder.apiId ?? 0,
       userId: 0,
@@ -618,15 +638,12 @@ export class AdminDashboardComponent implements OnInit {
 
     const isApiOrder = this.selectedOrder.id && this.selectedOrder.id !== 0;
 
-    // For API orders, we only strictly care about the status being selected.
-    // We check the specific controls to avoid being blocked by hidden customer/email fields.
     if (isApiOrder) {
       if (this.orderForm.get('status')?.invalid) {
         alert('Veuillez sélectionner un statut valide.');
         return;
       }
     } else {
-      // For local/mock orders, all fields are required.
       if (this.orderForm.invalid) {
         alert('Veuillez remplir tous les champs obligatoires.');
         return;
@@ -636,7 +653,6 @@ export class AdminDashboardComponent implements OnInit {
     const newStatus = this.orderService.normalizeBackendStatus(
       this.orderForm.value.status
     );
-
     if (!newStatus) {
       alert('Veuillez sélectionner un statut valide.');
       return;
@@ -645,29 +661,24 @@ export class AdminDashboardComponent implements OnInit {
     const orderId = this.selectedOrder.id;
 
     if (isApiOrder) {
-      // API order
       this.orderService.updateStatus(orderId, newStatus).subscribe({
         next: updatedOrder => {
           const apiIndex = this.apiOrders.findIndex(o => o.id === orderId);
           if (apiIndex !== -1) this.apiOrders[apiIndex] = updatedOrder;
-
           const uiIndex = this.orders.findIndex(o => o.apiId === orderId);
-          if (uiIndex !== -1) {
+          if (uiIndex !== -1)
             this.orders[uiIndex].status = updatedOrder.status as any;
-          }
-
           this.closeEditOrderModal();
           alert('Statut de la commande mis à jour avec succès !');
         },
         error: err => {
           console.error('Error updating order status:', err);
-          const msg =
-            err.error?.message || 'Erreur lors de la mise à jour du statut.';
-          alert(msg);
+          alert(
+            err.error?.message || 'Erreur lors de la mise à jour du statut.'
+          );
         }
       });
     } else if (this._editingLocalOrderId) {
-      // Local-only order (Mock)
       const uiIndex = this.orders.findIndex(
         o => o.id === this._editingLocalOrderId
       );
@@ -703,7 +714,6 @@ export class AdminDashboardComponent implements OnInit {
           }
         });
       } else {
-        // Local-only order
         this.orders = this.orders.filter(o => o.id !== orderId);
         this.saveLocalOrders();
         alert('Commande supprimée !');
@@ -738,7 +748,7 @@ export class AdminDashboardComponent implements OnInit {
       this.closeAddOrderModal();
       alert('Commande créée avec succès !');
     } else {
-      alert('Veuillez renseigner le client et l‘email.');
+      alert('Veuillez renseigner le client et lemail.');
     }
   }
 
@@ -906,12 +916,7 @@ export class AdminDashboardComponent implements OnInit {
     this.isAddUserModalOpen = true;
     this.userMessage = '';
     this.userError = '';
-    this.userForm.reset({
-      nom: '',
-      email: '',
-      password: '',
-      role: 'CUSTOMER'
-    });
+    this.userForm.reset({ nom: '', email: '', password: '', role: 'CUSTOMER' });
     this.userForm
       .get('password')
       ?.setValidators([Validators.required, Validators.minLength(4)]);
@@ -928,14 +933,12 @@ export class AdminDashboardComponent implements OnInit {
     this.isEditUserModalOpen = true;
     this.userMessage = '';
     this.userError = '';
-
     this.userForm.patchValue({
       nom: user.nom,
       email: user.email,
       password: '',
       role: user.role
     });
-
     this.userForm.get('password')?.clearValidators();
     this.userForm.get('password')?.updateValueAndValidity();
   }
@@ -953,7 +956,6 @@ export class AdminDashboardComponent implements OnInit {
       });
       return;
     }
-
     this.userService.createUser(this.userForm.value).subscribe({
       next: created => {
         this.users.push(created);
@@ -971,19 +973,14 @@ export class AdminDashboardComponent implements OnInit {
 
   updateUser(): void {
     if (!this.selectedUser || !this.selectedUser.id) return;
-    if (this.userForm.invalid && !this.userForm.get('password')?.value) {
-      // Password can be empty for update
-    }
 
     const updated: any = {
       nom: this.userForm.value.nom,
       email: this.userForm.value.email,
       role: this.userForm.value.role
     };
-
-    if (this.userForm.value.password) {
+    if (this.userForm.value.password)
       updated.password = this.userForm.value.password;
-    }
 
     this.userService.updateUser(this.selectedUser.id, updated).subscribe({
       next: user => {

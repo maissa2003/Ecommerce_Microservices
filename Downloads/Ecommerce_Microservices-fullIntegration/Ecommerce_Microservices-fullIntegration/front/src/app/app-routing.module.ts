@@ -14,62 +14,162 @@ import { CategoryComponent } from './components/category/category.component';
 import { ArticleCatalogComponent } from './components/article-catalog/article-catalog.component';
 import { FeedbackComponent } from './components/feedback/feedback.component';
 import { FeedbackAdminComponent } from './components/feedback-admin/feedback-admin.component';
+import { AuthGuard } from '../app/components/guards/auth.guard';
+import { AdminGuard } from '../app/components/guards/admin.guard';
 
 const routes: Routes = [
-  // Routes publiques
+  // ── Routes publiques ──────────────────────────────────────────────
   { path: '', component: LandingPageComponent },
   { path: 'signin', component: SigninComponent },
-  { path: 'login', component: SigninComponent }, // Alias pour signin
+  { path: 'login', component: SigninComponent },
   { path: 'signup', component: SignupComponent },
-  { path: 'register', component: SignupComponent }, // Alias pour signup
-  { path: 'inscription', component: SignupComponent }, // Alias français
+  { path: 'register', component: SignupComponent },
+  { path: 'inscription', component: SignupComponent },
 
-  // Routes admin
-  { path: 'admin', component: AdminDashboardComponent },
-  { path: 'admin-dashboard', component: AdminDashboardComponent },
-  { path: 'dashboard', component: AdminDashboardComponent },
-  { path: 'admin/dashboard', component: AdminDashboardComponent },
-  { path: 'admin/cart', component: CartComponent },
+  // ── Routes admin (AuthGuard + AdminGuard) ─────────────────────────
+  {
+    path: 'admin',
+    component: AdminDashboardComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'admin-dashboard',
+    component: AdminDashboardComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'dashboard',
+    component: AdminDashboardComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'admin/dashboard',
+    component: AdminDashboardComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'admin/cart',
+    component: CartComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'customers',
+    component: CustomerComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'admin/customers',
+    component: CustomerComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'clients',
+    component: CustomerComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'admin/clients',
+    component: CustomerComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'admin/feedback',
+    component: FeedbackAdminComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'admin/avis',
+    component: FeedbackAdminComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'admin/reviews',
+    component: FeedbackAdminComponent,
+    canActivate: [AuthGuard, AdminGuard]
+  },
 
-  // Routes clients (gestion des clients par l'admin)
-  { path: 'customers', component: CustomerComponent },
-  { path: 'admin/customers', component: CustomerComponent },
-  { path: 'clients', component: CustomerComponent }, // Alias français
-  { path: 'admin/clients', component: CustomerComponent },
+  // ── Routes client connecté (AuthGuard seulement) ──────────────────
+  {
+    path: 'mon-compte',
+    component: CustomerDashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'account',
+    component: CustomerDashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'profile',
+    component: CustomerDashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'profil',
+    component: CustomerDashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'dashboard-client',
+    component: CustomerDashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'client/dashboard',
+    component: CustomerDashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'espace-client',
+    component: CustomerDashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'cart',
+    component: CartComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'orders',
+    component: OrderHistoryComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'orders/:id',
+    component: OrderDetailComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'feedback',
+    component: FeedbackComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'avis',
+    component: FeedbackComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'reviews',
+    component: FeedbackComponent,
+    canActivate: [AuthGuard]
+  },
 
-  // Routes pour le client connecté (tableau de bord client)
-  { path: 'mon-compte', component: CustomerDashboardComponent },
-  { path: 'account', component: CustomerDashboardComponent },
-  { path: 'profile', component: CustomerDashboardComponent },
-  { path: 'profil', component: CustomerDashboardComponent },
-  { path: 'dashboard-client', component: CustomerDashboardComponent },
-  { path: 'client/dashboard', component: CustomerDashboardComponent },
-  { path: 'espace-client', component: CustomerDashboardComponent },
+  // ── Routes publiques catalogue ────────────────────────────────────
   { path: 'boutique', component: ArticleCatalogComponent },
   { path: 'produits', component: ArticleCatalogComponent },
   { path: 'shop', component: ArticleCatalogComponent },
-  { path: 'cart', component: CartComponent },
-  { path: 'orders', component: OrderHistoryComponent },
-  { path: 'orders/:id', component: OrderDetailComponent },
 
-  // Routes pour les avis/feedback
-  { path: 'feedback', component: FeedbackComponent },
-  { path: 'avis', component: FeedbackComponent },
-  { path: 'reviews', component: FeedbackComponent },
-  { path: 'admin/feedback', component: FeedbackAdminComponent },
-  { path: 'admin/avis', component: FeedbackAdminComponent },
-  { path: 'admin/reviews', component: FeedbackAdminComponent },
-
-  // Redirection pour les routes non trouvées
+  // ── Fallback ──────────────────────────────────────────────────────
   { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {
-      scrollPositionRestoration: 'enabled', // Restaure la position de défilement
+      scrollPositionRestoration: 'enabled',
       anchorScrolling: 'enabled',
-      enableTracing: false // Mettre à true pour le débogage
+      enableTracing: false
     })
   ],
   exports: [RouterModule]

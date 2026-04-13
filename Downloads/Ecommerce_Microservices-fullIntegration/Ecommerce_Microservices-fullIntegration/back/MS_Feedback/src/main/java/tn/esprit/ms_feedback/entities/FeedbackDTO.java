@@ -14,10 +14,10 @@ public class FeedbackDTO {
 
     private Long id;
 
-    @NotNull(message = "L'ID de l'article est obligatoire")
+    @NotNull(message = "L'articleId est obligatoire")
     private Long articleId;
 
-    @NotNull(message = "L'ID de l'utilisateur est obligatoire")
+    @NotNull(message = "L'userId est obligatoire")
     private Long userId;
 
     @NotBlank(message = "Le commentaire ne peut pas être vide")
@@ -27,31 +27,37 @@ public class FeedbackDTO {
     @Min(1) @Max(5)
     private int rating;
 
-    private FeedbackStatus status;
+    private String status;
+
+    // ✅ NOUVEAU
+    private String adminNote;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Conversion Entity -> DTO
-    public static FeedbackDTO fromEntity(Feedback feedback) {
+    // ─── Mapping ────────────────────────────────────────────────────────────────
+
+    public static FeedbackDTO fromEntity(Feedback f) {
         return FeedbackDTO.builder()
-                .id(feedback.getId())
-                .articleId(feedback.getArticleId())
-                .userId(feedback.getUserId())
-                .comment(feedback.getComment())
-                .rating(feedback.getRating())
-                .status(feedback.getStatus())
-                .createdAt(feedback.getCreatedAt())
-                .updatedAt(feedback.getUpdatedAt())
+                .id(f.getId())
+                .articleId(f.getArticleId())
+                .userId(f.getUserId())
+                .comment(f.getComment())
+                .rating(f.getRating())
+                .status(f.getStatus() != null ? f.getStatus().name() : null)
+                .adminNote(f.getAdminNote())
+                .createdAt(f.getCreatedAt())
+                .updatedAt(f.getUpdatedAt())
                 .build();
     }
 
-    // Conversion DTO -> Entity
     public Feedback toEntity() {
         return Feedback.builder()
                 .articleId(this.articleId)
                 .userId(this.userId)
                 .comment(this.comment)
                 .rating(this.rating)
+                .adminNote(this.adminNote)
                 .build();
     }
 }

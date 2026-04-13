@@ -8,7 +8,9 @@ import tn.esprit.ms_feedback.entities.FeedbackDTO;
 import tn.esprit.ms_feedback.entities.FeedbackStatus;
 import tn.esprit.ms_feedback.repositories.FeedbackRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +36,6 @@ public class FeedbackService {
     }
 
     public FeedbackDTO create(FeedbackDTO dto) {
-        // Vérifier si l'utilisateur a déjà donné un feedback sur cet article
         if (feedbackRepository.existsByArticleIdAndUserId(dto.getArticleId(), dto.getUserId())) {
             throw new RuntimeException("Vous avez déjà soumis un feedback pour cet article.");
         }
@@ -49,7 +50,6 @@ public class FeedbackService {
                 .orElseThrow(() -> new RuntimeException("Feedback introuvable avec l'id : " + id));
         existing.setComment(dto.getComment());
         existing.setRating(dto.getRating());
-        // Repasse en PENDING après modification pour re-modération
         existing.setStatus(FeedbackStatus.PENDING);
         return FeedbackDTO.fromEntity(feedbackRepository.save(existing));
     }
@@ -112,7 +112,96 @@ public class FeedbackService {
         return FeedbackDTO.fromEntity(feedbackRepository.save(feedback));
     }
 
-    // ─── Statistiques ───────────────────────────────────────────────────────────
+    // ─── ✅ NOUVEAU : Note interne admin ────────────────────────────────────────
+
+    public FeedbackDTO addAdminNote(Long id, String note) {
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Feedback introuvable avec l'id : " + id));
+        feedback.setAdminNote(note);
+        log.info("Admin note ajoutée sur feedback id={}", id);
+        return FeedbackDTO.fromEntity(feedbackRepository.save(feedback));
+    }
+
+    // ─── ✅ NOUVEAU : Actions en lot ─────────────────────────────────────────────
+
+    public int bulkApprove(List<Long> ids) {
+        int count = 0;
+        for (Long id : ids) {
+            try {
+                changeStatus(id, FeedbackStatus.APPROVED);
+                count++;
+            } catch (Exception e) {
+                log.warn("Impossible d'approuver feedback id={}: {}", id, e.getMessage());
+            }
+        }
+        log.info("Bulk approve: {} feedbacks approuvés", count);
+        return count;
+    }
+
+    public int bulkReject(List<Long> ids) {
+        int count = 0;
+        for (Long id : ids) {
+            try {
+                changeStatus(id, FeedbackStatus.REJECTED);
+                count++;
+            } catch (Exception e) {
+                log.warn("Impossible de rejeter feedback id={}: {}", id, e.getMessage());
+            }
+        }
+        log.info("Bulk reject: {} feedbacks rejetés", count);
+        return count;
+    }
+
+    public int bulkDelete(List<Long> ids) {
+        int count = 0;
+        for (Long id : ids) {
+            try {
+                delete(id);
+                count++;
+            } catch (Exception e) {
+                log.warn("Impossible de supprimer feedback id={}: {}", id, e.getMessage());
+            }
+        }
+        log.info("Bulk delete: {} feedbacks supprimés", count);
+        return count;
+    }
+
+    // ─── ✅ NOUVEAU : Statistiques globales admin ────────────────────────────────
+
+    public Map<String, Object> getGlobalStats() {
+        List<Feedback> all = feedbackRepository.findAll();
+
+        long total = all.size();
+        long approved = all.stream().filter(f -> f.getStatus() == FeedbackStatus.APPROVED).count();
+        long rejected = all.stream().filter(f -> f.getStatus() == FeedbackStatus.REJECTED).count();
+        long pending  = all.stream().filter(f -> f.getStatus() == FeedbackStatus.PENDING).count();
+
+        double avgRating = all.stream()
+                .filter(f -> f.getStatus() == FeedbackStatus.APPROVED)
+                .mapToInt(Feedback::getRating)
+                .average()
+                .orElse(0.0);
+
+        // Distribution des notes (1 à 5) sur les approuvés
+        Map<Integer, Long> ratingDist = new HashMap<>();
+        for (int i = 1; i <= 5; i++) {
+            final int star = i;
+            ratingDist.put(star, all.stream()
+                    .filter(f -> f.getStatus() == FeedbackStatus.APPROVED && f.getRating() == star)
+                    .count());
+        }
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("total", total);
+        stats.put("approved", approved);
+        stats.put("rejected", rejected);
+        stats.put("pending", pending);
+        stats.put("averageRating", Math.round(avgRating * 10.0) / 10.0);
+        stats.put("ratingDistribution", ratingDist);
+        return stats;
+    }
+
+    // ─── Statistiques par article ────────────────────────────────────────────────
 
     public Double getAverageRating(Long articleId) {
         Double avg = feedbackRepository.findAverageRatingByArticleId(articleId);

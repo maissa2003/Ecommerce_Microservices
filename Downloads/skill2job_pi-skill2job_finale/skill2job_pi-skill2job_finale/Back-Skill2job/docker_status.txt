@@ -1,0 +1,8 @@
+﻿CONTAINER ID   IMAGE                              COMMAND                  CREATED          STATUS                    PORTS                               NAMES
+f2bebb33edba   back-skill2job-frontend            "/docker-entrypoint.ΓÇª"   10 minutes ago   Up 9 minutes              0.0.0.0:80->80/tcp                  frontend
+55079bde32b7   back-skill2job-session-service     "java -jar app.jar"      10 minutes ago   Up 9 minutes              0.0.0.0:8085->8085/tcp              session-service
+0fc0da3b0813   back-skill2job-formation-service   "java -jar app.jar"      10 minutes ago   Up 9 minutes              0.0.0.0:8083->8083/tcp              formation-service
+466f91b6e6d2   back-skill2job-exams-service       "java -jar app.jar"      10 minutes ago   Up 9 minutes              0.0.0.0:8082->8082/tcp              exams-service
+b27eeb85069e   back-skill2job-api-gateway         "java -jar app.jar"      10 minutes ago   Up 9 minutes              0.0.0.0:8090->8090/tcp, 8761/tcp    api-gateway
+809ccd0274ff   back-skill2job-eureka-server       "java -jar app.jar"      10 minutes ago   Up 10 minutes (healthy)   0.0.0.0:8761->8761/tcp              eureka-server
+96ada2c2115f   mysql:8.0                          "docker-entrypoint.sΓÇª"   4 hours ago      Up 23 minutes (healthy)   0.0.0.0:3306->3306/tcp, 33060/tcp   mysql

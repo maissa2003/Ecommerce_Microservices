@@ -1,0 +1,95 @@
+<div class="meet-container">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h2>Session Room</h2>
+      <span class="room-code">Room: {{ roomCode }}</span>
+    </div>
+    <div class="participant-count">
+      👥 {{ participants.length + 1 }} participants
+    </div>
+  </div>
+
+  <!-- Participants Grid -->
+  <div class="participants-grid">
+    <!-- ME -->
+    <div class="participant-card me">
+      <video
+        *ngIf="cameraEnabled"
+        #localVideo
+        autoplay
+        muted
+        playsinline
+        class="participant-video"
+      ></video>
+
+      <div class="avatar" *ngIf="!cameraEnabled">
+        {{ getInitials(username) }}
+      </div>
+
+      <div class="name">
+        {{ username }}
+        <span class="badge">You</span>
+        <!-- ✅ Coach badge for trainer -->
+        <span *ngIf="isTrainer" class="coach-badge">👑 Coach</span>
+      </div>
+
+      <div class="mic-status">
+        <span>{{ micEnabled ? "🎤" : "🔇" }}</span>
+        <span>{{ micEnabled ? "Mic On" : "Mic Off" }}</span>
+      </div>
+      <span class="online-dot" title="Online"></span>
+    </div>
+
+    <!-- Remote Participants -->
+    <div
+      class="participant-card"
+      *ngFor="let participant of participants"
+      [class.offline]="!participant.online"
+    >
+      <video
+        *ngIf="participant.cameraOn && participant.stream"
+        autoplay
+        playsinline
+        class="participant-video"
+        #remoteVideo
+        (canplay)="attachStream(remoteVideo, participant.stream!)"
+      ></video>
+
+      <div class="avatar" *ngIf="!participant.cameraOn || !participant.stream">
+        {{ getInitials(participant.username) }}
+      </div>
+
+      <div class="name">
+        {{ participant.username }}
+        <!-- ✅ Coach badge for trainer participants -->
+        <span *ngIf="participant.isTrainer" class="coach-badge">👑 Coach</span>
+        <span class="online-label">{{
+          participant.online ? "🟢 Online" : "⚫ Offline"
+        }}</span>
+      </div>
+
+      <span class="online-dot" [class.offline-dot]="!participant.online"></span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button (click)="toggleMic()" [class.active]="micEnabled">
+      <span class="btn-icon">{{ micEnabled ? "🎤" : "🔇" }}</span>
+      <span class="btn-label">{{ micEnabled ? "Mute" : "Unmute" }}</span>
+    </button>
+
+    <button (click)="toggleCamera()" [class.active]="cameraEnabled">
+      <span class="btn-icon">{{ cameraEnabled ? "📹" : "📷" }}</span>
+      <span class="btn-label">{{
+        cameraEnabled ? "Stop Camera" : "Start Camera"
+      }}</span>
+    </button>
+
+    <button class="leave" (click)="leaveSession()">
+      <span class="btn-icon">🚪</span>
+      <span class="btn-label">Leave</span>
+    </button>
+  </div>
+</div>

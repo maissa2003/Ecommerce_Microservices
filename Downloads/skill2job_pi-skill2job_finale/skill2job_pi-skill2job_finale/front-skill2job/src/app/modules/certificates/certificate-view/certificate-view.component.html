@@ -1,0 +1,138 @@
+<div class="certificate-view" *ngIf="!loading && certificate && exam">
+  <!-- Certificate Display -->
+  <div class="certificate-display">
+    <div class="certificate-header">
+      <h1>🎓 CERTIFICATE OF ACHIEVEMENT</h1>
+    </div>
+
+    <div class="certificate-body">
+      <h2 class="exam-title">{{ exam.title }}</h2>
+
+      <div class="awarded-to">
+        <p>This is to certify that</p>
+        <h3>Student: {{ currentUsername }}</h3>
+        <p>has successfully completed the exam</p>
+      </div>
+
+      <div class="certificate-details">
+        <div class="detail-item">
+          <span class="label">Certificate Code:</span>
+          <span class="code">{{ certificate.certificateCode }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Issue Date:</span>
+          <span>{{ formatDate(certificate.issueDate) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Required Score:</span>
+          <span>{{ exam.passScore }}%</span>
+        </div>
+        <div class="detail-item" *ngIf="evaluation">
+          <span class="label">Your Score:</span>
+          <span
+            class="score-badge"
+            [class.passed]="evaluation.passed"
+            [class.failed]="!evaluation.passed"
+          >
+            {{ evaluation.score.toFixed(1) }}%
+          </span>
+        </div>
+      </div>
+
+      <div class="signature">
+        <ng-container *ngIf="signatureImage; else textSignature">
+          <img [src]="signatureImage" alt="Signature" class="signature-image" />
+        </ng-container>
+        <ng-template #textSignature>
+          <p>{{ signatureText }}</p>
+        </ng-template>
+        <p class="year">{{ currentYear }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Breakdown -->
+  <div class="questions-section" *ngIf="questionResults.length">
+    <h2>Question Breakdown</h2>
+
+    <div class="summary-stats">
+      <span>{{ correctCount }} / {{ questionResults.length }} correct</span>
+    </div>
+
+    <p class="hint" *ngIf="questionResults[0].userAnswer === '—'">
+      Answer details are not available for this certificate.
+    </p>
+
+    <div class="question-list">
+      <div
+        *ngFor="let result of questionResults; let i = index"
+        class="question-card"
+        [class.correct]="result.correct"
+        [class.incorrect]="!result.correct"
+      >
+        <div class="question-header">
+          <span class="question-num">Question {{ i + 1 }}</span>
+          <span
+            class="result-badge"
+            [class.correct]="result.correct"
+            [class.incorrect]="!result.correct"
+          >
+            {{ result.correct ? "✓ Correct" : "✗ Incorrect" }}
+          </span>
+        </div>
+
+        <p class="question-content">{{ result.question.content }}</p>
+
+        <div class="options-list" *ngIf="result.question.optionA">
+          <span class="opt">A) {{ result.question.optionA }}</span>
+          <span class="opt">B) {{ result.question.optionB }}</span>
+          <span class="opt">C) {{ result.question.optionC }}</span>
+          <span class="opt">D) {{ result.question.optionD }}</span>
+        </div>
+
+        <div class="answers-row">
+          <div class="answer-item">
+            <span class="label">Your answer:</span>
+            <span class="value" [class.wrong]="!result.correct">
+              {{ result.userAnswer === "—" ? "—" : result.userAnswer }}
+            </span>
+          </div>
+          <div class="answer-item" *ngIf="!result.correct">
+            <span class="label">Correct answer:</span>
+            <span class="value correct-ans">{{ result.correctAnswer }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn btn-secondary" (click)="goBack()">
+      ← Back to Certificates
+    </button>
+    <button class="btn btn-primary" (click)="downloadPDF()">
+      ⬇️ Download Certificate
+    </button>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="loading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Loading certificate details...</p>
+</div>
+
+<!-- Error State -->
+<div *ngIf="error && !loading" class="error-container">
+  <div class="error-icon">⚠️</div>
+  <h3>{{ error }}</h3>
+  <button class="btn btn-primary" (click)="goBack()">
+    Back to Certificates
+  </button>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>&copy; {{ currentYear }} SKILL2JOB. All rights reserved.</p>
+</footer>

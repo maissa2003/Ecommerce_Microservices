@@ -1,0 +1,113 @@
+<div class="question-table-container">
+  <div class="header">
+    <h2>Questions</h2>
+    <button type="button" class="btn-back" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Back to Exams
+    </button>
+  </div>
+
+  <div class="exam-selector">
+    <label for="examSelect">Exam</label>
+    <select
+      id="examSelect"
+      [(ngModel)]="selectedExamId"
+      (ngModelChange)="onExamChange()"
+      class="select-exam"
+    >
+      <option [ngValue]="null">Select an exam</option>
+      <option *ngFor="let exam of exams" [ngValue]="exam.id">{{
+        exam.title
+      }}</option>
+    </select>
+    <button
+      type="button"
+      class="btn-add"
+      (click)="addQuestion()"
+      [disabled]="!selectedExamId"
+    >
+      <i class="fas fa-plus"></i> Add Question
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i> Loading questions...
+  </div>
+
+  <div *ngIf="!selectedExamId && !loading" class="no-data">
+    <i class="fas fa-file-alt"></i>
+    <p>Select an exam to view and manage its questions.</p>
+  </div>
+
+  <div
+    *ngIf="
+      !loading && selectedExamId && questions.length === 0 && !errorMessage
+    "
+    class="no-data"
+  >
+    <i class="fas fa-question-circle"></i>
+    <p>No questions for this exam yet.</p>
+    <button type="button" class="btn-add-inline" (click)="addQuestion()">
+      <i class="fas fa-plus"></i> Add first question
+    </button>
+  </div>
+
+  <table
+    *ngIf="!loading && selectedExamId && questions.length > 0"
+    class="question-table"
+  >
+    <thead>
+      <tr>
+        <th class="col-num">#</th>
+        <th class="col-content">Question</th>
+        <th class="col-correct">Correct</th>
+        <th class="col-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let q of questions; let i = index">
+        <td class="col-num">{{ i + 1 }}</td>
+        <td class="col-content" [title]="q.content">
+          {{ truncate(q.content, 80) }}
+        </td>
+        <td class="col-correct">
+          <span class="correct-badge">{{
+            getOptionLabel(q.correctAnswer)
+          }}</span>
+        </td>
+        <td class="actions">
+          <button
+            type="button"
+            class="action-btn edit"
+            (click)="editQuestion(q)"
+            title="Edit"
+          >
+            <i class="fas fa-edit"></i>
+          </button>
+          <button
+            type="button"
+            class="action-btn delete"
+            (click)="deleteQuestion(q)"
+            [disabled]="deletingId === q.id"
+            title="Delete"
+          >
+            <i
+              class="fas"
+              [ngClass]="
+                deletingId === q.id ? 'fa-spinner fa-spin' : 'fa-trash-alt'
+              "
+            ></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && questions.length > 0" class="page-info">
+    {{ questions.length }} question{{ questions.length !== 1 ? "s" : "" }} for
+    {{ selectedExam?.title }}
+  </div>
+</div>

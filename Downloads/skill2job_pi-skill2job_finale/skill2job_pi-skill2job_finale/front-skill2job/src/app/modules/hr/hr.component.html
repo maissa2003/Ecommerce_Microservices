@@ -1,0 +1,137 @@
+<div class="page-header">
+  <h2>Trainer Applications (HR)</h2>
+  <p class="subtitle">Manage and review trainer applications</p>
+</div>
+
+<div class="toolbar">
+  <div class="filter">
+    <label><b>Status:</b></label>
+    <select [(ngModel)]="selectedStatus" (change)="loadApplications()">
+      <option value="">ALL</option>
+      <option value="PENDING">PENDING</option>
+      <option value="ACCEPTED">ACCEPTED</option>
+      <option value="REJECTED">REJECTED</option>
+    </select>
+  </div>
+  <div class="toolbar-right">
+    <div class="export-info" *ngIf="applications.length > 0">
+      {{ applications.length }} result(s)
+      {{ selectedStatus ? "· " + selectedStatus : "· ALL" }}
+    </div>
+    <button class="btn refresh" (click)="loadApplications()">🔄 Refresh</button>
+    <button class="btn export" (click)="exportCSV()">📤 Export CSV</button>
+  </div>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>User ID</th>
+      <th>Status</th>
+      <th>CV</th>
+      <th>Motivation</th>
+      <th>Updated At</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let app of applications">
+      <td>{{ app.id }}</td>
+      <td>{{ app.userId }}</td>
+      <td>
+        <span class="badge" [ngClass]="app.status?.toLowerCase()">{{
+          app.status
+        }}</span>
+      </td>
+      <td><a [href]="app.cvUrl" target="_blank" rel="noopener">Open CV</a></td>
+      <td class="motivation">{{ app.motivation }}</td>
+      <td>{{ app.updatedAt | date: "yyyy-MM-dd HH:mm" }}</td>
+      <td class="actions">
+        <button class="btn chat" (click)="openChat(app)">
+          💬 Chat
+          <span class="chat-badge" *ngIf="unreadCounts[app.id] > 0">
+            {{ unreadCounts[app.id] }}
+          </span>
+        </button>
+        <button class="btn analyze" (click)="analyze(app.id)">
+          🤖 Analyze
+        </button>
+        <button class="btn approve" (click)="approve(app.id)">
+          ✅ Approve
+        </button>
+        <button class="btn reject" (click)="reject(app.id)">❌ Reject</button>
+        <button class="btn delete" (click)="deleteApplication(app.id)">
+          🗑 Delete
+        </button>
+      </td>
+    </tr>
+    <tr *ngIf="applications.length === 0">
+      <td colspan="7" class="empty">No applications yet</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ✅ CHAT MODAL -->
+<div class="chat-backdrop" *ngIf="chatOpen" (click)="closeChat()">
+  <div class="chat-modal" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar">T{{ chatApp?.userId }}</div>
+        <div>
+          <div class="chat-name">Trainer #{{ chatApp?.userId }}</div>
+          <div class="chat-sub">
+            Application #{{ chatApp?.id }} · {{ chatApp?.status }}
+          </div>
+        </div>
+      </div>
+      <button class="chat-close" (click)="closeChat()">✕</button>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages">
+      <div class="chat-empty" *ngIf="messages.length === 0">
+        <span>💬 No messages yet. Start the conversation.</span>
+      </div>
+
+      <div
+        *ngFor="let msg of messages"
+        class="msg-row"
+        [ngClass]="isAdmin(msg) ? 'msg-right' : 'msg-left'"
+      >
+        <div
+          class="msg-bubble"
+          [ngClass]="isAdmin(msg) ? 'bubble-admin' : 'bubble-trainer'"
+        >
+          <div class="msg-role">
+            {{ isAdmin(msg) ? "🛡️ Admin" : "👤 Trainer" }}
+          </div>
+          <div class="msg-content">{{ msg.content }}</div>
+          <div class="msg-time">
+            {{ msg.createdAt | date: "HH:mm · MMM d" }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-row">
+      <textarea
+        class="chat-input"
+        [(ngModel)]="newMessage"
+        (keydown)="handleKey($event)"
+        placeholder="Type a message... (Enter to send)"
+        rows="2"
+      >
+      </textarea>
+      <button
+        class="chat-send"
+        (click)="sendMessage()"
+        [disabled]="!newMessage.trim() || sendingMessage"
+      >
+        {{ sendingMessage ? "⏳" : "📨" }}
+      </button>
+    </div>
+  </div>
+</div>

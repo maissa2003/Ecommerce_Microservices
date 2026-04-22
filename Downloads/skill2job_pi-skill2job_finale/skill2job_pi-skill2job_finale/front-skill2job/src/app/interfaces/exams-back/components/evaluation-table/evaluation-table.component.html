@@ -1,0 +1,135 @@
+<div class="evaluation-container">
+  <div class="header">
+    <h2>
+      <i class="fas fa-chart-bar"></i>
+      {{ examId ? "Evaluations for Exam #" + examId : "All Evaluations" }}
+    </h2>
+    <button class="btn-refresh" (click)="refresh()" [disabled]="loading">
+      <i
+        class="fas"
+        [ngClass]="loading ? 'fa-spinner fa-spin' : 'fa-sync-alt'"
+      ></i>
+      {{ loading ? "Loading..." : "Refresh" }}
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading evaluations...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fas fa-exclamation-circle"></i>
+    <p>{{ errorMessage }}</p>
+    <button class="btn-retry" (click)="refresh()">Retry</button>
+  </div>
+
+  <div
+    *ngIf="!loading && !errorMessage && evaluations.length === 0"
+    class="no-data"
+  >
+    <i class="fas fa-folder-open"></i>
+    <p>No evaluations found.</p>
+    <p *ngIf="examId">
+      <a routerLink="/admin/exams/exam-table">← Back to Exams</a>
+    </p>
+  </div>
+
+  <div
+    class="table-wrapper"
+    *ngIf="!loading && !errorMessage && evaluations.length > 0"
+  >
+    <table class="evaluation-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Student</th>
+          <th>Score</th>
+          <th>Result</th>
+          <th>Exam</th>
+          <th>Certificate</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let eval of evaluations"
+          [class.passed]="eval.passed"
+          [class.failed]="!eval.passed"
+        >
+          <td>#{{ eval.id }}</td>
+          <td>
+            <span class="student-name">
+              {{ userNames.get(eval.userId) || "Unknown user" }}
+            </span>
+          </td>
+          <td>
+            <strong>{{ eval.score }}%</strong>
+          </td>
+          <td>
+            <span
+              class="badge"
+              [ngClass]="eval.passed ? 'badge-success' : 'badge-danger'"
+            >
+              <i
+                class="fas"
+                [ngClass]="eval.passed ? 'fa-check-circle' : 'fa-times-circle'"
+              ></i>
+              {{ eval.passed ? "PASSED" : "FAILED" }}
+            </span>
+          </td>
+          <td>{{ eval.exam?.title || "N/A" }}</td>
+          <td>
+            <span *ngIf="eval.certificate" class="badge badge-cert">
+              <i class="fas fa-certificate"></i> CERT #{{ eval.certificate.id }}
+            </span>
+            <span
+              *ngIf="!eval.certificate && eval.passed"
+              class="badge badge-warning"
+            >
+              <i class="fas fa-clock"></i> Pending
+            </span>
+            <span
+              *ngIf="!eval.certificate && !eval.passed"
+              class="badge badge-secondary"
+            >
+              <i class="fas fa-times"></i> N/A
+            </span>
+          </td>
+          <td class="actions">
+            <button
+              *ngIf="eval.certificate"
+              class="action-btn btn-view"
+              [routerLink]="['/admin/exams/certificates', eval.certificate.id]"
+              title="View Certificate"
+            >
+              <i class="fas fa-certificate"></i>
+            </button>
+            <button
+              *ngIf="eval.passed && !eval.certificate"
+              class="action-btn btn-generate"
+              (click)="generateCertificate(eval.id)"
+              title="Generate Certificate"
+            >
+              <i class="fas fa-award"></i>
+            </button>
+            <button
+              class="action-btn btn-view"
+              [routerLink]="['/admin/exams/evaluation-details', eval.id]"
+              title="View Details"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+            <button
+              class="action-btn btn-delete"
+              (click)="deleteEvaluation(eval.id)"
+              title="Delete"
+            >
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

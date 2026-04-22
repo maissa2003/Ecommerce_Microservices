@@ -1,0 +1,189 @@
+/* ✅ Le parent (PartnerComponent) doit gérer le centrage (max-width + margin auto)
+   Ici on ne refait PAS max-width/margin auto pour éviter l'affichage "bizarre". */
+.pp-page {
+  width: 100%;
+  box-sizing: border-box;
+
+  /* ✅ espace sous la navbar fixed (ajuste si ta navbar est plus grande) */
+  padding: 26px 0;
+}
+
+/* Header */
+.pp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.pp-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.pp-subtitle {
+  margin: 6px 0 0;
+  color: #666;
+  font-weight: 600;
+}
+
+/* messages */
+.pp-msg {
+  margin: 10px 0;
+  font-weight: 800;
+}
+
+.pp-loading {
+  margin: 10px 0;
+  color: #555;
+}
+
+/* Card */
+.pp-card {
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+
+  /* ✅ largeur pro du formulaire + centré */
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+/* Grid */
+.pp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+
+.pp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pp-field label {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  color: #555;
+  text-transform: uppercase;
+}
+
+.pp-field input,
+.pp-field textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #e1e1e1;
+  border-radius: 12px;
+  font-size: 14px;
+  transition: 0.2s;
+  outline: none;
+  background: #fff;
+}
+
+.pp-field input:focus,
+.pp-field textarea:focus {
+  border-color: #c4161c;
+  box-shadow: 0 0 0 3px rgba(196, 22, 28, 0.1);
+}
+
+.pp-full {
+  grid-column: 1 / -1;
+}
+
+/* Actions */
+.pp-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.pp-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pp-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pp-btn.primary {
+  background: #c4161c;
+  color: #fff;
+}
+
+.pp-btn.primary:hover {
+  opacity: 0.92;
+}
+
+.pp-btn.danger {
+  background: #f2f2f2;
+  color: #8b0000;
+}
+
+.pp-btn.danger:hover {
+  background: #ffecec;
+}
+
+/* Status Badge */
+.pp-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.pp-status.pending {
+  background: #fff7e6;
+  border-color: #ffe0a3;
+  color: #9a6b00;
+}
+
+.pp-status.approved {
+  background: #e9fbef;
+  border-color: #b9f3c6;
+  color: #147a3e;
+}
+
+.pp-status.suspended {
+  background: #ffecec;
+  border-color: #ffc9c9;
+  color: #b42318;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .pp-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pp-actions {
+    justify-content: stretch;
+  }
+
+  .pp-btn {
+    width: 100%;
+  }
+
+  .pp-card {
+    padding: 16px;
+  }
+}

@@ -1,0 +1,460 @@
+<div class="equipment-page">
+  <div class="equipment-header">
+    <h2>Sessions</h2>
+
+    <button
+      *ngIf="userRole !== 'ROLE_LEARNER'"
+      class="add-btn"
+      (click)="openAddModal()"
+    >
+      + Add Session
+    </button>
+
+    <p *ngIf="userRole === 'ROLE_LEARNER'" class="info-text">
+      You are in learner mode. Session creation and modifications are disabled.
+    </p>
+  </div>
+
+  <div class="equipment-grid">
+    <div
+      class="equipment-card"
+      *ngFor="let s of sessions"
+      (click)="openDetails(s)"
+    >
+      <div class="session-banner">
+        <div
+          class="session-type"
+          [ngClass]="{
+            online: s.type === 'ONLINE',
+            onsite: s.type === 'ONSITE'
+          }"
+        >
+          {{ s.type }}
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h3>{{ s.name }}</h3>
+
+        <p>Capacity: {{ s.capacity }}</p>
+
+        <p *ngIf="s.salle">Salle ID: {{ s.salle.id }}</p>
+
+        <p>
+          {{ s.startAt | date: "medium" }}
+        </p>
+
+        <div class="card-actions" *ngIf="userRole !== 'ROLE_LEARNER'">
+          <button
+            class="small-btn edit-btn"
+            (click)="editSession(s); $event.stopPropagation()"
+          >
+            ✎
+          </button>
+          <button
+            class="small-btn delete-btn"
+            (click)="deleteSession(s.id!); $event.stopPropagation()"
+          >
+            🗑
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SESSION MODAL -->
+<div class="modal-overlay" *ngIf="showAddModal">
+  <div class="modal-card large-modal">
+    <!-- Modal Header with decorative element -->
+    <div class="modal-header">
+      <div class="modal-title-wrapper">
+        <div class="modal-icon">📅</div>
+        <h2>{{ isEditing ? "Edit Session" : "Create New Session" }}</h2>
+      </div>
+      <button class="close-btn" (click)="closeAddModal()">✕</button>
+    </div>
+
+    <!-- Progress Steps Indicator -->
+    <div class="modal-steps">
+      <div
+        class="step"
+        [ngClass]="{ active: currentStep === 1, completed: currentStep > 1 }"
+      >
+        <span class="step-number">1</span>
+        <span class="step-label">Basic Info</span>
+      </div>
+      <div class="step-line" [ngClass]="{ active: currentStep > 1 }"></div>
+      <div
+        class="step"
+        [ngClass]="{ active: currentStep === 2, completed: currentStep > 2 }"
+      >
+        <span class="step-number">2</span>
+        <span class="step-label">Schedule</span>
+      </div>
+      <div class="step-line" [ngClass]="{ active: currentStep > 2 }"></div>
+      <div
+        class="step"
+        [ngClass]="{ active: currentStep === 3, completed: currentStep > 3 }"
+      >
+        <span class="step-number">3</span>
+        <span class="step-label">Equipment</span>
+      </div>
+    </div>
+
+    <form class="session-form">
+      <!-- STEP 1: BASIC INFO SECTION -->
+      <div *ngIf="currentStep === 1" class="form-step-container">
+        <div class="form-card">
+          <div class="section-title">
+            <span class="title-icon">📋</span>
+            <h3>Basic Information</h3>
+          </div>
+
+          <div class="form-section">
+            <label>Session Name <span class="required">*</span></label>
+            <div class="input-wrapper" [class.error]="errors['name']">
+              <input
+                type="text"
+                [(ngModel)]="newSession.name"
+                (input)="onNameChange()"
+                name="name"
+                placeholder="e.g., Java, Spring Boot Workshop"
+                required
+              />
+              <span class="input-focus-border"></span>
+            </div>
+            <span class="error-message" *ngIf="errors['name']">{{
+              errors["name"]
+            }}</span>
+          </div>
+
+          <!-- TYPE + SALLE -->
+          <div class="form-row">
+            <div class="form-section">
+              <label>Session Type <span class="required">*</span></label>
+              <div class="select-wrapper" [class.error]="errors['type']">
+                <select
+                  [(ngModel)]="newSession.type"
+                  (change)="onTypeChange()"
+                  name="type"
+                >
+                  <option value="ONLINE">🌐 Online</option>
+                  <option value="ONSITE">🏢 Onsite</option>
+                </select>
+                <span class="select-arrow">▼</span>
+              </div>
+              <span class="error-message" *ngIf="errors['type']">{{
+                errors["type"]
+              }}</span>
+            </div>
+
+            <div class="form-section" *ngIf="newSession.type === 'ONSITE'">
+              <label>Select Salle <span class="required">*</span></label>
+              <div class="select-wrapper" [class.error]="errors['salleId']">
+                <select
+                  [(ngModel)]="newSession.salleId"
+                  (change)="onSalleChange()"
+                  name="salle"
+                >
+                  <option value="" disabled selected>Choose a room</option>
+                  <option *ngFor="let salle of salles" [value]="salle.id">
+                    {{ salle.name }}
+                  </option>
+                </select>
+                <span class="select-arrow">▼</span>
+              </div>
+              <span class="error-message" *ngIf="errors['salleId']">{{
+                errors["salleId"]
+              }}</span>
+            </div>
+          </div>
+
+          <!-- TRAINING COURSE SELECTION -->
+          <div class="form-section">
+            <label>Training Course</label>
+            <div class="select-wrapper">
+              <select [(ngModel)]="newSession.formationId" name="formation">
+                <option [ngValue]="null"
+                  >Select a training course (optional)</option
+                >
+                <option
+                  *ngFor="let formation of formations"
+                  [ngValue]="formation.id"
+                >
+                  {{ formation.title }}
+                </option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: SCHEDULE SECTION -->
+      <div *ngIf="currentStep === 2" class="form-step-container">
+        <div class="form-card">
+          <div class="section-title">
+            <span class="title-icon">⏰</span>
+            <h3>Schedule & Capacity</h3>
+          </div>
+
+          <!-- START DATE & TIME -->
+          <div class="form-row">
+            <div class="form-section">
+              <label>Start Date <span class="required">*</span></label>
+              <mat-form-field
+                appearance="outline"
+                class="custom-datepicker"
+                [class.error]="errors['startDate']"
+              >
+                <mat-label>Choose date</mat-label>
+                <input
+                  matInput
+                  [matDatepicker]="startPicker"
+                  [(ngModel)]="startDateObj"
+                  [min]="minDate"
+                  (dateChange)="onStartDateChange()"
+                  name="startDate"
+                />
+                <mat-datepicker-toggle matSuffix [for]="startPicker">
+                  <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker
+                  #startPicker
+                  [startAt]="minDate"
+                ></mat-datepicker>
+              </mat-form-field>
+              <span class="error-message" *ngIf="errors['startDate']">{{
+                errors["startDate"]
+              }}</span>
+            </div>
+
+            <div class="form-section">
+              <label>Start Time <span class="required">*</span></label>
+              <div class="time-input-wrapper">
+                <input
+                  type="time"
+                  [(ngModel)]="startTimeStr"
+                  (change)="onStartTimeChange()"
+                  name="startTime"
+                  class="time-input"
+                  step="60"
+                />
+                <span class="time-icon">🕒</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- END DATE & TIME -->
+          <div class="form-row">
+            <div class="form-section">
+              <label>End Date <span class="required">*</span></label>
+              <mat-form-field
+                appearance="outline"
+                class="custom-datepicker"
+                [class.error]="errors['endDate']"
+              >
+                <mat-label>Choose date</mat-label>
+                <input
+                  matInput
+                  [matDatepicker]="endPicker"
+                  [(ngModel)]="endDateObj"
+                  [min]="minDate"
+                  (dateChange)="onEndDateChange()"
+                  name="endDate"
+                />
+                <mat-datepicker-toggle matSuffix [for]="endPicker">
+                  <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #endPicker [startAt]="minDate"></mat-datepicker>
+              </mat-form-field>
+              <span class="error-message" *ngIf="errors['endDate']">{{
+                errors["endDate"]
+              }}</span>
+            </div>
+
+            <div class="form-section">
+              <label>End Time <span class="required">*</span></label>
+              <div class="time-input-wrapper">
+                <input
+                  type="time"
+                  [(ngModel)]="endTimeStr"
+                  (change)="onEndTimeChange()"
+                  name="endTime"
+                  class="time-input"
+                  step="60"
+                />
+                <span class="time-icon">🕒</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Duration Hint -->
+          <div
+            class="duration-hint"
+            [class.error-hint]="errors['duration']"
+            *ngIf="newSession.startAt && newSession.endAt"
+          >
+            <span class="hint-icon" *ngIf="!errors['duration']">⏱️</span>
+            <span class="hint-icon" *ngIf="errors['duration']">⚠️</span>
+            <span *ngIf="!errors['duration']"
+              >Session duration:
+              <strong>{{ getSessionDuration() }}</strong> (max 2 hours)</span
+            >
+            <span *ngIf="errors['duration']">{{ errors["duration"] }}</span>
+          </div>
+
+          <!-- CAPACITY SECTION -->
+          <div class="form-section">
+            <label>Session Capacity <span class="required">*</span></label>
+            <div class="input-wrapper" [class.error]="errors['capacity']">
+              <input
+                type="number"
+                [(ngModel)]="newSession.capacity"
+                (input)="onCapacityChange()"
+                name="capacity"
+                placeholder="Enter maximum participants"
+                min="1"
+                required
+              />
+              <span class="input-focus-border"></span>
+            </div>
+            <span class="error-message" *ngIf="errors['capacity']">{{
+              errors["capacity"]
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: EQUIPMENT SECTION -->
+      <div *ngIf="currentStep === 3" class="form-step-container">
+        <div
+          class="form-card equipment-card"
+          *ngIf="newSession.type === 'ONSITE'"
+        >
+          <div class="section-title">
+            <span class="title-icon">🔧</span>
+            <h3>Equipment Reservations</h3>
+            <span class="section-badge">Optional</span>
+          </div>
+
+          <div class="equipment-header">
+            <p class="equipment-hint">
+              Select equipment needed for this session
+            </p>
+            <button
+              type="button"
+              class="add-equipment-btn"
+              (click)="addEquipmentLine()"
+            >
+              <span class="btn-icon">+</span>
+              Add Equipment
+            </button>
+          </div>
+
+          <div
+            *ngIf="newSession.sessionEquipments.length === 0"
+            class="empty-equipment"
+          >
+            <span class="empty-icon">📦</span>
+            <p>No equipment added yet</p>
+          </div>
+
+          <div
+            *ngFor="let se of newSession.sessionEquipments; let i = index"
+            class="equipment-row"
+          >
+            <div class="equipment-select-wrapper">
+              <select [(ngModel)]="se.equipment" name="equipment{{ i }}">
+                <option [ngValue]="null" disabled>Select equipment</option>
+                <option
+                  *ngFor="let eq of getEquipmentsForRow(se)"
+                  [ngValue]="eq"
+                >
+                  {{ eq.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="quantity-wrapper">
+              <input
+                type="number"
+                [(ngModel)]="se.quantityUsed"
+                name="qty{{ i }}"
+                placeholder="Qty"
+                min="1"
+              />
+            </div>
+
+            <button
+              type="button"
+              class="remove-btn"
+              (click)="removeEquipmentLine(i)"
+              title="Remove equipment"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="form-card" *ngIf="newSession.type === 'ONLINE'">
+          <div class="section-title">
+            <span class="title-icon">✅</span>
+            <h3>Ready to Create</h3>
+          </div>
+          <p class="online-message">
+            This is an online session. Equipment setup is not required.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" (click)="closeAddModal()">
+          <span class="btn-text">Cancel</span>
+        </button>
+
+        <div class="nav-buttons">
+          <button
+            type="button"
+            class="prev-btn"
+            *ngIf="currentStep > 1"
+            (click)="previousStep()"
+          >
+            <span class="btn-text">← Back</span>
+          </button>
+
+          <button
+            type="button"
+            class="next-btn"
+            *ngIf="currentStep < 3"
+            (click)="nextStep()"
+          >
+            <span class="btn-text">Next →</span>
+          </button>
+
+          <button
+            type="button"
+            class="create-btn"
+            *ngIf="currentStep === 3"
+            (click)="saveSession()"
+            [disabled]="loading"
+          >
+            <span class="btn-icon" *ngIf="!loading">✓</span>
+            <span class="spinner" *ngIf="loading"></span>
+            <span class="btn-text">{{
+              loading
+                ? isEditing
+                  ? "Updating..."
+                  : "Creating..."
+                : isEditing
+                ? "Update Session"
+                : "Create Session"
+            }}</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

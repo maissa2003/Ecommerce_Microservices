@@ -1,0 +1,210 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>HR Dashboard</h1>
+      <p class="subtitle">
+        Recruitment analytics and trainer application insights
+      </p>
+    </div>
+    <div class="updated">🕐 Live data</div>
+  </div>
+
+  <div class="loading-wrap" *ngIf="loading">⏳ Loading...</div>
+
+  <ng-container *ngIf="!loading">
+    <!-- ─── KPI CARDS ─────────────────────────────── -->
+    <div class="kpi-grid">
+      <div class="kpi-card total">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-info">
+          <div class="kpi-value">{{ total }}</div>
+          <div class="kpi-label">Total Applications</div>
+        </div>
+      </div>
+
+      <div class="kpi-card pending">
+        <div class="kpi-icon">⏳</div>
+        <div class="kpi-info">
+          <div class="kpi-value">{{ pending }}</div>
+          <div class="kpi-label">Pending Review</div>
+        </div>
+      </div>
+
+      <div class="kpi-card accepted">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-info">
+          <div class="kpi-value">{{ accepted }}</div>
+          <div class="kpi-label">Accepted</div>
+        </div>
+      </div>
+
+      <div class="kpi-card rejected">
+        <div class="kpi-icon">❌</div>
+        <div class="kpi-info">
+          <div class="kpi-value">{{ rejected }}</div>
+          <div class="kpi-label">Rejected</div>
+        </div>
+      </div>
+
+      <div class="kpi-card rate">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-info">
+          <div class="kpi-value">{{ acceptanceRate }}%</div>
+          <div class="kpi-label">Acceptance Rate</div>
+        </div>
+        <div class="rate-bar">
+          <div class="rate-fill" [style.width.%]="acceptanceRate"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── CHARTS ROW ────────────────────────────── -->
+    <div class="charts-row">
+      <!-- Donut Chart -->
+      <div class="chart-card">
+        <div class="chart-title">📊 Application Status</div>
+
+        <div class="donut-wrap">
+          <svg viewBox="0 0 160 160" width="160" height="160">
+            <path
+              *ngFor="let d of statusChartData; let i = index"
+              [attr.d]="getDonutPath(i)"
+              [attr.fill]="d.color"
+              stroke="white"
+              stroke-width="2"
+            ></path>
+            <circle cx="80" cy="80" r="35" fill="white" />
+            <text
+              x="80"
+              y="76"
+              text-anchor="middle"
+              font-size="14"
+              font-weight="bold"
+              fill="#111827"
+            >
+              {{ total }}
+            </text>
+            <text
+              x="80"
+              y="92"
+              text-anchor="middle"
+              font-size="9"
+              fill="#6b7280"
+            >
+              TOTAL
+            </text>
+          </svg>
+
+          <div class="donut-legend">
+            <div class="legend-item" *ngFor="let d of statusChartData">
+              <span class="legend-dot" [style.background]="d.color"></span>
+              <span class="legend-label">{{ d.label }}</span>
+              <span class="legend-val">{{ d.value }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar Chart - Levels -->
+      <div class="chart-card">
+        <div class="chart-title">🎓 Experience Level Distribution</div>
+
+        <div class="bar-chart">
+          <div class="bar-row" *ngFor="let d of levelData">
+            <div class="bar-label">{{ d.label }}</div>
+            <div class="bar-track">
+              <div
+                class="bar-fill"
+                [style.width.%]="getBarWidth(d.value)"
+                [style.background]="d.color"
+              ></div>
+            </div>
+            <div class="bar-val">{{ d.value }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acceptance Rate Gauge -->
+      <div class="chart-card gauge-card">
+        <div class="chart-title">🏆 Acceptance Rate</div>
+
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 200 120" width="200" height="120">
+            <!-- Background arc -->
+            <path
+              d="M 20 100 A 80 80 0 0 1 180 100"
+              fill="none"
+              stroke="#e5e7eb"
+              stroke-width="16"
+              stroke-linecap="round"
+            />
+            <!-- Foreground arc -->
+            <path
+              d="M 20 100 A 80 80 0 0 1 180 100"
+              fill="none"
+              [attr.stroke]="
+                acceptanceRate >= 70
+                  ? '#22c55e'
+                  : acceptanceRate >= 40
+                  ? '#f59e0b'
+                  : '#ef4444'
+              "
+              stroke-width="16"
+              stroke-linecap="round"
+              [attr.stroke-dasharray]="'251.2'"
+              [attr.stroke-dashoffset]="251.2 - (251.2 * acceptanceRate) / 100"
+            />
+            <text
+              x="100"
+              y="95"
+              text-anchor="middle"
+              font-size="24"
+              font-weight="bold"
+              fill="#111827"
+            >
+              {{ acceptanceRate }}%
+            </text>
+          </svg>
+          <div class="gauge-label">of applications approved</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RECENT TABLE ───────────────────────────── -->
+    <div class="recent-card">
+      <div class="chart-title">🕐 Recent Applications</div>
+
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Status</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let app of applications.slice(0, 5)">
+            <td>#{{ app.id }}</td>
+            <td>#{{ app.userId }}</td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="
+                  app.status === 'ACCEPTED'
+                    ? 'ok'
+                    : app.status === 'REJECTED'
+                    ? 'bad'
+                    : 'wait'
+                "
+              >
+                {{ app.status }}
+              </span>
+            </td>
+            <td>{{ app.updatedAt | date: "MMM d, y" }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+</div>

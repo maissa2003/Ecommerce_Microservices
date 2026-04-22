@@ -1,0 +1,220 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2>Trainer Details</h2>
+      <p class="subtitle">AI analysis results for trainer applications</p>
+    </div>
+
+    <div class="header-actions">
+      <div class="search">
+        <span class="icon">🔎</span>
+        <input
+          type="text"
+          placeholder="Search (app id, level, skills, summary, tags, notes...)"
+          [(ngModel)]="search"
+        />
+      </div>
+
+      <button class="btn ghost" (click)="load()">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width: 70px;">ID</th>
+            <th style="width: 130px;">Application</th>
+            <th style="width: 110px;">Level</th>
+            <th>Skills</th>
+            <th style="width: 120px;">Experience</th>
+            <th>AI Summary</th>
+
+            <!-- NEW -->
+            <th style="width: 220px;">HR Review</th>
+
+            <th style="width: 170px;">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let d of filteredDetails">
+            <td>
+              <span class="mono">{{ d.id }}</span>
+            </td>
+
+            <td>
+              <span class="pill">#{{ d.application?.id }}</span>
+            </td>
+
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  junior: d.level === 'JUNIOR',
+                  mid: d.level === 'MID',
+                  senior: d.level === 'SENIOR'
+                }"
+              >
+                {{ d.level }}
+              </span>
+            </td>
+
+            <td>
+              <div class="chips">
+                <span class="chip" *ngFor="let s of splitSkills(d.skills)">{{
+                  s
+                }}</span>
+                <span class="muted" *ngIf="!d.skills">—</span>
+              </div>
+            </td>
+
+            <td>
+              <span class="exp">{{ d.yearsExperience ?? 0 }} yrs</span>
+            </td>
+
+            <td>
+              <div class="ai-card">
+                <div class="ai-top">
+                  <span class="ai-title">🤖 AI Report</span>
+
+                  <span
+                    class="ai-badge"
+                    [ngClass]="{
+                      ok: d.level === 'SENIOR',
+                      warn: d.level === 'MID',
+                      risk: d.level === 'JUNIOR'
+                    }"
+                  >
+                    {{
+                      d.level === "SENIOR"
+                        ? "🟢 Strong"
+                        : d.level === "MID"
+                        ? "🟡 Medium"
+                        : "🟠 Basic"
+                    }}
+                  </span>
+                </div>
+
+                <div class="ai-body">
+                  <div class="summary">
+                    {{ d.aiSummary || "—" }}
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <!-- HR REVIEW COLUMN -->
+            <td>
+              <ng-container *ngIf="getReviewForRow(d) as r; else noReview">
+                <div class="review-box">
+                  <div class="review-top">
+                    <span class="review-badge">Reviewed</span>
+                    <span class="prio" [ngClass]="priorityClass(r.priority)">{{
+                      r.priority
+                    }}</span>
+                  </div>
+
+                  <div class="review-tags" *ngIf="r.tags?.length">
+                    <span class="tag" *ngFor="let t of r.tags">{{ t }}</span>
+                  </div>
+
+                  <div class="review-notes" *ngIf="r.notes">
+                    {{ r.notes }}
+                  </div>
+
+                  <div class="review-history" *ngIf="lastHistory(d).length">
+                    <div class="h" *ngFor="let h of lastHistory(d)">
+                      <span class="ht">{{ h.text }}</span>
+                      <span class="hd">{{ formatDate(h.at) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-template #noReview>
+                <div class="review-empty">
+                  <div class="muted">No HR review yet.</div>
+                  <button class="btn mini" (click)="openReview(d)">
+                    📝 Add review
+                  </button>
+                </div>
+              </ng-template>
+            </td>
+
+            <td class="actions-col">
+              <button class="btn mini" (click)="openReview(d)">
+                📝 Review
+              </button>
+              <button
+                class="btn mini ghost"
+                *ngIf="isReviewed(d)"
+                (click)="clearReview(d)"
+              >
+                🧹 Clear
+              </button>
+              <button class="btn danger" (click)="delete(d.id)">
+                🗑 Delete
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredDetails.length === 0">
+            <td colspan="8" class="empty">No trainer details found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- =========================
+       REVIEW MODAL
+  ========================== -->
+  <div class="modal-backdrop" *ngIf="reviewOpen" (click)="closeReview()"></div>
+
+  <div class="modal" *ngIf="reviewOpen">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">HR Review</div>
+        <div class="modal-sub">
+          Application #{{ activeRow?.application?.id }}
+        </div>
+      </div>
+      <button class="x" (click)="closeReview()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="field">
+        <span>Priority</span>
+        <select [(ngModel)]="reviewPriority">
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Tags (comma separated)</span>
+        <input
+          [(ngModel)]="reviewTagsInput"
+          placeholder="Strong Java, Interview, Needs verification..."
+        />
+      </label>
+
+      <label class="field">
+        <span>Internal Notes (private)</span>
+        <textarea
+          rows="6"
+          [(ngModel)]="reviewNotes"
+          placeholder="Write internal notes for HR only..."
+        ></textarea>
+      </label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn ghost" (click)="closeReview()">Cancel</button>
+      <button class="btn primary" (click)="saveReview()">💾 Save Review</button>
+    </div>
+  </div>
+</div>

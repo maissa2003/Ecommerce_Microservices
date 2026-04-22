@@ -1,0 +1,83 @@
+<div class="courses-header">
+  <h2>Manage Training Courses</h2>
+  <button class="btn-add" (click)="openAddForm()">+ Add Course</button>
+</div>
+
+<div *ngIf="courses.length === 0">No courses found.</div>
+
+<div class="card-grid">
+  <div *ngFor="let c of courses" class="course-card" (click)="goToCourse(c.id)">
+    <div class="card-image">
+      <img
+        [src]="
+          c.imageUrl
+            ? c.imageUrl.startsWith('http')
+              ? c.imageUrl
+              : environment.apiUrl.replace('/api', '') + c.imageUrl
+            : '/assets/placeholder.png'
+        "
+        alt="{{ c.title }}"
+      />
+    </div>
+    <div class="card-body">
+      <h3>{{ c.title }}</h3>
+      <p class="desc">{{ c.description }}</p>
+      <div class="muted">
+        Category: {{ c.category?.name || c.category?.id }}
+      </div>
+    </div>
+    <div class="card-actions" (click)="$event.stopPropagation()">
+      <button class="btn-edit" (click)="editCourse(c)">Edit</button>
+      <button class="btn-delete" (click)="deleteCourse(c.id)">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- overlay form -->
+<div class="overlay" *ngIf="showForm">
+  <div class="form-panel">
+    <h3>{{ formMode === "add" ? "Add Course" : "Edit Course" }}</h3>
+
+    <label>Image</label>
+    <input
+      id="image-input"
+      type="file"
+      accept="image/*"
+      (change)="onImageSelected($event)"
+    />
+    <div *ngIf="imagePreview || newCourse.imageUrl" class="preview">
+      <img
+        [src]="
+          imagePreview
+            ? imagePreview
+            : newCourse.imageUrl || '/assets/placeholder.png'
+        "
+      />
+    </div>
+
+    <label>Title</label>
+    <input [(ngModel)]="newCourse.title" placeholder="Title" />
+
+    <label>Description</label>
+    <textarea
+      [(ngModel)]="newCourse.description"
+      placeholder="Description"
+    ></textarea>
+
+    <label>Category Name</label>
+    <input [(ngModel)]="newCourse.category.name" placeholder="Category Name" />
+
+    <label>PDF (drag & drop or select)</label>
+    <input
+      id="pdf-input"
+      type="file"
+      accept="application/pdf"
+      (change)="onPdfSelected($event)"
+    />
+
+    <div class="form-actions">
+      <button (click)="addCourse()">{{ editingId ? "Save" : "Create" }}</button>
+      <button (click)="cancelEdit()">Cancel</button>
+    </div>
+  </div>
+</div>

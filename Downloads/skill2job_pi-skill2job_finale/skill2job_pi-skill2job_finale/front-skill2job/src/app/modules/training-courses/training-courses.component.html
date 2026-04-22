@@ -1,0 +1,1093 @@
+<div class="page-container">
+  <!-- ══════════════════════════════════════════════════════════════
+       TABS
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="page-header">
+    <div class="tabs-container">
+      <button
+        class="tab-button"
+        [class.active]="activeView === 'courses'"
+        (click)="switchView('courses')"
+      >
+        <span class="tab-label">Training Courses</span>
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeView === 'categories'"
+        (click)="switchView('categories')"
+      >
+        <span class="tab-label">Categories</span>
+      </button>
+      <button
+        class="tab-button payments-tab"
+        [class.active]="activeView === 'payments'"
+        (click)="switchView('payments')"
+      >
+        <span class="tab-label">Payments</span>
+        <span class="tab-badge" *ngIf="pendingPaymentsCount > 0">{{
+          pendingPaymentsCount
+        }}</span>
+      </button>
+      <button
+        class="tab-button coupons-tab"
+        [class.active]="activeView === 'coupons'"
+        (click)="switchView('coupons')"
+      >
+        <span class="tab-label">Coupons</span>
+        <span
+          class="tab-badge tab-badge--green"
+          *ngIf="activeCouponsCount > 0"
+          >{{ activeCouponsCount }}</span
+        >
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       COURSES VIEW
+  ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeView === 'courses'" class="content-wrapper">
+    <div class="section-header">
+      <div class="header-content">
+        <h1 class="section-title">Training Courses</h1>
+        <p class="section-subtitle">
+          Manage and organize your training programs
+        </p>
+      </div>
+      <button class="btn-primary" (click)="openAddCourseForm()">
+        <span class="btn-text">New Course</span>
+      </button>
+    </div>
+
+    <div *ngIf="courses.length === 0" class="empty-state">
+      <div class="empty-icon-wrapper"><div class="empty-icon">📚</div></div>
+      <h3 class="empty-title">No courses yet</h3>
+      <p class="empty-description">
+        Start by creating your first training course
+      </p>
+      <button class="btn-primary" (click)="openAddCourseForm()">
+        Create Course
+      </button>
+    </div>
+
+    <div class="courses-grid" *ngIf="courses.length > 0">
+      <div *ngFor="let c of pagedCourses" class="course-card">
+        <div class="card-image-wrapper" (click)="goToCourse(c.id)">
+          <img
+            class="card-image"
+            [src]="
+              c.imageUrl
+                ? c.imageUrl.startsWith('http')
+                  ? c.imageUrl
+                  : environment.apiUrl.replace('/api', '') + c.imageUrl
+                : '/assets/placeholder.png'
+            "
+            [alt]="c.title"
+          />
+          <div class="image-overlay"></div>
+          <div class="price-badge">
+            {{ getCurrencySymbol(c.currency) }}{{ c.price | number: "1.2-2" }}
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-header">
+            <h3 class="card-title" (click)="goToCourse(c.id)">{{ c.title }}</h3>
+            <span class="category-tag">{{
+              c.category?.name || "Uncategorized"
+            }}</span>
+          </div>
+          <p class="card-description">{{ c.description }}</p>
+
+          <!-- ✅ NOUVEAU : badge trainer -->
+          <div class="card-trainer" [class.card-trainer--none]="!c.trainerId">
+            <span class="card-trainer-icon">👤</span>
+            <span class="card-trainer-name">{{
+              getTrainerName(c.trainerId)
+            }}</span>
+          </div>
+
+          <div class="card-footer">
+            <div class="price-info">
+              <span class="price-amount"
+                >{{ getCurrencySymbol(c.currency)
+                }}{{ c.price | number: "1.2-2" }}</span
+              >
+              <span class="price-points" *ngIf="c.pointsPrice"
+                >or {{ c.pointsPrice }} pts</span
+              >
+            </div>
+            <div class="card-actions">
+              <button
+                class="btn-action btn-edit"
+                (click)="$event.stopPropagation(); editCourse(c)"
+              >
+                <span>Edit</span>
+              </button>
+              <button
+                class="btn-action btn-delete"
+                (click)="$event.stopPropagation(); deleteCourse(c.id)"
+              >
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-pagination" *ngIf="totalPages > 1">
+      <button
+        class="ap-btn"
+        (click)="prevPage()"
+        [disabled]="currentPage === 1"
+      >
+        ← Previous
+      </button>
+      <span class="ap-info">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button
+        class="ap-btn"
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+      >
+        Next →
+      </button>
+    </div>
+
+    <!-- ── COURSE FORM MODAL ───────────────────────────────────── -->
+    <div
+      class="modal-overlay"
+      *ngIf="showCourseForm"
+      (click)="cancelCourseEdit()"
+    >
+      <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            {{ courseFormMode === "add" ? "Create New Course" : "Edit Course" }}
+          </h2>
+          <button class="btn-close" (click)="cancelCourseEdit()">×</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Image -->
+          <div class="form-group">
+            <label class="form-label">Course Image</label>
+            <div class="file-upload-wrapper">
+              <input
+                id="image-input"
+                type="file"
+                accept="image/*"
+                (change)="onImageSelected($event)"
+                hidden
+              />
+              <label for="image-input" class="file-upload-button">
+                <span>{{
+                  imagePreview || newCourse.imageUrl
+                    ? "Change Image"
+                    : "Choose Image"
+                }}</span>
+              </label>
+            </div>
+            <div
+              *ngIf="imagePreview || newCourse.imageUrl"
+              class="image-preview"
+            >
+              <img
+                [src]="
+                  imagePreview
+                    ? imagePreview
+                    : newCourse.imageUrl || '/assets/placeholder.png'
+                "
+                alt="Preview"
+              />
+            </div>
+          </div>
+
+          <!-- Title -->
+          <div class="form-group">
+            <label class="form-label"
+              >Title <span class="required">*</span></label
+            >
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="newCourse.title"
+              placeholder="Enter course title"
+              required
+            />
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea
+              class="form-textarea"
+              [(ngModel)]="newCourse.description"
+              placeholder="Enter course description"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <!-- Currency + Price -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label"
+                >Currency <span class="required">*</span></label
+              >
+              <select
+                class="form-select"
+                [(ngModel)]="newCourse.currency"
+                (change)="onCurrencyChange($event)"
+                required
+              >
+                <option *ngFor="let cur of currencies" [value]="cur.code"
+                  >{{ cur.symbol }} {{ cur.name }}</option
+                >
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Price <span class="required">*</span></label
+              >
+              <input
+                type="number"
+                class="form-input"
+                [(ngModel)]="newCourse.price"
+                (input)="onPriceInput()"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Points Price -->
+          <div class="form-group">
+            <label class="form-label">
+              Points Price (Wallet)
+              <span class="form-hint-inline"
+                >Optional — allow purchase with wallet points</span
+              >
+            </label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                class="form-input"
+                [(ngModel)]="newCourse.pointsPrice"
+                placeholder="e.g. 500"
+                step="10"
+                min="0"
+              />
+              <span class="input-unit">pts</span>
+            </div>
+            <p class="form-hint">
+              Leave empty to disable wallet payment for this course.
+            </p>
+          </div>
+
+          <!-- Currency conversion hint -->
+          <div
+            *ngIf="originalPrice && originalCurrency !== newCourse.currency"
+            class="conversion-info"
+          >
+            <span class="conversion-label">Conversion:</span>
+            <span class="conversion-text">
+              {{ originalPrice | number: "1.2-2" }} {{ originalCurrency }} →
+              {{ newCourse.price | number: "1.2-2" }} {{ newCourse.currency }}
+            </span>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label class="form-label"
+              >Category <span class="required">*</span></label
+            >
+            <select
+              class="form-select"
+              [value]="newCourse.category?.id || ''"
+              (change)="onCategoryChange($event)"
+              required
+            >
+              <option value="">Select a category</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{
+                cat.name
+              }}</option>
+            </select>
+          </div>
+
+          <!-- ✅ NOUVEAU : Assign Trainer -->
+          <div class="form-group">
+            <label class="form-label">
+              Assign Trainer
+              <span class="form-hint-inline">Optional</span>
+            </label>
+            <select class="form-select" [(ngModel)]="newCourse.trainerId">
+              <option [ngValue]="null">— No trainer assigned —</option>
+              <option *ngFor="let t of trainers" [ngValue]="t.id">
+                {{ t.username }} ({{ t.email }})
+              </option>
+            </select>
+            <p
+              class="form-hint"
+              *ngIf="trainers.length === 0"
+              style="color:#c62828;"
+            >
+              ⚠️ No trainers found. Trainer accounts must be created first.
+            </p>
+          </div>
+
+          <!-- Multi-PDF Section -->
+          <div class="form-group">
+            <label class="form-label">
+              PDF Materials (optional)
+              <span class="form-hint-inline">Select multiple PDF files</span>
+            </label>
+
+            <div class="file-upload-wrapper">
+              <input
+                id="pdf-input"
+                type="file"
+                accept="application/pdf"
+                (change)="onPdfsSelected($event)"
+                multiple
+                hidden
+              />
+              <label for="pdf-input" class="file-upload-button secondary">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <span>Choose PDF Files</span>
+              </label>
+            </div>
+
+            <!-- Existing PDFs (edit mode) -->
+            <div
+              class="pdf-files-list"
+              *ngIf="newCourse.pdfUrls && newCourse.pdfUrls.length > 0"
+            >
+              <div class="pdf-list-header">
+                <span class="pdf-list-title"
+                  >📄 Existing PDFs ({{ newCourse.pdfUrls.length }})</span
+                >
+              </div>
+              <div
+                *ngFor="let pdfUrl of newCourse.pdfUrls; let i = index"
+                class="pdf-file-item existing-pdf"
+              >
+                <div class="pdf-file-icon">📄</div>
+                <div class="pdf-file-info">
+                  <span class="pdf-file-name">{{
+                    getFileNameFromUrl(pdfUrl)
+                  }}</span>
+                  <span class="pdf-file-status">Already uploaded</span>
+                </div>
+                <button
+                  type="button"
+                  class="pdf-file-remove"
+                  (click)="removeExistingPdf(i)"
+                  title="Remove this PDF"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <!-- Newly selected PDFs -->
+            <div class="pdf-files-list" *ngIf="selectedPdfs.length > 0">
+              <div class="pdf-list-header">
+                <span class="pdf-list-title"
+                  >📎 New PDFs to upload ({{ selectedPdfs.length }})</span
+                >
+              </div>
+              <div
+                *ngFor="let pdf of selectedPdfs; let i = index"
+                class="pdf-file-item new-pdf"
+              >
+                <div class="pdf-file-icon">📄</div>
+                <div class="pdf-file-info">
+                  <span class="pdf-file-name">{{ pdf.name }}</span>
+                  <span class="pdf-file-size"
+                    >{{ (pdf.size / 1024 / 1024).toFixed(2) }} MB</span
+                  >
+                </div>
+                <button
+                  type="button"
+                  class="pdf-file-remove"
+                  (click)="removePdf(i)"
+                  title="Remove from upload list"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <p
+              class="form-hint"
+              *ngIf="
+                selectedPdfs.length === 0 &&
+                (!newCourse.pdfUrls || newCourse.pdfUrls.length === 0)
+              "
+            >
+              No PDF files selected. You can add course materials, assignments,
+              or resources.
+            </p>
+          </div>
+        </div>
+        <!-- /modal-body -->
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="cancelCourseEdit()">
+            Cancel
+          </button>
+          <button class="btn-primary" (click)="addCourse()">
+            {{ editingCourseId ? "Save Changes" : "Create Course" }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /courses view -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       CATEGORIES VIEW
+  ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeView === 'categories'" class="content-wrapper">
+    <div class="section-header">
+      <div class="header-content">
+        <h1 class="section-title">Categories</h1>
+        <p class="section-subtitle">Organize your courses by category</p>
+      </div>
+      <button class="btn-primary" (click)="openAddCategoryForm()">
+        <span class="btn-text">New Category</span>
+      </button>
+    </div>
+
+    <div *ngIf="categories.length === 0" class="empty-state">
+      <div class="empty-icon-wrapper"><div class="empty-icon">📂</div></div>
+      <h3 class="empty-title">No categories yet</h3>
+      <p class="empty-description">
+        Create categories to organize your courses
+      </p>
+      <button class="btn-primary" (click)="openAddCategoryForm()">
+        Create Category
+      </button>
+    </div>
+
+    <div class="categories-list" *ngIf="categories.length > 0">
+      <div *ngFor="let category of categories" class="category-card">
+        <div class="category-card-header" (click)="toggleCategory(category.id)">
+          <div class="category-info-section">
+            <h3 class="category-name">{{ category.name }}</h3>
+            <p class="category-description">
+              {{ category.description || "No description provided" }}
+            </p>
+            <div class="category-meta">
+              <span class="courses-count-badge"
+                >{{ getCategoryCoursesCount(category.id) }} courses</span
+              >
+            </div>
+          </div>
+          <div
+            class="category-actions-section"
+            (click)="$event.stopPropagation()"
+          >
+            <button
+              class="btn-action-icon btn-edit-icon"
+              (click)="editCategory(category)"
+            >
+              <span>Edit</span>
+            </button>
+            <button
+              class="btn-action-icon btn-delete-icon"
+              (click)="deleteCategory(category.id)"
+            >
+              <span>Delete</span>
+            </button>
+            <button
+              class="btn-expand-icon"
+              (click)="toggleCategory(category.id)"
+            >
+              <span
+                class="expand-arrow"
+                [class.expanded]="isCategoryExpanded(category.id)"
+                >›</span
+              >
+            </button>
+          </div>
+        </div>
+        <div class="category-card-body" *ngIf="isCategoryExpanded(category.id)">
+          <div
+            *ngIf="getCategoryCourses(category.id).length === 0"
+            class="no-courses-message"
+          >
+            <p>No courses in this category yet</p>
+          </div>
+          <div
+            class="category-courses-grid"
+            *ngIf="getCategoryCourses(category.id).length > 0"
+          >
+            <div
+              *ngFor="let course of getCategoryCourses(category.id)"
+              class="course-mini-card"
+            >
+              <div class="mini-card-image" (click)="goToCourse(course.id)">
+                <img
+                  [src]="
+                    course.imageUrl
+                      ? course.imageUrl.startsWith('http')
+                        ? course.imageUrl
+                        : 'http://localhost:8089' + course.imageUrl
+                      : '/assets/placeholder.png'
+                  "
+                  [alt]="course.title"
+                />
+                <div class="mini-price-badge">
+                  {{ getCurrencySymbol(course.currency)
+                  }}{{ course.price | number: "1.2-2" }}
+                </div>
+              </div>
+              <div class="mini-card-content">
+                <h4 class="mini-card-title" (click)="goToCourse(course.id)">
+                  {{ course.title }}
+                </h4>
+                <p class="mini-card-description">{{ course.description }}</p>
+                <div class="mini-card-footer">
+                  <span class="mini-price"
+                    >{{ getCurrencySymbol(course.currency)
+                    }}{{ course.price | number: "1.2-2" }}</span
+                  >
+                  <div class="mini-card-actions">
+                    <button
+                      class="btn-mini btn-edit-mini"
+                      (click)="$event.stopPropagation(); editCourse(course)"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      class="btn-mini btn-delete-mini"
+                      (click)="
+                        $event.stopPropagation(); deleteCourse(course.id)
+                      "
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORY FORM MODAL -->
+    <div
+      class="modal-overlay"
+      *ngIf="showCategoryForm"
+      (click)="cancelCategoryEdit()"
+    >
+      <div
+        class="modal-container modal-small"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="modal-header">
+          <h2 class="modal-title">
+            {{
+              categoryFormMode === "add"
+                ? "Create New Category"
+                : "Edit Category"
+            }}
+          </h2>
+          <button class="btn-close" (click)="cancelCategoryEdit()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label"
+              >Category Name <span class="required">*</span></label
+            >
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="newCategory.name"
+              placeholder="e.g., Web Development"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea
+              class="form-textarea"
+              [(ngModel)]="newCategory.description"
+              placeholder="Brief description of this category"
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="cancelCategoryEdit()">
+            Cancel
+          </button>
+          <button class="btn-primary" (click)="addCategory()">
+            {{ editingCategoryId ? "Save Changes" : "Create Category" }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /categories view -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       PAYMENTS VIEW
+  ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeView === 'payments'" class="content-wrapper">
+    <div class="pay-stat-chip">
+      <span class="pay-stat-dot" style="background:#c62828"></span>
+      💰 {{ totalRevenue | number: "1.2-2" }} earned
+    </div>
+    <div class="section-header">
+      <div class="header-content">
+        <h1 class="section-title">Payment Transactions</h1>
+        <p class="section-subtitle">
+          Review and approve student payments to grant course access
+        </p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="pay-stat-chip">
+          <span class="pay-stat-dot dot-pending"></span
+          >{{ pendingPaymentsCount }} Pending
+        </div>
+        <div class="pay-stat-chip">
+          <span class="pay-stat-dot dot-approved"></span
+          >{{ approvedCount }} Approved
+        </div>
+        <button class="btn-secondary" (click)="loadPayments()">
+          🔄 Refresh
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="paymentsLoading" class="pay-loading">
+      <div class="pay-spinner"></div>
+      <p>Loading transactions...</p>
+    </div>
+
+    <div *ngIf="!paymentsLoading && payments.length === 0" class="empty-state">
+      <div class="empty-icon-wrapper"><div class="empty-icon">💳</div></div>
+      <h3 class="empty-title">No transactions yet</h3>
+      <p class="empty-description">
+        Payment transactions will appear here once students start purchasing
+        courses
+      </p>
+    </div>
+
+    <div class="pay-cards-list" *ngIf="!paymentsLoading && payments.length > 0">
+      <div
+        *ngFor="let p of payments"
+        class="pay-card"
+        [class.pay-card--pending]="p.status === 'PENDING'"
+        [class.pay-card--approved]="p.status === 'APPROVED'"
+        [class.pay-card--rejected]="p.status === 'REJECTED'"
+        [class.pay-card--refunded]="p.status === 'REFUNDED'"
+      >
+        <div class="pay-card-bar"></div>
+        <div class="pay-col pay-col-student">
+          <div class="pay-avatar">
+            {{ (p.username || "U").charAt(0).toUpperCase() }}
+          </div>
+          <div class="pay-student-info">
+            <span class="pay-student-name">{{
+              p.username || "User #" + p.userId
+            }}</span>
+            <span class="pay-txn-id">{{ p.transactionId }}</span>
+          </div>
+        </div>
+        <div class="pay-col pay-col-course">
+          <span class="pay-col-label">Course</span>
+          <span class="pay-course-name">{{ getCourseName(p.courseId) }}</span>
+        </div>
+        <div class="pay-col pay-col-amount">
+          <span class="pay-col-label">Amount</span>
+          <span class="pay-amount-final"
+            >{{ p.currency }} {{ p.finalPrice | number: "1.2-2" }}</span
+          >
+          <span class="pay-amount-original"
+            >was {{ p.currency }} {{ p.originalPrice | number: "1.2-2" }}</span
+          >
+          <span class="pay-coupon-tag" *ngIf="p.couponCode"
+            >🎟️ {{ p.couponCode }} −{{ p.discountPercentage }}%</span
+          >
+        </div>
+        <div class="pay-col pay-col-method">
+          <span class="pay-col-label">Method</span>
+          <span class="pay-method-pill"
+            >{{ getMethodIcon(p.paymentMethod) }}
+            {{ p.paymentMethod | titlecase }}</span
+          >
+        </div>
+        <div class="pay-col pay-col-date">
+          <span class="pay-col-label">Date</span>
+          <span class="pay-date-main">{{
+            p.createdAt | date: "dd MMM yyyy"
+          }}</span>
+          <span class="pay-date-time">{{ p.createdAt | date: "HH:mm" }}</span>
+        </div>
+        <div class="pay-col pay-col-status">
+          <span class="pay-status-badge" [ngClass]="getStatusClass(p.status)">
+            <span class="pay-status-dot"></span>{{ p.status }}
+          </span>
+          <span
+            *ngIf="p.status === 'APPROVED' && p.approvedAt"
+            class="pay-status-sub"
+            >{{ p.approvedAt | date: "dd/MM/yy HH:mm" }}</span
+          >
+          <span
+            *ngIf="p.status === 'REJECTED' && p.adminNotes"
+            class="pay-status-sub pay-status-sub--red"
+            >{{ p.adminNotes }}</span
+          >
+        </div>
+        <div class="pay-col pay-col-actions">
+          <ng-container *ngIf="p.status === 'PENDING'">
+            <input
+              type="text"
+              class="pay-notes-input"
+              [(ngModel)]="adminNotes[p.id]"
+              placeholder="Optional note..."
+            />
+            <div class="pay-action-btns">
+              <button
+                class="pay-btn-approve"
+                (click)="approvePayment(p.id)"
+                [disabled]="paymentActionLoading[p.id]"
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                {{ paymentActionLoading[p.id] ? "..." : "Approve" }}
+              </button>
+              <button
+                class="pay-btn-reject"
+                (click)="openRejectModal(p.id)"
+                [disabled]="paymentActionLoading[p.id]"
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+                Reject
+              </button>
+            </div>
+          </ng-container>
+          <div class="pay-action-done" *ngIf="p.status === 'APPROVED'">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#2d9d78"
+              stroke-width="2.5"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Access granted
+          </div>
+          <div
+            class="pay-action-done pay-action-done--red"
+            *ngIf="p.status === 'REJECTED'"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#c62828"
+              stroke-width="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            Rejected
+          </div>
+          <div
+            class="pay-action-done pay-action-done--grey"
+            *ngIf="p.status === 'REFUNDED'"
+          >
+            ↩ Refunded
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REJECT MODAL -->
+    <div
+      class="modal-overlay"
+      *ngIf="showRejectModal !== null"
+      (click)="closeRejectModal()"
+    >
+      <div
+        class="modal-container modal-small"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="modal-header">
+          <h2 class="modal-title">Reject Payment</h2>
+          <button class="btn-close" (click)="closeRejectModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Reason for rejection</label>
+            <textarea
+              class="form-textarea"
+              [(ngModel)]="rejectReason[showRejectModal!]"
+              placeholder="Explain why this payment is being rejected..."
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeRejectModal()">
+            Cancel
+          </button>
+          <button class="btn-danger" (click)="confirmReject(showRejectModal!)">
+            Confirm Reject
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /payments view -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       COUPONS VIEW
+  ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeView === 'coupons'" class="content-wrapper">
+    <div class="section-header">
+      <div class="header-content">
+        <h1 class="section-title">Coupon Codes</h1>
+        <p class="section-subtitle">
+          Create and manage promotional discount codes
+        </p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="pay-stat-chip">
+          <span class="pay-stat-dot dot-approved"></span
+          >{{ activeCouponsCount }} Active
+        </div>
+        <button class="btn-primary" (click)="openAddCouponForm()">
+          <span class="btn-text">+ New Coupon</span>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="couponsLoading" class="pay-loading">
+      <div class="pay-spinner"></div>
+      <p>Loading coupons...</p>
+    </div>
+
+    <div *ngIf="!couponsLoading && coupons.length === 0" class="empty-state">
+      <div class="empty-icon-wrapper"><div class="empty-icon">🎟️</div></div>
+      <h3 class="empty-title">No coupons yet</h3>
+      <p class="empty-description">
+        Create discount codes to offer promotions to your students
+      </p>
+      <button class="btn-primary" (click)="openAddCouponForm()">
+        Create Coupon
+      </button>
+    </div>
+
+    <div
+      class="coupon-table-wrapper"
+      *ngIf="!couponsLoading && coupons.length > 0"
+    >
+      <table class="coupon-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Discount</th>
+            <th>Expires</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let c of coupons"
+            [class.coupon-row--inactive]="!c.active"
+            [class.coupon-row--expired]="isCouponExpired(c)"
+          >
+            <td>
+              <span class="coupon-code-chip">{{ c.code }}</span>
+            </td>
+            <td>
+              <span class="coupon-discount-badge"
+                >{{ c.discountPercentage }}% off</span
+              >
+            </td>
+            <td>
+              <span [class.text-danger]="isCouponExpired(c)">{{
+                c.expiryDate | date: "dd MMM yyyy"
+              }}</span>
+              <span class="expired-tag" *ngIf="isCouponExpired(c)"
+                >Expired</span
+              >
+            </td>
+            <td>
+              <button
+                class="coupon-toggle-btn"
+                [class.coupon-toggle-btn--active]="
+                  c.active && !isCouponExpired(c)
+                "
+                [class.coupon-toggle-btn--inactive]="!c.active"
+                [class.coupon-toggle-btn--expired]="isCouponExpired(c)"
+                (click)="toggleCoupon(c.id!)"
+                [disabled]="couponActionLoading[c.id!] || isCouponExpired(c)"
+                [title]="
+                  isCouponExpired(c)
+                    ? 'Expired — cannot toggle'
+                    : c.active
+                    ? 'Click to deactivate'
+                    : 'Click to activate'
+                "
+              >
+                <span class="toggle-dot"></span
+                >{{ getCouponStatus(c) | titlecase }}
+              </button>
+            </td>
+            <td class="text-muted">{{ c.createdAt | date: "dd MMM yyyy" }}</td>
+            <td>
+              <div class="coupon-actions">
+                <button class="btn-action btn-edit" (click)="editCoupon(c)">
+                  <span>Edit</span>
+                </button>
+                <button
+                  class="btn-action btn-delete"
+                  (click)="deleteCoupon(c.id!)"
+                  [disabled]="couponActionLoading[c.id!]"
+                >
+                  <span>{{
+                    couponActionLoading[c.id!] ? "..." : "Delete"
+                  }}</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- COUPON FORM MODAL -->
+    <div
+      class="modal-overlay"
+      *ngIf="showCouponForm"
+      (click)="cancelCouponEdit()"
+    >
+      <div
+        class="modal-container modal-small"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="modal-header">
+          <h2 class="modal-title">
+            {{
+              couponFormMode === "add" ? "🎟️ Create Coupon" : "✏️ Edit Coupon"
+            }}
+          </h2>
+          <button class="btn-close" (click)="cancelCouponEdit()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">
+              Coupon Code <span class="required">*</span>
+              <span class="form-hint-inline"
+                >Will be uppercased automatically</span
+              >
+            </label>
+            <input
+              type="text"
+              class="form-input coupon-code-input"
+              [(ngModel)]="newCoupon.code"
+              placeholder="e.g. SUMMER25"
+              maxlength="32"
+              style="text-transform:uppercase;letter-spacing:0.06em;font-weight:600"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label"
+              >Discount Percentage <span class="required">*</span></label
+            >
+            <div class="input-with-unit">
+              <input
+                type="number"
+                class="form-input"
+                [(ngModel)]="newCoupon.discountPercentage"
+                min="1"
+                max="100"
+                step="1"
+                placeholder="e.g. 20"
+              />
+              <span class="input-unit">%</span>
+            </div>
+            <p class="form-hint">
+              Students pay {{ 100 - (newCoupon.discountPercentage || 0) }}% of
+              the original price.
+            </p>
+          </div>
+          <div class="form-group">
+            <label class="form-label"
+              >Expiry Date <span class="required">*</span></label
+            >
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="newCoupon.expiryDate"
+              [min]="today"
+            />
+          </div>
+          <div class="form-group form-group--inline">
+            <label class="form-label">Active</label>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="newCoupon.active" />
+              <span class="switch-slider"></span>
+            </label>
+            <span class="switch-hint">{{
+              newCoupon.active
+                ? "Coupon is enabled and usable"
+                : "Coupon is disabled"
+            }}</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="cancelCouponEdit()">
+            Cancel
+          </button>
+          <button class="btn-primary" (click)="saveCoupon()">
+            {{ couponFormMode === "add" ? "Create Coupon" : "Save Changes" }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /coupons view -->
+</div>

@@ -1,0 +1,329 @@
+<div class="question-form-container">
+  <!-- Header -->
+  <div class="header">
+    <h2>
+      <i class="fas fa-question-circle"></i>
+      {{ isEditing ? "Edit Question" : "Create New Question" }}
+    </h2>
+    <button class="btn-back" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Back to Exams
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading question details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !loading" class="error-state">
+    <i class="fas fa-exclamation-circle"></i>
+    <p>{{ errorMessage }}</p>
+    <button class="btn-retry" (click)="loadQuestion()">Retry</button>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="success-message">
+    <i class="fas fa-check-circle"></i>
+    <span>{{ successMessage }}</span>
+    <button class="btn-add-another" (click)="resetForm()">
+      <i class="fas fa-plus-circle"></i> Add Another Question
+    </button>
+  </div>
+
+  <!-- Form Card -->
+  <div *ngIf="!loading" class="form-card">
+    <div class="form-header">
+      <h3>
+        <i class="fas fa-file-alt"></i>
+        {{ isEditing ? "Edit Question Details" : "Enter Question Details" }}
+      </h3>
+      <div class="exam-badge" *ngIf="examId">
+        <i class="fas fa-file-excel"></i>
+        Exam #{{ examId }}
+      </div>
+    </div>
+
+    <div class="form-body">
+      <!-- Exam Info Card -->
+      <div *ngIf="examId" class="info-card">
+        <i class="fas fa-info-circle"></i>
+        <div class="info-content">
+          <span class="label">Adding question to Exam</span>
+          <span class="value">#{{ examId }}</span>
+          <span *ngIf="examTitle" class="exam-title">{{ examTitle }}</span>
+        </div>
+      </div>
+
+      <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">
+        <!-- Question Content Section -->
+        <div class="form-section">
+          <h4>
+            <i class="fas fa-question"></i>
+            Question Content
+          </h4>
+
+          <div class="form-group">
+            <label for="content">
+              Question Text <span class="required">*</span>
+            </label>
+            <textarea
+              id="content"
+              formControlName="content"
+              rows="4"
+              class="form-control"
+              [class.invalid]="isFieldInvalid('content')"
+              placeholder="Enter your question here..."
+            ></textarea>
+            <div class="error-message" *ngIf="isFieldInvalid('content')">
+              <i class="fas fa-exclamation-circle"></i>
+              Question content is required
+            </div>
+            <div class="helper-text">
+              <i class="fas fa-info-circle"></i>
+              Write a clear and concise question
+            </div>
+          </div>
+        </div>
+
+        <!-- Options Section -->
+        <div class="form-section">
+          <h4>
+            <i class="fas fa-list-ul"></i>
+            Answer Options
+          </h4>
+
+          <div class="options-grid">
+            <!-- Option A -->
+            <div class="option-item">
+              <div class="option-header">
+                <span class="option-letter">A</span>
+                <span>Option A <span class="required">*</span></span>
+              </div>
+              <div class="form-group">
+                <input
+                  type="text"
+                  formControlName="optionA"
+                  class="form-control"
+                  [class.invalid]="isFieldInvalid('optionA')"
+                  placeholder="Enter option A"
+                />
+                <div class="error-message" *ngIf="isFieldInvalid('optionA')">
+                  <i class="fas fa-exclamation-circle"></i>
+                  Option A is required
+                </div>
+              </div>
+            </div>
+
+            <!-- Option B -->
+            <div class="option-item">
+              <div class="option-header">
+                <span class="option-letter">B</span>
+                <span>Option B <span class="required">*</span></span>
+              </div>
+              <div class="form-group">
+                <input
+                  type="text"
+                  formControlName="optionB"
+                  class="form-control"
+                  [class.invalid]="isFieldInvalid('optionB')"
+                  placeholder="Enter option B"
+                />
+                <div class="error-message" *ngIf="isFieldInvalid('optionB')">
+                  <i class="fas fa-exclamation-circle"></i>
+                  Option B is required
+                </div>
+              </div>
+            </div>
+
+            <!-- Option C -->
+            <div class="option-item">
+              <div class="option-header">
+                <span class="option-letter">C</span>
+                <span>Option C</span>
+              </div>
+              <div class="form-group">
+                <input
+                  type="text"
+                  formControlName="optionC"
+                  class="form-control"
+                  placeholder="Enter option C (optional)"
+                />
+              </div>
+            </div>
+
+            <!-- Option D -->
+            <div class="option-item">
+              <div class="option-header">
+                <span class="option-letter">D</span>
+                <span>Option D</span>
+              </div>
+              <div class="form-group">
+                <input
+                  type="text"
+                  formControlName="optionD"
+                  class="form-control"
+                  placeholder="Enter option D (optional)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Correct Answer Section -->
+        <div class="form-section">
+          <h4>
+            <i class="fas fa-check-circle"></i>
+            Correct Answer
+          </h4>
+
+          <div class="correct-answer-section">
+            <h5>Select the correct answer:</h5>
+            <div class="answer-options">
+              <!-- Answer A -->
+              <div class="answer-option">
+                <input
+                  type="radio"
+                  id="answerA"
+                  value="A"
+                  formControlName="correctAnswer"
+                />
+                <label for="answerA">
+                  A
+                  <span
+                    class="option-preview"
+                    *ngIf="questionForm.get('optionA')?.value"
+                  >
+                    {{ questionForm.get("optionA")?.value | slice: 0:20
+                    }}{{
+                      questionForm.get("optionA")?.value.length > 20
+                        ? "..."
+                        : ""
+                    }}
+                  </span>
+                </label>
+              </div>
+
+              <!-- Answer B -->
+              <div class="answer-option">
+                <input
+                  type="radio"
+                  id="answerB"
+                  value="B"
+                  formControlName="correctAnswer"
+                />
+                <label for="answerB">
+                  B
+                  <span
+                    class="option-preview"
+                    *ngIf="questionForm.get('optionB')?.value"
+                  >
+                    {{ questionForm.get("optionB")?.value | slice: 0:20
+                    }}{{
+                      questionForm.get("optionB")?.value.length > 20
+                        ? "..."
+                        : ""
+                    }}
+                  </span>
+                </label>
+              </div>
+
+              <!-- Answer C -->
+              <div class="answer-option">
+                <input
+                  type="radio"
+                  id="answerC"
+                  value="C"
+                  formControlName="correctAnswer"
+                />
+                <label for="answerC">
+                  C
+                  <span
+                    class="option-preview"
+                    *ngIf="questionForm.get('optionC')?.value"
+                  >
+                    {{ questionForm.get("optionC")?.value | slice: 0:20
+                    }}{{
+                      questionForm.get("optionC")?.value.length > 20
+                        ? "..."
+                        : ""
+                    }}
+                  </span>
+                </label>
+              </div>
+
+              <!-- Answer D -->
+              <div class="answer-option">
+                <input
+                  type="radio"
+                  id="answerD"
+                  value="D"
+                  formControlName="correctAnswer"
+                />
+                <label for="answerD">
+                  D
+                  <span
+                    class="option-preview"
+                    *ngIf="questionForm.get('optionD')?.value"
+                  >
+                    {{ questionForm.get("optionD")?.value | slice: 0:20
+                    }}{{
+                      questionForm.get("optionD")?.value.length > 20
+                        ? "..."
+                        : ""
+                    }}
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="error-message" *ngIf="isFieldInvalid('correctAnswer')">
+              <i class="fas fa-exclamation-circle"></i>
+              Please select the correct answer
+            </div>
+            <div class="helper-text">
+              <i class="fas fa-info-circle"></i>
+              Choose which option is the correct answer
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-footer">
+      <button
+        type="button"
+        class="btn-cancel"
+        (click)="goBack()"
+        [disabled]="submitting"
+      >
+        <i class="fas fa-times"></i> Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="questionForm.invalid || submitting"
+        (click)="onSubmit()"
+      >
+        <i
+          class="fas"
+          [ngClass]="
+            submitting
+              ? 'fa-spinner fa-spin'
+              : isEditing
+              ? 'fa-save'
+              : 'fa-plus-circle'
+          "
+        ></i>
+        {{
+          submitting
+            ? "Saving..."
+            : isEditing
+            ? "Update Question"
+            : "Create Question"
+        }}
+      </button>
+    </div>
+  </div>
+</div>

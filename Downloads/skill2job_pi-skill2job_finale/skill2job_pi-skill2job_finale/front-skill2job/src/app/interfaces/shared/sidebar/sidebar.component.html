@@ -1,0 +1,89 @@
+<div class="sidebar">
+  <div class="logo"></div>
+
+  <ul class="menu">
+    <li routerLink="/admin/dashboard" routerLinkActive="active">
+      Dashboard
+    </li>
+
+    <li routerLink="/admin/users" routerLinkActive="active">
+      Users
+    </li>
+
+    <li routerLink="/admin/training-courses" routerLinkActive="active">
+      Training Courses
+    </li>
+
+    <!-- EXAMS MENU - Only Exams List and Certificates -->
+    <li class="menu-parent">
+      <div class="menu-title" (click)="toggleExamsMenu()">
+        <span><i class="fas fa-file-alt"></i> Exams</span>
+        <span class="arrow" [class.rotate]="isExamsOpen">▸</span>
+      </div>
+
+      <ul class="submenu" [class.open]="isExamsOpen">
+        <!-- Exams List -->
+        <li routerLink="/admin/exams/exam-table" routerLinkActive="active">
+          <i class="fas fa-list"></i> Exams List
+        </li>
+
+        <!-- Divider -->
+        <li class="divider"></li>
+
+        <!-- Certificates Subheader -->
+        <li class="subheader">CERTIFICATES</li>
+
+        <!-- All Certificates -->
+        <li routerLink="/admin/exams/certificates" routerLinkActive="active">
+          <i class="fas fa-certificate"></i> All Certificates
+        </li>
+      </ul>
+    </li>
+
+    <li class="menu-parent">
+      <div class="menu-title" (click)="toggleSessionsMenu()">
+        <span>Sessions</span>
+        <span class="arrow" [class.rotate]="isSessionsOpen">▸</span>
+      </div>
+
+      <ul class="submenu" [class.open]="isSessionsOpen">
+        <li
+          routerLink="/admin/sessions"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Sessions List
+        </li>
+        <li routerLink="/admin/sessions/blocs" routerLinkActive="active">
+          Blocs
+        </li>
+        <li routerLink="/admin/sessions/equipments" routerLinkActive="active">
+          Equipments
+        </li>
+      </ul>
+    </li>
+
+    <li routerLink="/admin/partners" routerLinkActive="active">
+      Partners
+    </li>
+
+    <li class="menu-parent">
+      <div class="menu-title" (click)="toggleHrMenu()">
+        <span><i class="fas fa-users"></i> HR</span>
+        <span class="arrow" [class.rotate]="isHrOpen">▸</span>
+      </div>
+
+      <ul class="submenu" [class.open]="isHrOpen">
+        <li routerLink="/admin/hr/applications" routerLinkActive="active">
+          <i class="fas fa-file-alt"></i> Applications
+        </li>
+        <li routerLink="/admin/hr/trainer-profiles" routerLinkActive="active">
+          <i class="fas fa-user-tie"></i> Trainer Profiles
+        </li>
+        <li routerLink="/admin/hr/trainer-details" routerLinkActive="active">
+          <i class="fas fa-id-card"></i> Trainer Details
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>

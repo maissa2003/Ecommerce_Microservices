@@ -1,0 +1,78 @@
+<div class="rooms-container">
+  <div class="header-section">
+    <h2 class="page-title">My Virtual Rooms</h2>
+    <div class="title-underline"></div>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading your virtual rooms...</p>
+  </div>
+
+  <div *ngIf="!loading && trainerRooms.length > 0" class="table-wrapper">
+    <table class="rooms-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Session</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Status</th>
+          <th>Participants</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let room of trainerRooms" class="room-row">
+          <td class="room-id">#{{ room.id }}</td>
+
+          <td class="session-name">{{ room.session?.name || "—" }}</td>
+
+          <td class="date-cell">{{ room.startAt | date: "medium" }}</td>
+
+          <td class="date-cell">{{ room.endAt | date: "medium" }}</td>
+
+          <!-- Status badge -->
+          <td>
+            <span
+              class="status-badge"
+              [ngClass]="{
+                'status-upcoming': getRoomStatus(room) === 'UPCOMING',
+                'status-ongoing': getRoomStatus(room) === 'ONGOING',
+                'status-ended': getRoomStatus(room) === 'ENDED'
+              }"
+            >
+              {{ getRoomStatus(room) }}
+            </span>
+          </td>
+
+          <!-- Participant count -->
+          <td class="participants-cell">
+            {{ room.session?.participants?.length || 0 }} /
+            {{ room.session?.capacity || "—" }}
+          </td>
+
+          <!-- Action -->
+          <td>
+            <button
+              class="enter-btn"
+              [disabled]="getRoomStatus(room) === 'ENDED'"
+              (click)="enterRoom(room)"
+            >
+              🎥 Enter Room
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!loading && trainerRooms.length === 0" class="empty-state">
+    <div class="empty-icon">◉</div>
+    <h3>No Virtual Rooms Found</h3>
+    <p>
+      You don't have any scheduled virtual rooms for your sessions at the
+      moment.
+    </p>
+  </div>
+</div>

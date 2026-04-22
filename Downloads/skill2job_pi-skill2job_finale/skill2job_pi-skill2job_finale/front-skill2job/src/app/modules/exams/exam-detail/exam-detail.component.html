@@ -1,0 +1,87 @@
+<div class="exam-detail-platform" *ngIf="!loading && exam">
+  <div class="detail-header">
+    <h1>{{ exam.title }}</h1>
+    <p class="exam-description">{{ exam.description }}</p>
+    <div class="summary-row" *ngIf="evaluation">
+      <span
+        class="score-badge"
+        [class.passed]="evaluation.passed"
+        [class.failed]="!evaluation.passed"
+      >
+        Score: {{ evaluation.score.toFixed(1) }}%
+      </span>
+      <span class="pass-score">Passing: {{ exam.passScore }}%</span>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <h2>Question breakdown</h2>
+    <p
+      class="hint"
+      *ngIf="questionResults.length && questionResults[0].userAnswer === '—'"
+    >
+      Open this page from "View results" after submitting an exam to see which
+      answers were correct or incorrect.
+    </p>
+    <div class="question-list">
+      <div
+        *ngFor="let result of questionResults; let i = index"
+        class="question-card"
+        [class.correct]="result.correct"
+        [class.incorrect]="!result.correct"
+      >
+        <div class="question-header">
+          <span class="question-num">Question {{ i + 1 }}</span>
+          <span
+            class="result-badge"
+            [class.correct]="result.correct"
+            [class.incorrect]="!result.correct"
+          >
+            {{ result.correct ? "✓ Correct" : "✗ Incorrect" }}
+          </span>
+        </div>
+        <p class="question-content">{{ result.question.content }}</p>
+        <div class="answers-row">
+          <div class="answer-item">
+            <span class="label">Your answer:</span>
+            <span class="value" [class.wrong]="!result.correct">{{
+              getAnswerDisplay(result.question, result.userAnswer)
+            }}</span>
+          </div>
+          <div class="answer-item" *ngIf="!result.correct">
+            <span class="label">Correct answer:</span>
+            <span class="value correct-ans">{{
+              getAnswerDisplay(result.question, result.correctAnswer)
+            }}</span>
+          </div>
+        </div>
+        <div class="options-list" *ngIf="result.question.optionA">
+          <span class="opt">A) {{ result.question.optionA }}</span>
+          <span class="opt">B) {{ result.question.optionB }}</span>
+          <span class="opt">C) {{ result.question.optionC }}</span>
+          <span class="opt">D) {{ result.question.optionD }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="summary-footer" *ngIf="evaluation && questionResults.length">
+      <p>{{ correctCount }} of {{ questionResults.length }} correct</p>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn btn-secondary" (click)="goToResults()">
+      ← Back to result
+    </button>
+    <button class="btn btn-primary" (click)="goToExams()">Back to exams</button>
+  </div>
+</div>
+
+<div *ngIf="loading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Loading exam details...</p>
+</div>
+
+<div *ngIf="error && !loading" class="error-container">
+  <p>{{ error }}</p>
+  <button class="btn btn-primary" (click)="goToExams()">Back to exams</button>
+</div>

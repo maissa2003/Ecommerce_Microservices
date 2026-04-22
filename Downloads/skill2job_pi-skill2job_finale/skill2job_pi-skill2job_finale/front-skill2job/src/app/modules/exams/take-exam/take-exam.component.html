@@ -1,0 +1,151 @@
+<!-- ─── Anti-Cheat Warning Modal ─────────────────────────────────────────── -->
+<div class="warning-overlay" *ngIf="warningVisible">
+  <div class="warning-box">
+    <div class="warning-icon">
+      <span *ngIf="violationCount < maxViolations">⚠️</span>
+      <span *ngIf="violationCount >= maxViolations">🚨</span>
+    </div>
+
+    <h2 *ngIf="violationCount < maxViolations">Violation Detected</h2>
+    <h2 *ngIf="violationCount >= maxViolations" class="danger">
+      Exam Auto-Submitting
+    </h2>
+
+    <p class="violation-message">{{ getViolationMessage() }}</p>
+
+    <div class="violation-counter">
+      <span
+        *ngFor="let i of [1, 2, 3]"
+        class="dot"
+        [class.active]="i <= violationCount"
+        [class.danger]="violationCount >= maxViolations"
+      >
+      </span>
+    </div>
+    <p class="counter-label">
+      Warning {{ violationCount }} of {{ maxViolations }}
+    </p>
+
+    <div *ngIf="autoSubmitCountdown !== null" class="countdown">
+      Submitting in <strong>{{ autoSubmitCountdown }}</strong
+      >s...
+    </div>
+
+    <button
+      class="btn-understand"
+      (click)="onWarningDismissed()"
+      [disabled]="violationCount >= maxViolations"
+    >
+      I Understand — Return to Exam
+    </button>
+  </div>
+</div>
+
+<!-- ─── Main Exam Platform ────────────────────────────────────────────────── -->
+<div class="exam-platform" *ngIf="!loading && exam">
+  <div class="exam-header">
+    <div class="header-top">
+      <h1 class="exam-title">{{ exam.title }}</h1>
+      <div class="timer" [class.warning]="timeLeft < 300">
+        <span class="timer-icon">⏱️</span>
+        <span class="timer-text">{{ getFormattedTime() }}</span>
+      </div>
+    </div>
+
+    <div
+      class="violation-badge"
+      *ngIf="violationCount > 0"
+      [class.danger]="violationCount >= maxViolations"
+    >
+      ⚠️ {{ violationCount }}/{{ maxViolations }} violations
+    </div>
+
+    <div class="progress-info">
+      <span class="question-counter"
+        >Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</span
+      >
+      <span class="answered-count"
+        >{{ answers.length }}/{{ questions.length }} answered</span
+      >
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="getProgress()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <h2 class="question-text">{{ currentQuestion.content }}</h2>
+
+    <div class="options-container">
+      <div
+        class="option"
+        [class.selected]="isAnswerSelected('A')"
+        (click)="selectAnswer('A')"
+      >
+        <div class="option-letter">A</div>
+        <div class="option-content">{{ currentQuestion.optionA }}</div>
+      </div>
+      <div
+        class="option"
+        [class.selected]="isAnswerSelected('B')"
+        (click)="selectAnswer('B')"
+      >
+        <div class="option-letter">B</div>
+        <div class="option-content">{{ currentQuestion.optionB }}</div>
+      </div>
+      <div
+        class="option"
+        [class.selected]="isAnswerSelected('C')"
+        (click)="selectAnswer('C')"
+      >
+        <div class="option-letter">C</div>
+        <div class="option-content">{{ currentQuestion.optionC }}</div>
+      </div>
+      <div
+        class="option"
+        [class.selected]="isAnswerSelected('D')"
+        (click)="selectAnswer('D')"
+      >
+        <div class="option-letter">D</div>
+        <div class="option-content">{{ currentQuestion.optionD }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="navigation">
+    <button
+      class="btn btn-secondary"
+      (click)="previousQuestion()"
+      [disabled]="currentQuestionIndex === 0 || submitting"
+    >
+      ← Previous
+    </button>
+
+    <button
+      *ngIf="!isLastQuestion()"
+      class="btn btn-primary"
+      (click)="nextQuestion()"
+      [disabled]="submitting"
+    >
+      Next →
+    </button>
+
+    <button
+      *ngIf="isLastQuestion()"
+      class="btn btn-success"
+      (click)="submitExam()"
+      [disabled]="submitting"
+    >
+      {{ submitting ? "Submitting..." : "Submit Exam" }}
+    </button>
+  </div>
+</div>
+
+<!-- Loading -->
+<div *ngIf="loading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Loading exam...</p>
+</div>

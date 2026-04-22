@@ -1,0 +1,165 @@
+<div class="page">
+  <!-- ✅ Notification banner -->
+  <div
+    class="notif-banner"
+    *ngIf="notification"
+    [ngClass]="'notif-' + notificationType"
+  >
+    <span>{{ notification }}</span>
+    <button class="notif-close" (click)="dismissNotification()">✕</button>
+  </div>
+
+  <h1>My Application</h1>
+  <p class="subtitle">
+    Track your application status and update it while pending.
+  </p>
+
+  <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="card" *ngIf="loading">
+    <div class="loading">⏳ Loading...</div>
+  </div>
+
+  <div class="card empty-card" *ngIf="!loading && !app && !errorMsg">
+    <div class="empty">
+      <div class="title">No application found</div>
+      <div class="desc">You haven't submitted an application yet.</div>
+      <a routerLink="/trainer-portal/apply" class="btn primary">📩 Apply Now</a>
+    </div>
+  </div>
+
+  <div class="card" *ngIf="!loading && app">
+    <!-- Status row -->
+    <div class="status-row">
+      <div class="field">
+        <div class="k">Status</div>
+        <div class="badge" [ngClass]="badgeClass(app.status)">
+          {{ app.status || "PENDING" }}
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="k">Submitted</div>
+        <div class="v">
+          {{ app.submittedAt ? (app.submittedAt | date: "mediumDate") : "-" }}
+        </div>
+      </div>
+
+      <div class="field" *ngIf="isPending">
+        <button class="btn ghost" (click)="toggleEdit()" [disabled]="loading">
+          {{ editMode ? "❌ Cancel" : "✏️ Edit" }}
+        </button>
+      </div>
+    </div>
+
+    <!-- AI Score Section -->
+    <div class="ai-section" *ngIf="details">
+      <div class="ai-title">🤖 AI Evaluation</div>
+
+      <div class="ai-cards">
+        <div class="ai-card" [ngClass]="scoreColor">
+          <div class="ai-label">Confidence Score</div>
+          <div class="ai-value">{{ extractConfidence() }}%</div>
+          <div class="ai-bar">
+            <div
+              class="ai-bar-fill"
+              [style.width.%]="extractConfidence()"
+            ></div>
+          </div>
+        </div>
+
+        <div class="ai-card">
+          <div class="ai-label">Estimated Level</div>
+          <div
+            class="ai-value level-badge"
+            [ngClass]="levelClass(details.level)"
+          >
+            {{ details.level || "-" }}
+          </div>
+        </div>
+
+        <div class="ai-card">
+          <div class="ai-label">Experience</div>
+          <div class="ai-value">{{ details.yearsExperience || 0 }} yrs</div>
+        </div>
+
+        <div class="ai-card skills-card">
+          <div class="ai-label">Detected Skills</div>
+          <div class="skills-list">
+            <span
+              class="skill-tag"
+              *ngFor="let skill of (details.skills || '').split(',')"
+            >
+              {{ skill.trim() }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-recommendation">
+        <div class="ai-label">💡 Profile Feedback</div>
+        <div class="rec-text">
+          {{
+            extractConfidence() >= 80
+              ? "🟢 Strong profile detected. Your application stands out!"
+              : extractConfidence() >= 60
+              ? "🟡 Good profile. Consider enriching your motivation and CV."
+              : "🟠 Basic profile. Add more details about your experience and skills to improve your chances."
+          }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Not analyzed yet -->
+    <div class="ai-pending" *ngIf="!details">
+      <div class="ai-pending-text">
+        🔍 Your application hasn't been analyzed yet. Check back after HR
+        review.
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form">
+      <label class="label">
+        <span>📄 CV Link</span>
+        <input
+          class="input"
+          [(ngModel)]="editCvUrl"
+          [disabled]="!canEdit || loading"
+        />
+      </label>
+
+      <label class="label">
+        <span>📝 Motivation</span>
+        <textarea
+          class="textarea"
+          rows="7"
+          [(ngModel)]="editMotivation"
+          [disabled]="!canEdit || loading"
+        ></textarea>
+      </label>
+
+      <div class="actions">
+        <button
+          class="btn primary"
+          (click)="save()"
+          [disabled]="!canEdit || loading"
+          *ngIf="canEdit"
+        >
+          💾 Save
+        </button>
+        <button class="btn danger" (click)="remove()" [disabled]="loading">
+          🗑️ Delete
+        </button>
+        <a class="btn ghost" routerLink="/trainer-portal/apply"
+          >✏️ New Submission</a
+        >
+      </div>
+
+      <div class="note" *ngIf="app.status !== 'PENDING'">
+        🔒 Editing disabled: your application is no longer pending.
+      </div>
+    </div>
+  </div>
+</div>

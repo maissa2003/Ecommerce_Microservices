@@ -1,0 +1,1051 @@
+:host {
+  font-family: "Segoe UI", sans-serif;
+  color: #333;
+}
+
+/* ================= NAVBAR ================= */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  background: white;
+  border-bottom: 1px solid #eee;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* LEFT SECTION */
+.nav-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.brand {
+  font-size: 26px;
+  font-weight: 800;
+  color: #c22b33;
+  letter-spacing: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.brand:hover {
+  opacity: 0.9;
+}
+
+/* CENTER SECTION */
+.nav-center {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+}
+
+.nav-links a {
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s ease;
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+  position: relative;
+  padding-bottom: 5px;
+}
+
+.trainer-btn {
+  background: linear-gradient(135deg, #28a745, #1e3c72);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 14px;
+  margin-left: 20px;
+}
+
+.trainer-btn:hover {
+  background: linear-gradient(135deg, #1e3c72, #0f1f3d);
+  transform: translateY(-2px);
+}
+
+.nav-links a:hover {
+  color: #c22b33;
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #c22b33;
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+/* RIGHT SECTION - PROFILE MENU */
+.nav-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex: 1;
+}
+
+/* ================= PROFILE MENU ================= */
+.profile-menu {
+  position: relative;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.profile-icon-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 16px 5px 5px;
+  border-radius: 40px;
+  background: linear-gradient(135deg, #f8f9ff, #ffffff);
+  border: 1px solid rgba(194, 43, 51, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-icon-wrapper::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #c22b33, #e63946, #c22b33, #e63946);
+  background-size: 300% 300%;
+  border-radius: 42px;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.profile-icon-wrapper:hover::before {
+  opacity: 0.5;
+}
+
+.profile-icon-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(194, 43, 51, 0.25);
+  border-color: transparent;
+}
+
+/* Profile Circle with Initials */
+.profile-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c22b33, #e63946);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(194, 43, 51, 0.3);
+  transition: all 0.3s ease;
+}
+
+.profile-circle.large {
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  box-shadow: 0 8px 20px rgba(194, 43, 51, 0.4);
+}
+
+.profile-icon-wrapper:hover .profile-circle {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(194, 43, 51, 0.4);
+}
+
+.profile-name {
+  font-weight: 600;
+  color: #333;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fa-chevron-down {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+  color: #c22b33;
+}
+
+.fa-chevron-down.rotate {
+  transform: rotate(180deg);
+}
+
+/* Magical Dropdown */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 15px);
+  right: 0;
+  width: 320px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(194, 43, 51, 0.3),
+    0 0 0 1px rgba(194, 43, 51, 0.1);
+  z-index: 1001;
+  overflow: hidden;
+  animation: magicAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: top right;
+}
+
+@keyframes magicAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) translateY(-20px);
+  }
+  50% {
+    transform: scale(1.02) translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Sparkle Effects */
+.magic-sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c22b33;
+  opacity: 0;
+  pointer-events: none;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.magic-sparkle:nth-child(1) {
+  top: 20px;
+  left: 20px;
+  animation-delay: 0s;
+}
+
+.magic-sparkle.sparkle-2 {
+  top: 60px;
+  right: 30px;
+  width: 8px;
+  height: 8px;
+  background: #e63946;
+  animation-delay: 0.5s;
+}
+
+.magic-sparkle.sparkle-3 {
+  bottom: 80px;
+  left: 40px;
+  width: 5px;
+  height: 5px;
+  background: #c22b33;
+  animation-delay: 1s;
+}
+
+.magic-sparkle.sparkle-4 {
+  bottom: 30px;
+  right: 50px;
+  width: 7px;
+  height: 7px;
+  background: #e63946;
+  animation-delay: 1.5s;
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 20px #c22b33;
+  }
+}
+
+/* Dropdown Header */
+.dropdown-header {
+  padding: 25px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(194, 43, 51, 0.05),
+    rgba(230, 57, 70, 0.1)
+  );
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid rgba(194, 43, 51, 0.1);
+}
+
+.dropdown-user-avatar {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.dropdown-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dropdown-user-info strong {
+  font-size: 18px;
+  color: #333;
+}
+
+.dropdown-user-info span {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Dropdown Items with Icons */
+.dropdown-item {
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  color: #333;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-icon {
+  width: 20px;
+  font-size: 18px;
+  color: #c22b33;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.item-glow {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(194, 43, 51, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.dropdown-item:hover {
+  background: rgba(194, 43, 51, 0.02);
+  padding-left: 25px;
+}
+
+.dropdown-item:hover .menu-icon {
+  transform: scale(1.2);
+  color: #c22b33;
+  filter: drop-shadow(0 0 8px rgba(194, 43, 51, 0.5));
+}
+
+.dropdown-item:hover .item-glow {
+  left: 100%;
+}
+
+.dropdown-item.logout:hover {
+  background: rgba(194, 43, 51, 0.05);
+}
+
+.dropdown-item.logout:hover .menu-icon {
+  color: #dc3545;
+}
+
+/* Dropdown Divider */
+.dropdown-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(194, 43, 51, 0.2),
+    transparent
+  );
+  margin: 8px 0;
+}
+
+/* ================= HERO ================= */
+
+.hero {
+  margin-top: 100px;
+  padding: 140px 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-text h1 {
+  font-size: 50px;
+}
+
+.hero-text span {
+  color: #c22b33;
+}
+
+.hero-image {
+  width: 420px;
+}
+
+/* FLOATING LOGO */
+.floating-logo {
+  animation: float 6s ease-in-out infinite;
+  filter: drop-shadow(0 20px 30px rgba(194, 43, 51, 0.15));
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-25px);
+  }
+}
+
+/* HERO BACKGROUND */
+.hero-bg {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: linear-gradient(
+    120deg,
+    rgba(194, 43, 51, 0.08),
+    rgba(255, 255, 255, 0),
+    rgba(194, 43, 51, 0.05)
+  );
+  animation: gradientMove 12s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    transform: translateX(-10%) translateY(-10%);
+  }
+  50% {
+    transform: translateX(10%) translateY(10%);
+  }
+  100% {
+    transform: translateX(-10%) translateY(-10%);
+  }
+}
+
+/* ================= SECTIONS ================= */
+
+.section {
+  padding: 80px 60px;
+}
+
+.grey {
+  background: #f8f8f8;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 50px;
+  color: #c22b33;
+}
+
+/* ================= GRID ================= */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+/* ================= ENHANCED CARD HOVER EFFECTS ================= */
+
+/* Base card styles with overflow hidden for magic effects */
+.card,
+.course-card,
+.team-card {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 1;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+/* Subtle gradient overlay that appears on hover */
+.card::before,
+.course-card::before,
+.team-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(194, 43, 51, 0.03) 0%,
+    rgba(230, 57, 70, 0.01) 100%
+  );
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.card:hover::before,
+.course-card:hover::before,
+.team-card:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Main hover transform */
+.card:hover,
+.course-card:hover,
+.team-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(194, 43, 51, 0.15);
+  border-color: rgba(194, 43, 51, 0.1);
+}
+
+/* Subtle shine effect */
+.card::after,
+.course-card::after,
+.team-card::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  opacity: 0;
+  transform: scale(0.5);
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.card:hover::after,
+.course-card:hover::after,
+.team-card:hover::after {
+  opacity: 1;
+  transform: scale(1);
+  animation: shine 1.5s ease-out;
+}
+
+@keyframes shine {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(0deg);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2) rotate(5deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5) rotate(10deg);
+  }
+}
+
+/* Content slide-up effect on hover */
+.card h3,
+.course-card h3,
+.team-card h3,
+.card p,
+.course-card p,
+.team-card p,
+.card button,
+.course-card button,
+.team-card .profile-icon,
+.team-card .email-indicator {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.card:hover h3,
+.course-card:hover h3,
+.team-card:hover h3 {
+  transform: translateY(-2px);
+  color: #c22b33;
+}
+
+.card:hover p,
+.course-card:hover p,
+.team-card:hover p {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.card:hover button,
+.course-card:hover button {
+  transform: scale(1.05);
+}
+
+/* Floating animation on hover */
+@keyframes gentleFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1.02);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.02);
+  }
+}
+
+.card:hover,
+.course-card:hover,
+.team-card:hover {
+  animation: gentleFloat 4s ease-in-out infinite;
+}
+
+/* ================= TEAM SECTION WITH INITIALS ================= */
+
+.team-card {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: 0.3s;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.team-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Icon with Initials */
+.profile-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c22b33, #e63946);
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 10px 20px rgba(194, 43, 51, 0.2);
+  transition: 0.3s ease;
+}
+
+.team-card:hover .profile-icon {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px rgba(194, 43, 51, 0.3);
+}
+
+.team-card h3 {
+  margin: 10px 0 5px;
+  color: #333;
+  font-size: 18px;
+}
+
+.team-card p {
+  color: #666;
+  margin: 0 0 15px;
+  font-size: 14px;
+}
+
+/* Email Popup */
+.email-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.popup-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.popup-content {
+  position: relative;
+  background: white;
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  z-index: 2001;
+  animation: popupScale 0.3s ease;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+@keyframes popupScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.popup-content h4 {
+  color: #c22b33;
+  margin: 0 0 15px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.popup-email {
+  background: #f8f8f8;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  font-size: 16px;
+  color: #333;
+  word-break: break-all;
+  border: 1px solid #eee;
+}
+
+.popup-email a {
+  color: #c22b33;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.popup-email a:hover {
+  color: #e63946;
+  text-decoration: underline;
+}
+
+.popup-close {
+  background: linear-gradient(135deg, #c22b33, #e63946);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+  margin-top: 10px;
+}
+
+.popup-close:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(194, 43, 51, 0.3);
+}
+
+/* Email icon in card (optional visual indicator) */
+.email-indicator {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #c22b33;
+  opacity: 0.7;
+  transition: 0.2s ease;
+}
+
+.team-card:hover .email-indicator {
+  opacity: 1;
+}
+
+.email-indicator i {
+  font-style: normal;
+  font-size: 14px;
+  margin-right: 5px;
+}
+
+/* ================= FAQ ================= */
+
+.faq-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.faq-item:hover {
+  background: #f8f8f8;
+  border-left-color: #c22b33;
+  padding-left: 25px;
+}
+
+.faq-item h3 {
+  transition: color 0.3s ease;
+}
+
+.faq-item:hover h3 {
+  color: #c22b33;
+}
+
+/* ================= CONTACT ================= */
+
+.contact {
+  text-align: center;
+  padding: 20px;
+  transition: all 0.3s ease;
+  border-radius: 10px;
+}
+
+.contact:hover {
+  background: #f8f8f8;
+  transform: scale(1.02);
+  box-shadow: 0 10px 30px rgba(194, 43, 51, 0.1);
+}
+
+.contact p {
+  transition: transform 0.3s ease;
+}
+
+.contact:hover p {
+  transform: translateX(5px);
+}
+
+.contact p:first-of-type:hover {
+  transform: translateX(10px);
+  color: #c22b33;
+}
+
+/* ================= BUTTON GENERAL ================= */
+
+.btn-primary {
+  background: linear-gradient(135deg, #c22b33, #e63946);
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+  z-index: -1;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(194, 43, 51, 0.3);
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.big {
+  padding: 15px 35px;
+}
+
+.small {
+  margin-top: 10px;
+}
+
+/* ================= FOOTER ================= */
+
+.footer {
+  background: #f8f8f8;
+  text-align: center;
+  padding: 30px;
+  transition: all 0.3s ease;
+}
+
+.footer:hover {
+  background: #f0f0f0;
+  letter-spacing: 1px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 992px) {
+  .navbar {
+    padding: 15px 20px;
+  }
+
+  .nav-links {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+    padding: 15px 20px;
+  }
+
+  .nav-left {
+    flex: 0 0 auto;
+  }
+
+  .nav-center {
+    order: 3;
+    width: 100%;
+    margin-top: 15px;
+    justify-content: center;
+    flex: 0 0 100%;
+  }
+
+  .nav-links {
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-links a {
+    font-size: 14px;
+  }
+
+  .nav-right {
+    flex: 0 0 auto;
+  }
+
+  /* Profile menu responsive */
+  .profile-name {
+    display: none;
+  }
+
+  .profile-icon-wrapper {
+    padding: 5px 5px 5px 5px;
+  }
+
+  .profile-dropdown {
+    width: 280px;
+    right: -10px;
+  }
+
+  /* Team section responsive */
+  .profile-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 28px;
+  }
+
+  .popup-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 12px 15px;
+  }
+
+  .brand {
+    font-size: 22px;
+    letter-spacing: 4px;
+  }
+
+  .nav-links {
+    gap: 10px;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+  }
+
+  .hero {
+    padding: 100px 20px;
+  }
+
+  .hero-text h1 {
+    font-size: 32px;
+  }
+
+  .hero-image {
+    width: 280px;
+  }
+
+  .section {
+    padding: 40px 20px;
+  }
+}

@@ -1,0 +1,719 @@
+<div class="uc-page" (click)="onPageClick()">
+  <!-- ══════════════════════════════════════════════════════
+       TOPBAR
+       Ligne 1 : Titre  |  Tabs  |  Wallet
+       Ligne 2 : Filtres + Recherche  (tab Explore only)
+       ══════════════════════════════════════════════════════ -->
+  <div class="uc-topbar">
+    <!-- ── LIGNE 1 ── -->
+    <div class="uc-topbar-row1">
+      <!-- Titre -->
+      <div class="uc-topbar-left">
+        <h1 class="uc-page-title">
+          <ng-container *ngIf="activeTab === 'courses'"
+            >Explore Courses</ng-container
+          >
+          <ng-container *ngIf="activeTab === 'my-courses'"
+            >My Training Courses</ng-container
+          >
+          <ng-container *ngIf="activeTab === 'history'"
+            >My Payments</ng-container
+          >
+        </h1>
+        <p class="uc-page-sub">
+          <ng-container *ngIf="activeTab === 'courses'"
+            >{{ filteredCourses.length }} program(s) available</ng-container
+          >
+          <ng-container *ngIf="activeTab === 'my-courses'"
+            >{{ myCourses.length }} enrolled course(s)</ng-container
+          >
+          <ng-container *ngIf="activeTab === 'history'"
+            >{{ myPayments.length }} transaction(s)</ng-container
+          >
+        </p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="uc-tab-bar" (click)="$event.stopPropagation()">
+        <button
+          class="uc-tab-btn"
+          [class.active]="activeTab === 'courses'"
+          (click)="activeTab = 'courses'"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+          </svg>
+          Explore
+        </button>
+
+        <button
+          class="uc-tab-btn"
+          [class.active]="activeTab === 'my-courses'"
+          (click)="switchToMyCourses()"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+            <path d="M6 12v5c3 3 9 3 12 0v-5" />
+          </svg>
+          My Courses
+          <span
+            class="uc-tab-badge"
+            *ngIf="enrolledCount > 0"
+            style="background:#2d9d78"
+            >{{ enrolledCount }}</span
+          >
+        </button>
+
+        <button
+          class="uc-tab-btn"
+          [class.active]="activeTab === 'history'"
+          (click)="switchToHistory()"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          Payments
+          <span class="uc-tab-badge" *ngIf="pendingPaymentsCount > 0">{{
+            pendingPaymentsCount
+          }}</span>
+        </button>
+      </div>
+
+      <!-- Wallet -->
+      <button class="uc-wallet-btn" (click)="goToWallet()">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          width="14"
+          height="14"
+        >
+          <path
+            d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
+          />
+        </svg>
+        My Wallet
+      </button>
+    </div>
+
+    <!-- ── LIGNE 2 : filtres + search (explore tab only) ── -->
+    <div
+      class="uc-topbar-row2"
+      *ngIf="activeTab === 'courses'"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="uc-filter-bar">
+        <!-- All -->
+        <button
+          class="uc-filter-btn"
+          [class.active]="selectedCategoryId === null && !priceFiltered"
+          (click)="resetAllFilters(); $event.stopPropagation()"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          All Courses
+          <span class="uc-filter-count">{{ courses.length }}</span>
+        </button>
+
+        <!-- Category -->
+        <div class="uc-cat-dropdown-wrap" (click)="$event.stopPropagation()">
+          <button
+            class="uc-filter-btn"
+            [class.active]="selectedCategoryId !== null"
+            [class.open]="isCatDropdownOpen"
+            (click)="toggleCatDropdown()"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="14"
+              height="14"
+            >
+              <path d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+            {{
+              selectedCategoryId !== null
+                ? getSelectedCategoryName()
+                : "Categories"
+            }}
+            <span *ngIf="selectedCategoryId !== null" class="uc-filter-count">{{
+              getSelectedCategoryCount()
+            }}</span>
+            <svg
+              class="uc-arrow"
+              [class.open]="isCatDropdownOpen"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              width="12"
+              height="12"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+          <div class="uc-cat-dropdown" *ngIf="isCatDropdownOpen">
+            <div class="uc-cat-dropdown-header">Select a category</div>
+            <div
+              *ngFor="let cat of categories"
+              class="uc-cat-dropdown-item"
+              [class.selected]="selectedCategoryId === cat.id"
+              (click)="filterByCategory(cat.id); closeCatDropdown()"
+            >
+              <span class="uc-cat-dropdown-name">{{ cat.name }}</span>
+              <span class="uc-cat-dropdown-count">{{
+                getCoursesByCategory(cat.id).length
+              }}</span>
+            </div>
+            <div *ngIf="categories.length === 0" class="uc-cat-dropdown-empty">
+              No categories found
+            </div>
+          </div>
+        </div>
+
+        <!-- Price -->
+        <div class="uc-price-filter-wrap" (click)="$event.stopPropagation()">
+          <button
+            class="uc-filter-btn"
+            [class.active]="priceFiltered"
+            [class.open]="isPriceDropdownOpen"
+            (click)="togglePriceDropdown()"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="14"
+              height="14"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            Price
+            <span *ngIf="priceFiltered" class="uc-filter-count active-price">
+              {{ priceMin | number: "1.0-0" }}–{{ priceMax | number: "1.0-0" }}
+            </span>
+            <svg
+              class="uc-arrow"
+              [class.open]="isPriceDropdownOpen"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              width="12"
+              height="12"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+          <div class="uc-price-dropdown" *ngIf="isPriceDropdownOpen">
+            <div class="upd-header">
+              <span class="upd-label">Price Range</span>
+              <span class="upd-range"
+                ><strong>{{ priceMin | number: "1.0-0" }}</strong
+                >&nbsp;–&nbsp;{{ priceMax | number: "1.0-0" }}</span
+              >
+            </div>
+            <div class="upd-slider-wrap">
+              <div class="upd-track">
+                <div
+                  class="upd-track-fill"
+                  [style.left.%]="getMinPercent()"
+                  [style.width.%]="getMaxPercent() - getMinPercent()"
+                ></div>
+              </div>
+              <input
+                class="upd-range upd-range-min"
+                type="range"
+                [min]="absoluteMin"
+                [max]="absoluteMax"
+                [step]="priceStep"
+                [(ngModel)]="priceMin"
+                (input)="onMinChange($event)"
+                (change)="applyFilters()"
+              />
+              <input
+                class="upd-range upd-range-max"
+                type="range"
+                [min]="absoluteMin"
+                [max]="absoluteMax"
+                [step]="priceStep"
+                [(ngModel)]="priceMax"
+                (input)="onMaxChange($event)"
+                (change)="applyFilters()"
+              />
+            </div>
+            <div class="upd-footer">
+              <button
+                class="upd-reset"
+                (click)="resetPriceFilter(); $event.stopPropagation()"
+              >
+                Reset
+              </button>
+              <button
+                class="upd-apply"
+                (click)="closePriceDropdown(); $event.stopPropagation()"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="uc-search-wrap">
+        <svg
+          class="uc-search-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input
+          class="uc-search-input"
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+          placeholder="Search courses, topics..."
+        />
+      </div>
+    </div>
+  </div>
+  <!-- /topbar -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- EXPLORE TAB                               -->
+  <!-- ══════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'courses'">
+    <div *ngIf="filteredCourses.length === 0" class="uc-empty">
+      <div class="uc-empty-icon">📚</div>
+      <p class="uc-empty-title">No courses found</p>
+      <p class="uc-empty-sub">Try adjusting your search or filters</p>
+    </div>
+
+    <div class="uc-grid" *ngIf="filteredCourses.length > 0">
+      <div
+        *ngFor="let course of pagedCourses; let i = index"
+        class="uc-card"
+        [style.animation-delay]="i * 50 + 'ms'"
+        (click)="goToDetail(course.id)"
+      >
+        <div class="uc-card-img">
+          <img
+            [src]="getImageUrl(course)"
+            [alt]="course.title"
+            loading="lazy"
+          />
+          <span class="uc-card-price-badge">
+            {{ getSymbolForCard(course)
+            }}{{ getDisplayPrice(course) | number: "1.2-2" }}
+          </span>
+        </div>
+
+        <div class="uc-card-body">
+          <span class="uc-card-tag">{{
+            course.category?.name || "General"
+          }}</span>
+          <h3 class="uc-card-title">{{ course.title }}</h3>
+          <p class="uc-card-desc">{{ course.description }}</p>
+
+          <!-- Progress (enrolled) -->
+          <div
+            class="uc-progress-section"
+            *ngIf="hasStartedCourse(course.id) && hasPaidAccess(course.id)"
+          >
+            <div class="uc-progress-header">
+              <span class="uc-progress-label">Progress</span>
+              <span class="uc-progress-percent"
+                >{{ getProgressPercentage(course.id) }}%</span
+              >
+            </div>
+            <div class="uc-progress-bar">
+              <div
+                class="uc-progress-fill"
+                [style.width.%]="getProgressPercentage(course.id)"
+              ></div>
+            </div>
+            <div
+              class="uc-progress-lessons"
+              *ngIf="getProgressForCourse(course.id) as p"
+            >
+              {{ p.completedLessons }} / {{ p.totalLessons }} lessons completed
+              <span class="uc-completion-badge" *ngIf="p.isCompleted"
+                >✨ Completed +50 pts</span
+              >
+            </div>
+          </div>
+
+          <div class="uc-card-footer">
+            <!-- Price + currency -->
+            <div class="uc-price-wrapper" (click)="$event.stopPropagation()">
+              <button class="uc-price-btn" (click)="toggleDropdown(course.id)">
+                <span class="uc-price-value"
+                  >{{ getSymbolForCard(course)
+                  }}{{ getDisplayPrice(course) | number: "1.2-2" }}</span
+                >
+                <span class="uc-price-points" *ngIf="course.pointsPrice"
+                  >or {{ course.pointsPrice }} pts</span
+                >
+                <svg
+                  class="uc-price-arrow"
+                  [class.open]="openDropdownId === course.id"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  width="12"
+                  height="12"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <div
+                class="uc-currency-dropdown"
+                *ngIf="openDropdownId === course.id"
+              >
+                <div class="uc-dropdown-label">Convert to</div>
+                <div
+                  *ngFor="let cur of getOtherCurrencies(course)"
+                  class="uc-currency-option"
+                  (click)="selectCurrency(course.id, cur.code)"
+                >
+                  <span class="uc-cur-flag">{{ cur.flag }}</span>
+                  <span class="uc-cur-code">{{ cur.code }}</span>
+                  <span class="uc-cur-converted"
+                    >{{ cur.symbol
+                    }}{{
+                      convertPrice(course, cur.code) | number: "1.2-2"
+                    }}</span
+                  >
+                </div>
+                <div
+                  *ngIf="cardCurrencies[course.id]"
+                  class="uc-currency-reset"
+                  (click)="resetCurrency(course.id)"
+                >
+                  ↩ Original price
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <button
+              class="uc-pay-btn"
+              (click)="goToPayment(course, $event)"
+              [class.uc-pay-btn--paid]="hasPaidAccess(course.id)"
+              [disabled]="hasPaidAccess(course.id)"
+            >
+              <svg
+                *ngIf="!hasPaidAccess(course.id)"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <rect x="1" y="4" width="22" height="16" rx="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+              </svg>
+              <svg
+                *ngIf="hasPaidAccess(course.id)"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              {{ hasPaidAccess(course.id) ? "Enrolled" : "Pay Now" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-pagination" *ngIf="totalPages > 1">
+      <button
+        class="uc-page-btn"
+        (click)="prevPage()"
+        [disabled]="currentPage === 1"
+      >
+        ← Previous
+      </button>
+      <span class="uc-page-info"
+        >Page {{ currentPage }} of {{ totalPages }}</span
+      >
+      <button
+        class="uc-page-btn"
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+      >
+        Next →
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- MY COURSES TAB                            -->
+  <!-- ══════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'my-courses'">
+    <div *ngIf="myCoursesLoading" class="uc-history-loading">
+      <div class="uc-spinner"></div>
+      <p>Loading your courses...</p>
+    </div>
+
+    <div *ngIf="!myCoursesLoading && myCourses.length === 0" class="uc-empty">
+      <div class="uc-empty-icon">🎓</div>
+      <p class="uc-empty-title">No enrolled courses yet</p>
+      <p class="uc-empty-sub">Purchase a course to see it here</p>
+      <button
+        class="uc-pay-btn"
+        style="margin-top:18px"
+        (click)="activeTab = 'courses'"
+      >
+        Browse Courses
+      </button>
+    </div>
+
+    <div class="uc-grid" *ngIf="!myCoursesLoading && myCourses.length > 0">
+      <div
+        *ngFor="let course of myCourses; let i = index"
+        class="uc-card uc-card--enrolled"
+        [style.animation-delay]="i * 50 + 'ms'"
+        (click)="goToCourseContent(course.id)"
+      >
+        <div class="uc-card-img">
+          <img
+            [src]="getImageUrl(course)"
+            [alt]="course.title"
+            loading="lazy"
+          />
+          <div class="uc-enrolled-ribbon">✓ Enrolled</div>
+        </div>
+
+        <div class="uc-card-body">
+          <span class="uc-card-tag">{{
+            course.category?.name || "General"
+          }}</span>
+          <h3 class="uc-card-title">{{ course.title }}</h3>
+          <p class="uc-card-desc">{{ course.description }}</p>
+
+          <div class="uc-progress-section">
+            <div class="uc-progress-header">
+              <span class="uc-progress-label">
+                {{
+                  hasStartedCourse(course.id) ? "Progress" : "Not started yet"
+                }}
+              </span>
+              <span class="uc-progress-percent"
+                >{{ getProgressPercentage(course.id) }}%</span
+              >
+            </div>
+            <div class="uc-progress-bar">
+              <div
+                class="uc-progress-fill"
+                [style.width.%]="getProgressPercentage(course.id)"
+              ></div>
+            </div>
+            <div
+              class="uc-progress-lessons"
+              *ngIf="getProgressForCourse(course.id) as p"
+            >
+              {{ p.completedLessons }} / {{ p.totalLessons }} lessons
+              <span class="uc-completion-badge" *ngIf="p.isCompleted">
+                Completed</span
+              >
+            </div>
+            <div
+              class="uc-progress-lessons"
+              *ngIf="!hasStartedCourse(course.id)"
+            >
+              Click to start learning
+            </div>
+          </div>
+
+          <div class="uc-card-footer">
+            <span class="uc-enrolled-label">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Access granted
+            </span>
+            <button
+              class="uc-pay-btn uc-pay-btn--start"
+              (click)="goToCourseContent(course.id); $event.stopPropagation()"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              {{ hasStartedCourse(course.id) ? "Continue" : "Start" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PAYMENTS TAB                              -->
+  <!-- ══════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'history'">
+    <div *ngIf="paymentsLoading" class="uc-history-loading">
+      <div class="uc-spinner"></div>
+      <p>Loading your transactions...</p>
+    </div>
+
+    <div *ngIf="!paymentsLoading && myPayments.length === 0" class="uc-empty">
+      <div class="uc-empty-icon">💳</div>
+      <p class="uc-empty-title">No payments yet</p>
+      <p class="uc-empty-sub">
+        Your payment history will appear here after your first purchase
+      </p>
+      <button
+        class="uc-pay-btn"
+        style="margin-top:18px"
+        (click)="activeTab = 'courses'"
+      >
+        Browse Courses
+      </button>
+    </div>
+
+    <div
+      class="uc-history-list"
+      *ngIf="!paymentsLoading && myPayments.length > 0"
+    >
+      <div
+        *ngFor="let p of myPayments"
+        class="uc-history-card"
+        [ngClass]="'hist-' + p.status.toLowerCase()"
+      >
+        <div class="uc-hist-stripe"></div>
+
+        <div class="uc-hist-course">
+          <div class="uc-hist-course-icon">📚</div>
+          <div>
+            <div class="uc-hist-course-name">
+              {{ getCourseName(p.courseId) }}
+            </div>
+            <div class="uc-hist-txn">{{ p.transactionId }}</div>
+          </div>
+        </div>
+
+        <div class="uc-hist-amount">
+          <div class="uc-hist-original" *ngIf="p.discountPercentage">
+            {{ p.currency }} {{ p.originalPrice | number: "1.2-2" }}
+          </div>
+          <div class="uc-hist-final">
+            {{ p.currency }} {{ p.finalPrice | number: "1.2-2" }}
+          </div>
+          <div class="uc-hist-discount" *ngIf="p.discountPercentage">
+            🎟️ {{ p.couponCode }} ({{ p.discountPercentage }}% off)
+          </div>
+        </div>
+
+        <div class="uc-hist-method">
+          <span class="uc-hist-method-icon">{{
+            getMethodIcon(p.paymentMethod)
+          }}</span>
+          <span class="uc-hist-method-label">{{
+            p.paymentMethod | titlecase
+          }}</span>
+        </div>
+
+        <div class="uc-hist-date">
+          <div class="uc-hist-date-main">
+            {{ p.createdAt | date: "dd MMM yyyy" }}
+          </div>
+          <div class="uc-hist-date-time">{{ p.createdAt | date: "HH:mm" }}</div>
+        </div>
+
+        <div class="uc-hist-status">
+          <span class="uc-hist-badge" [ngClass]="getStatusClass(p.status)">
+            <span class="uc-hist-badge-dot"></span>
+            {{ p.status }}
+          </span>
+          <div class="uc-hist-status-msg" *ngIf="p.status === 'PENDING'">
+            ⏳ Awaiting admin approval
+          </div>
+          <div
+            class="uc-hist-status-msg approved-msg"
+            *ngIf="p.status === 'APPROVED'"
+          >
+            ✅ Access granted!
+          </div>
+          <div
+            class="uc-hist-status-msg rejected-msg"
+            *ngIf="p.status === 'REJECTED'"
+          >
+            ❌ {{ p.adminNotes || "Payment rejected" }}
+          </div>
+          <div
+            class="uc-hist-status-msg refunded-msg"
+            *ngIf="p.status === 'REFUNDED'"
+          >
+            ↩ Amount refunded
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

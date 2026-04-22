@@ -1,0 +1,63 @@
+<div class="trainer-content">
+  <div class="welcome-section">
+    <h1>Welcome, {{ username }}! 👋</h1>
+    <p>Manage your sessions and monitor your trainees</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-info">
+        <h3>Sessions</h3>
+        <p class="stat-value">--</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <h3>Trainees</h3>
+        <p class="stat-value">--</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-info">
+        <h3>Active Sessions</h3>
+        <p class="stat-value">--</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-info">
+        <h3>Rating</h3>
+        <p class="stat-value">--</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-links-section">
+    <h2>Quick Actions</h2>
+    <div class="links-grid">
+      <a [routerLink]="['/trainer/my-courses']" class="link-card">
+        <span class="link-icon">📚</span>
+        <span>My Courses</span>
+      </a>
+      <a [routerLink]="['/trainer-sessions/trainer']" class="link-card">
+        <span class="link-icon">📅</span>
+        <span>My Sessions</span>
+      </a>
+      <a [routerLink]="['/trainer-sessions/equipments']" class="link-card">
+        <span class="link-icon">🖥️</span>
+        <span>Equipment</span>
+      </a>
+      <a [routerLink]="['/trainer-sessions/rooms']" class="link-card">
+        <span class="link-icon">🏛️</span>
+        <span>Rooms</span>
+      </a>
+      <a [routerLink]="['/trainer-sessions/virtual-rooms']" class="link-card">
+        <span class="link-icon">📈</span>
+        <span>Virtual Rooms</span>
+      </a>
+    </div>
+  </div>
+</div>

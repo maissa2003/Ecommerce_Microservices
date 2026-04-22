@@ -1,0 +1,237 @@
+<!-- NAVBAR -->
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="nav-left">
+    <span class="brand">SKILL2JOB</span>
+  </div>
+
+  <div class="nav-center">
+    <nav class="nav-links">
+      <a (click)="scrollTo('features')">Features</a>
+      <a (click)="scrollTo('courses')">Courses</a>
+      <a (click)="scrollTo('team')">Team</a>
+      <a (click)="scrollTo('faq')">FAQ</a>
+      <a (click)="scrollTo('contact')">Contact</a>
+    </nav>
+  </div>
+
+  <div class="nav-right">
+    <!-- Hamburger Menu Icon Only -->
+    <div class="hamburger-menu" (click)="toggleMobileMenu()">
+      <div class="hamburger-icon" [class.open]="isMobileMenuOpen">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Menu Overlay -->
+  <div
+    class="mobile-menu-overlay"
+    *ngIf="isMobileMenuOpen"
+    (click)="closeMobileMenu()"
+  ></div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" *ngIf="isMobileMenuOpen">
+    <div class="mobile-menu-content">
+      <div class="mobile-menu-item signup" (click)="handleSignup()">
+        Sign Up
+      </div>
+
+      <div class="mobile-menu-divider"></div>
+      <div class="mobile-menu-text">
+        Already have an account?
+        <a routerLink="/signin">Log in</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <h1>
+      Learn Skills.
+      <span>Get Your Dream Job.</span>
+    </h1>
+
+    <p>
+      Modern learning platform designed to help students gain real skills and
+      connect with career opportunities.
+    </p>
+
+    <button class="btn-primary big">Start Learning</button>
+  </div>
+
+  <img src="assets/logo.png" class="hero-image floating-logo" />
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="section">
+  <h2 class="section-title">Platform Features</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Interactive Courses</h3>
+      <p>Learn with modern and practical courses.</p>
+    </div>
+
+    <div class="card">
+      <h3>Expert Teachers</h3>
+      <p>Learn from industry professionals.</p>
+    </div>
+
+    <div class="card">
+      <h3>Career Guidance</h3>
+      <p>Prepare for real job opportunities.</p>
+    </div>
+
+    <div class="card">
+      <h3>Certificates</h3>
+      <p>Get certified and boost your CV.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COURSES -->
+<section id="courses" class="section grey">
+  <h2 class="section-title">Popular Courses</h2>
+
+  <div class="grid">
+    <div class="course-card">
+      <h3>Java Spring Boot</h3>
+      <p>Backend development with Spring Boot.</p>
+      <button class="btn-primary small">View Course</button>
+    </div>
+
+    <div class="course-card">
+      <h3>Angular Development</h3>
+      <p>Frontend development with Angular.</p>
+      <button class="btn-primary small">View Course</button>
+    </div>
+
+    <div class="course-card">
+      <h3>DevOps & Docker</h3>
+      <p>Learn Docker, CI/CD, Kubernetes.</p>
+      <button class="btn-primary small">View Course</button>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team" class="section">
+  <h2 class="section-title">Meet Our Team</h2>
+
+  <div class="grid">
+    <div
+      class="team-card"
+      (click)="showEmail('Mathlouthi Hamza', 'hamza.mathlouthi@skill2job.com')"
+    >
+      <div class="profile-icon">
+        MH
+      </div>
+      <h3>Mathlouthi Hamza</h3>
+      <p>Backend Engineer</p>
+      <div class="email-indicator"><i>✉️</i> click to see email</div>
+    </div>
+
+    <div
+      class="team-card"
+      (click)="showEmail('Lekhlifi Souhe', 'souhe.lekhlifi@skill2job.com')"
+    >
+      <div class="profile-icon">
+        SL
+      </div>
+      <h3>Khelifi Souha</h3>
+      <p>Frontend Engineer</p>
+      <div class="email-indicator"><i>✉️</i> click to see email</div>
+    </div>
+
+    <div
+      class="team-card"
+      (click)="showEmail('Ahmed Houssine Khemir', 'ahmed.khemir@skill2job.com')"
+    >
+      <div class="profile-icon">
+        AK
+      </div>
+      <h3>Khemir Ahmed Houssine</h3>
+      <p>DevOps Engineer</p>
+      <div class="email-indicator"><i>✉️</i> click to see email</div>
+    </div>
+
+    <div
+      class="team-card"
+      (click)="showEmail('Aziz Loueti', 'aziz.loueti@skill2job.com')"
+    >
+      <div class="profile-icon">
+        AL
+      </div>
+      <h3>Loueti Mohamed Aziz</h3>
+      <p>Full Stack Engineer</p>
+      <div class="email-indicator"><i>✉️</i> click to see email</div>
+    </div>
+
+    <div
+      class="team-card"
+      (click)="showEmail('Mayssa Kelibi', 'mayssa.kelibi@skill2job.com')"
+    >
+      <div class="profile-icon">
+        MK
+      </div>
+      <h3>Kelibi Mayssa</h3>
+      <p>UI/UX Designer</p>
+      <div class="email-indicator"><i>✉️</i> click to see email</div>
+    </div>
+  </div>
+
+  <!-- Email Popup -->
+  <div class="email-popup" *ngIf="selectedMember">
+    <div class="popup-overlay" (click)="closePopup()"></div>
+    <div class="popup-content">
+      <h4>{{ selectedMember.name }}</h4>
+      <div class="popup-email">
+        <a [href]="'mailto:' + selectedMember.email">{{
+          selectedMember.email
+        }}</a>
+      </div>
+      <button class="popup-close" (click)="closePopup()">Close</button>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="section grey">
+  <h2 class="section-title">Frequently Asked Questions</h2>
+
+  <div class="faq">
+    <div class="faq-item">
+      <h3>How do I enroll?</h3>
+      <p>Create an account and select your course.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Are courses free?</h3>
+      <p>Some courses are free, others are premium.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Do I get a certificate?</h3>
+      <p>Yes, after completing courses successfully.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section">
+  <h2 class="section-title">Contact Us</h2>
+
+  <div class="contact">
+    <p><strong>Address:</strong> ESPRIT, Ariana, Tunisia</p>
+    <p><strong>Phone:</strong> +216 55 300 799</p>
+    <p><strong>Email:</strong> contactskill2job.com</p>
+  </div>
+</section>
+
+<router-outlet></router-outlet>

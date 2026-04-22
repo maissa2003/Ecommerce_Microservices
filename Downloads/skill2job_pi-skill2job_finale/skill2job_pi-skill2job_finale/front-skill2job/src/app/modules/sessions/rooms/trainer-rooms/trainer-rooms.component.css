@@ -1,0 +1,239 @@
+.rooms-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  background: #ffffff;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, sans-serif;
+}
+
+.header-section {
+  margin-bottom: 3rem;
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: -0.5px;
+    color: #000000;
+    margin: 0 0 1rem 0;
+    text-transform: uppercase;
+  }
+
+  .title-underline {
+    height: 2px;
+    width: 60px;
+    background: #000000;
+    transition: width 0.3s ease;
+  }
+
+  &:hover .title-underline {
+    width: 100px;
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: #fafafa;
+  border: 1px solid #eaeaea;
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e0e0e0;
+    border-top-color: #000000;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #666666;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.table-wrapper {
+  border: 1px solid #000000;
+  background: #ffffff;
+  overflow-x: auto;
+  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.2);
+}
+
+.rooms-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+
+  th {
+    background: #000000;
+    color: #ffffff;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.8rem;
+    padding: 1.2rem 1rem;
+    text-align: left;
+    border-right: 1px solid #333333;
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  td {
+    padding: 1.2rem 1rem;
+    border-bottom: 1px solid #eaeaea;
+    color: #333333;
+  }
+
+  .room-row {
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: #f8f8f8;
+
+      .join-link .link-arrow {
+        transform: translateX(4px);
+      }
+    }
+  }
+
+  .room-id {
+    font-weight: 600;
+    color: #000000;
+    font-size: 0.85rem;
+  }
+
+  .join-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: #000000;
+    border: 1px solid #000000;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    .link-text {
+      margin-right: 0.5rem;
+    }
+
+    .link-arrow {
+      transition: transform 0.2s ease;
+    }
+
+    &:hover {
+      background: #000000;
+      color: #ffffff;
+    }
+  }
+
+  .date-cell {
+    font-family: "SF Mono", "Courier New", monospace;
+    font-size: 0.85rem;
+    color: #444444;
+  }
+
+  .session-name {
+    font-weight: 500;
+    color: #000000;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .session-type {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid #000000;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.type-live {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    &.type-recorded {
+      background: #000000;
+      color: #ffffff;
+    }
+  }
+
+  .trainer-name {
+    font-weight: 400;
+    color: #666666;
+    font-size: 0.9rem;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 5rem 2rem;
+  border: 1px solid #000000;
+  background: #fafafa;
+
+  .empty-icon {
+    font-size: 4rem;
+    line-height: 1;
+    color: #000000;
+    margin-bottom: 1.5rem;
+    opacity: 0.3;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: #000000;
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  p {
+    color: #666666;
+    font-size: 0.95rem;
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 768px) {
+  .rooms-container {
+    padding: 1.5rem;
+  }
+
+  .header-section .page-title {
+    font-size: 2rem;
+  }
+
+  .rooms-table {
+    font-size: 0.85rem;
+
+    th,
+    td {
+      padding: 1rem 0.75rem;
+    }
+
+    .join-link {
+      padding: 0.4rem 0.8rem;
+    }
+  }
+}

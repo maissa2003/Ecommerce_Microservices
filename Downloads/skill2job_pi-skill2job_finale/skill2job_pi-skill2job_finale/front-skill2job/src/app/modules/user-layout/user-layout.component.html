@@ -1,0 +1,58 @@
+<header class="navbar">
+  <div class="nav-left">
+    <span class="brand" routerLink="/user">SKILL2JOB</span>
+  </div>
+
+  <div class="nav-center">
+    <nav class="nav-links">
+      <a routerLink="/user">Home</a>
+      <a routerLink="/user/courses">Courses</a>
+      <a routerLink="/user/offers">Job Offers</a>
+      <a routerLink="applications">My Applications</a>
+    </nav>
+  </div>
+
+  <div class="nav-right">
+    <!-- ✅ Notifications -->
+    <app-notifications-bell></app-notifications-bell>
+    <div class="profile-menu" (click)="toggleProfileMenu()">
+      <div class="profile-icon-wrapper">
+        <div class="profile-circle">
+          {{ getInitials(currentUser?.username || "Learner") }}
+        </div>
+        <span class="profile-name">{{
+          currentUser?.username || "Learner"
+        }}</span>
+        <i class="fas fa-chevron-down" [class.rotate]="isProfileMenuOpen"></i>
+      </div>
+
+      <div
+        class="profile-dropdown"
+        *ngIf="isProfileMenuOpen"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="dropdown-header">
+          <div class="profile-circle large">
+            {{ getInitials(currentUser?.username || "Learner") }}
+          </div>
+          <div class="dropdown-user-info">
+            <strong>{{ currentUser?.username || "Learner" }}</strong>
+            <span>{{ currentUser?.email || "" }}</span>
+          </div>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <div class="dropdown-item logout" (click)="logout()">
+          <i class="fas fa-sign-out-alt menu-icon"></i>
+          <span>Logout</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ✅ ICI le contenu change selon la route -->
+<div class="user-content">
+  <router-outlet></router-outlet>
+</div>

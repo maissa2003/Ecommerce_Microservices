@@ -1,0 +1,146 @@
+<div class="exam-platform">
+  <!-- Welcome Header -->
+  <div class="welcome-header">
+    <h1>Welcome back, <span class="highlight">Mayssa</span> 👋</h1>
+    <p class="subtitle">Ready to test your knowledge? Choose an exam below.</p>
+  </div>
+
+  <!-- Stats Cards (Black/Red/White) -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.completedExams || 0 }}</div>
+      <div class="stat-label">COMPLETED EXAMS</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.averageScore || 0 }}%</div>
+      <div class="stat-label">AVERAGE SCORE</div>
+    </div>
+
+    <div class="stat-card clickable" (click)="goToCertificates()">
+      <div class="stat-value">{{ stats.certificates || 0 }}</div>
+      <div class="stat-label">CERTIFICATES</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.pendingExams || 0 }}</div>
+      <div class="stat-label">PENDING EXAMS</div>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeFilter === 'all'"
+      (click)="filterExams('all')"
+    >
+      All Exams
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeFilter === 'available'"
+      (click)="filterExams('available')"
+    >
+      Available
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeFilter === 'completed'"
+      (click)="filterExams('completed')"
+    >
+      Completed
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading exams...</p>
+  </div>
+
+  <!-- Exams Grid -->
+  <div *ngIf="!loading" class="exams-grid">
+    <div *ngFor="let exam of filteredExams" class="exam-card">
+      <!-- Status Badge -->
+      <div
+        class="exam-status"
+        [class.available]="isExamAvailable(exam.id)"
+        [class.completed]="!isExamAvailable(exam.id)"
+      >
+        {{ getExamStatus(exam.id) }}
+      </div>
+
+      <!-- Exam Content -->
+      <h3 class="exam-title">{{ exam.title }}</h3>
+      <p class="exam-description">
+        {{ exam.description || "No description available" }}
+      </p>
+
+      <!-- Exam Details -->
+      <div class="exam-details">
+        <div class="detail-item">
+          <span class="detail-icon">❓</span>
+          <span
+            [class.no-questions]="
+              !exam.questions || exam.questions.length === 0
+            "
+          >
+            {{ exam.questions?.length || 0 }} Questions
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon">⏱️</span>
+          <span>{{ exam.duration || 30 }} minutes</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon">🎯</span>
+          <span>Pass: {{ exam.passScore }}%</span>
+        </div>
+      </div>
+
+      <!-- Show warning if no questions -->
+      <div
+        *ngIf="
+          isExamAvailable(exam.id) &&
+          (!exam.questions || exam.questions.length === 0)
+        "
+        class="no-questions-warning"
+      >
+        ⚠️ No questions available yet
+      </div>
+
+      <!-- Score for completed exams -->
+      <div *ngIf="getUserScore(exam.id) as score" class="score-section">
+        <div class="score-label">
+          <span>Your Score:</span>
+          <span [style.color]="score >= exam.passScore ? '#4caf50' : '#b71c1c'">
+            {{ score }}%
+          </span>
+        </div>
+        <div class="progress-bar">
+          <div
+            class="progress-fill"
+            [style.width]="score + '%'"
+            [style.background]="score >= exam.passScore ? '#4caf50' : '#b71c1c'"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button
+        class="action-btn"
+        [class.start]="isExamAvailable(exam.id)"
+        [class.view]="!isExamAvailable(exam.id)"
+        (click)="handleExamAction(exam)"
+      >
+        {{ isExamAvailable(exam.id) ? "START EXAM" : "VIEW RESULTS" }}
+      </button>
+    </div>
+
+    <!-- No Exams Message -->
+    <div *ngIf="filteredExams.length === 0" class="no-exams">
+      <p>No exams available</p>
+    </div>
+  </div>
+</div>

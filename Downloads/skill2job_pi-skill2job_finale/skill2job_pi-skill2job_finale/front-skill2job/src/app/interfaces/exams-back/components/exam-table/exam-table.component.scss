@@ -1,0 +1,494 @@
+.exam-table-container {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+  margin-left: 270px;
+  box-sizing: border-box;
+  width: calc(100% - 270px);
+
+  // ─── Header ───────────────────────────────────────────────────────────────
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: white;
+    padding: 20px 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #d32f2f;
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .btn-add {
+      background: #d32f2f;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+
+      i {
+        font-size: 14px;
+      }
+
+      &:hover {
+        background: #b71c1c;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(211, 47, 47, 0.25);
+      }
+    }
+  }
+
+  // ─── Search Bar ───────────────────────────────────────────────────────────
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+
+      .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 14px;
+        pointer-events: none;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 12px 40px 12px 40px;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 14px;
+        background: white;
+        color: #1a1a1a;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        outline: none;
+
+        &::placeholder {
+          color: #aaa;
+        }
+
+        &:focus {
+          border-color: #d32f2f;
+          box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+        }
+      }
+
+      .clear-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #aaa;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+
+        &:hover {
+          color: #d32f2f;
+          background: #ffeaea;
+        }
+      }
+    }
+
+    .results-count {
+      white-space: nowrap;
+      font-size: 13px;
+      color: #888;
+      font-weight: 500;
+    }
+  }
+
+  // ─── States ───────────────────────────────────────────────────────────────
+
+  .loading-spinner {
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    color: #666;
+    i {
+      margin-right: 8px;
+      color: #d32f2f;
+    }
+  }
+
+  .error-message {
+    background: white;
+    color: #d32f2f;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #d32f2f;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    i {
+      margin-right: 8px;
+    }
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    color: #666;
+
+    i {
+      font-size: 48px;
+      color: #d32f2f;
+      margin-bottom: 16px;
+      opacity: 0.5;
+      display: block;
+    }
+    p {
+      font-size: 16px;
+      color: #1a1a1a;
+    }
+
+    .btn-clear-search {
+      margin-top: 12px;
+      padding: 8px 20px;
+      background: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      &:hover {
+        background: #b71c1c;
+      }
+    }
+  }
+
+  // ─── Table ────────────────────────────────────────────────────────────────
+
+  .exam-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    table-layout: fixed;
+    margin-bottom: 0;
+
+    col.col-title {
+      width: 180px;
+    }
+    col.col-description {
+      width: auto;
+    }
+    col.col-passscore {
+      width: 120px;
+    }
+    col.col-actions {
+      width: 220px;
+    }
+
+    th {
+      background: #1a1a1a;
+      color: white;
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    tr {
+      transition: background 0.15s ease;
+      &:hover {
+        background: #fafafa;
+      }
+      &:last-child td {
+        border-bottom: none;
+      }
+    }
+
+    .col-title-cell {
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .col-desc-cell {
+      color: #666;
+    }
+
+    .pass-score-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: #ffeaea;
+      color: #d32f2f;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(211, 47, 47, 0.2);
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+
+      .action-btn {
+        width: 34px;
+        height: 34px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        background: white;
+        color: #1a1a1a;
+        flex-shrink: 0;
+
+        i {
+          font-size: 14px;
+        }
+
+        &:hover {
+          background: #d32f2f;
+          color: white;
+          border-color: #d32f2f;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+        }
+
+        &.delete:hover {
+          background: #b71c1c;
+          border-color: #b71c1c;
+        }
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+
+  // ─── Pagination ───────────────────────────────────────────────────────────
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+
+    .page-btn {
+      height: 36px;
+      min-width: 36px;
+      padding: 0 12px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      color: #1a1a1a;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      &:hover:not(:disabled) {
+        border-color: #d32f2f;
+        color: #d32f2f;
+        background: #ffeaea;
+      }
+
+      &.active {
+        background: #d32f2f;
+        color: white;
+        border-color: #d32f2f;
+        box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .nav-btn {
+      padding: 0 16px;
+      font-weight: 500;
+    }
+
+    .page-numbers {
+      display: flex;
+      gap: 4px;
+    }
+  }
+
+  .page-info {
+    text-align: center;
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 10px;
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .exam-table-container {
+    margin-left: 0;
+    width: 100%;
+    padding: 16px;
+
+    .header {
+      flex-direction: column;
+      gap: 16px;
+      align-items: stretch;
+      .btn-add {
+        justify-content: center;
+      }
+    }
+
+    .search-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .exam-table {
+      display: block;
+      overflow-x: auto;
+      table-layout: auto;
+    }
+
+    .pagination {
+      flex-wrap: wrap;
+    }
+  }
+  // ─── Paste this into evaluation-table, certificate-list, exam-table,
+  //     question-form, and certificate-details SCSS files ─────────────────────
+
+  // Prevents content from overflowing under the sidebar
+  :host {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  // Wraps tables so they scroll horizontally instead of going under sidebar
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+  }
+
+  // General container reset
+  .evaluation-container,
+  .certificate-container,
+  .exam-table-container,
+  .question-form-container,
+  .certificate-details-container {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 24px;
+    overflow-x: hidden;
+  }
+
+  // Tables never exceed their wrapper
+  table {
+    width: 100%;
+    min-width: 600px; // allows horizontal scroll on small screens
+    border-collapse: collapse;
+    table-layout: auto;
+  }
+
+  // ─── Student name pill ────────────────────────────────────────────────────────
+  .student-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: #1a1a1a;
+
+    &::before {
+      content: "👤";
+      font-size: 0.85rem;
+    }
+  }
+
+  // ─── Level badges ─────────────────────────────────────────────────────────────
+  .level-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+
+    &.gold {
+      background: rgba(255, 193, 7, 0.15);
+      color: #b8860b;
+      border: 1px solid rgba(255, 193, 7, 0.4);
+    }
+    &.silver {
+      background: rgba(176, 190, 197, 0.15);
+      color: #607d8b;
+      border: 1px solid rgba(176, 190, 197, 0.4);
+    }
+    &.bronze {
+      background: rgba(188, 120, 48, 0.15);
+      color: #8d5524;
+      border: 1px solid rgba(188, 120, 48, 0.4);
+    }
+  }
+
+  // ─── Cert code (monospace, truncate long codes) ───────────────────────────────
+  .cert-code {
+    font-family: monospace;
+    font-size: 0.82rem;
+    color: #555;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

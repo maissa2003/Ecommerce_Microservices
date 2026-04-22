@@ -1,0 +1,169 @@
+<div class="exam-table-container">
+  <!-- ─── Header ─────────────────────────────────────────────────────────── -->
+  <div class="header">
+    <h2>Exams List</h2>
+    <button
+      type="button"
+      class="btn-add"
+      (click)="addExam(); $event.preventDefault()"
+    >
+      <i class="fas fa-plus"></i> Add New Exam
+    </button>
+  </div>
+
+  <!-- ─── Search Bar ─────────────────────────────────────────────────────── -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search search-icon"></i>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search by title or description..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearch()"
+      />
+      <button class="clear-btn" *ngIf="searchQuery" (click)="clearSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <span class="results-count">
+      {{ filteredExams.length }} exam{{
+        filteredExams.length !== 1 ? "s" : ""
+      }}
+      found
+    </span>
+  </div>
+
+  <!-- ─── States ─────────────────────────────────────────────────────────── -->
+  <div *ngIf="loading" class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i> Loading exams...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+  </div>
+
+  <div
+    *ngIf="!loading && filteredExams.length === 0 && !errorMessage"
+    class="no-data"
+  >
+    <i class="fas fa-folder-open"></i>
+    <p *ngIf="searchQuery">
+      No exams match "<strong>{{ searchQuery }}</strong
+      >"
+    </p>
+    <p *ngIf="!searchQuery">
+      No exams found. Click "Add New Exam" to create one.
+    </p>
+    <button
+      *ngIf="searchQuery"
+      class="btn-clear-search"
+      (click)="clearSearch()"
+    >
+      Clear Search
+    </button>
+  </div>
+
+  <!-- ─── Table ───────────────────────────────────────────────────────────── -->
+  <table *ngIf="!loading && filteredExams.length > 0" class="exam-table">
+    <colgroup>
+      <col class="col-title" />
+      <col class="col-description" />
+      <col class="col-passscore" />
+      <col class="col-actions" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Pass Score</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let exam of pagedExams">
+        <td class="col-title-cell">{{ exam.title }}</td>
+        <td class="col-desc-cell">{{ exam.description }}</td>
+        <td>
+          <span class="pass-score-badge">{{ exam.passScore }}%</span>
+        </td>
+        <td class="actions">
+          <button
+            class="action-btn edit"
+            (click)="editExam(exam.id!)"
+            title="Edit Exam"
+          >
+            <i class="fas fa-edit"></i>
+          </button>
+          <button
+            class="action-btn evaluations"
+            (click)="viewEvaluations(exam.id!)"
+            title="View Evaluations"
+          >
+            <i class="fas fa-chart-bar"></i>
+          </button>
+          <button
+            class="action-btn question"
+            [routerLink]="['/admin/exams/question-table', exam.id]"
+            title="Manage Questions"
+          >
+            <i class="fas fa-question-circle"></i>
+          </button>
+          <button
+            class="action-btn certificate"
+            [routerLink]="['/admin/exams/certificates']"
+            [queryParams]="{ examId: exam.id }"
+            title="View Certificates"
+          >
+            <i class="fas fa-certificate"></i>
+          </button>
+          <button
+            class="action-btn delete"
+            (click)="deleteExam(exam.id!)"
+            title="Delete Exam"
+          >
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── Pagination ─────────────────────────────────────────────────────── -->
+  <div class="pagination" *ngIf="!loading && totalPages > 1">
+    <button
+      class="page-btn nav-btn"
+      (click)="goToPage(currentPage - 1)"
+      [disabled]="currentPage === 1"
+    >
+      <i class="fas fa-chevron-left"></i> Previous
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of pageNumbers"
+        class="page-btn"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)"
+      >
+        {{ page }}
+      </button>
+    </div>
+
+    <button
+      class="page-btn nav-btn"
+      (click)="goToPage(currentPage + 1)"
+      [disabled]="currentPage === totalPages"
+    >
+      Next <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+
+  <!-- Page info -->
+  <div class="page-info" *ngIf="!loading && filteredExams.length > 0">
+    Showing {{ (currentPage - 1) * pageSize + 1 }}–{{
+      Math.min(currentPage * pageSize, filteredExams.length)
+    }}
+    of {{ filteredExams.length }} exams
+  </div>
+</div>

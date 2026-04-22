@@ -1,0 +1,207 @@
+<div class="home-page">
+  <!-- Alerts -->
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Welcome to the Trainer Portal</h1>
+      <p class="subtitle">
+        Share your expertise and help students build real-world skills. Manage
+        your application, profile, and future courses from here.
+      </p>
+
+      <div class="cta-row">
+        <!-- ✅ Primary CTA based on status -->
+        <button
+          class="btn primary"
+          *ngIf="status === 'NONE'"
+          (click)="goApply()"
+        >
+          📩 Apply as a Trainer
+        </button>
+
+        <button
+          class="btn primary"
+          *ngIf="status === 'PENDING'"
+          (click)="goMyApplication()"
+        >
+          📄 View My Application
+        </button>
+
+        <button
+          class="btn primary"
+          *ngIf="status === 'ACCEPTED'"
+          (click)="goCreateCourse()"
+        >
+          🎓 Create a Course
+        </button>
+
+        <button
+          class="btn primary"
+          *ngIf="status === 'REJECTED'"
+          (click)="goApply()"
+        >
+          🔁 Submit a New Application
+        </button>
+
+        <!-- Secondary -->
+        <button class="btn ghost" (click)="goMyProfile()">
+          👤 My Profile
+        </button>
+
+        <button class="btn ghost" (click)="loadStatus()" [disabled]="loading">
+          {{ loading ? "Refreshing..." : "🔄 Refresh" }}
+        </button>
+      </div>
+    </div>
+
+    <!-- STATUS CARD -->
+    <div class="status-card">
+      <div class="status-top">
+        <div class="title">Application Status</div>
+        <div class="badge" [ngClass]="statusClass">{{ statusLabel }}</div>
+      </div>
+
+      <div class="status-body" *ngIf="status === 'NONE'">
+        <p>You have not submitted an application yet.</p>
+        <p class="muted">
+          Start now to become an approved trainer on Skill2Job.
+        </p>
+      </div>
+
+      <div class="status-body" *ngIf="status === 'PENDING'">
+        <p>Your application is under review.</p>
+        <p class="muted">You can edit it while it’s still pending.</p>
+        <a class="link" (click)="goMyApplication()">Open application →</a>
+      </div>
+
+      <div class="status-body" *ngIf="status === 'ACCEPTED'">
+        <p>Congratulations! You are an approved trainer.</p>
+        <p class="muted">You can now start creating your courses.</p>
+        <a class="link" (click)="goCreateCourse()"
+          >Create your first course →</a
+        >
+      </div>
+
+      <div class="status-body" *ngIf="status === 'REJECTED'">
+        <p>Your application was not approved.</p>
+        <p class="muted">You can submit a new improved application anytime.</p>
+        <a class="link" (click)="goApply()">Submit a new application →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <div class="section-head">
+      <h2>How it works</h2>
+      <p>Become a trainer in 3 simple steps.</p>
+    </div>
+
+    <div class="grid3">
+      <div class="card">
+        <div class="icon">📝</div>
+        <h3>Submit your application</h3>
+        <p>
+          Tell us about your experience, add your CV link, and share your
+          motivation.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="icon">🔎</div>
+        <h3>Get reviewed</h3>
+        <p>
+          Our team reviews your profile to ensure quality and relevance for
+          students.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="icon">🎓</div>
+        <h3>Start teaching</h3>
+        <p>
+          Create courses and help students learn practical skills that match the
+          job market.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="section soft">
+    <div class="section-head">
+      <h2>Why become a trainer?</h2>
+      <p>Build your reputation and impact learners worldwide.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="benefit">
+        <div class="b-icon">💰</div>
+        <div>
+          <h4>Earn from your expertise</h4>
+          <p>Create valuable content and monetize your knowledge.</p>
+        </div>
+      </div>
+
+      <div class="benefit">
+        <div class="b-icon">🌍</div>
+        <div>
+          <h4>Reach international students</h4>
+          <p>Teach learners from different backgrounds and countries.</p>
+        </div>
+      </div>
+
+      <div class="benefit">
+        <div class="b-icon">🏆</div>
+        <div>
+          <h4>Boost your professional profile</h4>
+          <p>Showcase your skills and grow your credibility.</p>
+        </div>
+      </div>
+
+      <div class="benefit">
+        <div class="b-icon">📈</div>
+        <div>
+          <h4>Grow your personal brand</h4>
+          <p>Build a community around your topics and expertise.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MINI DASHBOARD (only if accepted) -->
+  <section class="section" *ngIf="status === 'ACCEPTED'">
+    <div class="section-head">
+      <h2>Your Trainer Dashboard</h2>
+      <p>Quick overview (you can make it dynamic later).</p>
+    </div>
+
+    <div class="grid3">
+      <div class="stat">
+        <div class="stat-k">Courses</div>
+        <div class="stat-v">{{ stats.courses }}</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-k">Students</div>
+        <div class="stat-v">{{ stats.students }}</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-k">Earnings</div>
+        <div class="stat-v">$ {{ stats.earnings }}</div>
+      </div>
+    </div>
+
+    <div class="actions-bottom">
+      <button class="btn primary" (click)="goCreateCourse()">
+        🎓 Create a Course
+      </button>
+      <button class="btn ghost" (click)="goMyProfile()">
+        👤 Update Profile
+      </button>
+    </div>
+  </section>
+</div>

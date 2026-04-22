@@ -1,0 +1,105 @@
+<div class="result-platform" *ngIf="!loading && exam && evaluation">
+  <!-- Result Card -->
+  <div
+    class="result-card"
+    [class.passed]="evaluation.passed"
+    [class.failed]="!evaluation.passed"
+  >
+    <!-- Header -->
+    <div class="result-header">
+      <h1>{{ exam.title }}</h1>
+      <p class="exam-description">{{ exam.description }}</p>
+    </div>
+
+    <!-- Score Section -->
+    <div class="score-section">
+      <div class="score-circle">
+        <div class="score-value">{{ evaluation.score.toFixed(1) }}%</div>
+        <div class="score-label">Your Score</div>
+      </div>
+
+      <div class="pass-score">
+        <span class="label">Passing Score:</span>
+        <span class="value">{{ exam.passScore }}%</span>
+      </div>
+    </div>
+
+    <!-- Result Message -->
+    <div class="result-message">
+      <div *ngIf="evaluation.passed" class="success-message">
+        <h2>Congratulations!</h2>
+        <p>You passed the exam!</p>
+      </div>
+      <div *ngIf="!evaluation.passed" class="fail-message">
+        <h2>Not this time</h2>
+        <p>Keep practicing, you'll get it next time!</p>
+      </div>
+    </div>
+
+    <!-- Certificate Section (only if passed) -->
+    <div *ngIf="evaluation.passed" class="certificate-section">
+      <div class="certificate-card" *ngIf="certificate; else generating">
+        <div class="certificate-icon">🏆</div>
+        <div class="certificate-info">
+          <h3>Certificate Generated!</h3>
+          <p class="cert-code">Code: {{ certificate.certificateCode }}</p>
+          <p class="cert-date">Issued: {{ certificate.issueDate | date }}</p>
+        </div>
+        <button class="btn btn-primary" (click)="downloadCertificate()">
+          Download Certificate
+        </button>
+      </div>
+
+      <ng-template #generating>
+        <div class="generating-certificate">
+          <div class="spinner-small"></div>
+          <p>Generating your certificate...</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Question details link -->
+    <div class="detail-link" *ngIf="evaluation">
+      <button class="btn btn-outline" (click)="viewQuestionDetails()">
+        See which questions were correct / incorrect
+      </button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn btn-secondary" (click)="goToExams()">
+        ← Back to Exams
+      </button>
+
+      <button
+        *ngIf="!evaluation.passed"
+        class="btn btn-primary"
+        (click)="retakeExam()"
+      >
+        Try Again
+      </button>
+
+      <button
+        *ngIf="evaluation.passed && certificate"
+        class="btn btn-success"
+        (click)="downloadCertificate()"
+      >
+        Download Certificate
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="loading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Loading your results...</p>
+</div>
+
+<!-- Error State -->
+<div *ngIf="error" class="error-container">
+  <div class="error-icon">⚠️</div>
+  <h3>Oops!</h3>
+  <p>{{ error }}</p>
+  <button class="btn btn-primary" (click)="goToExams()">Back to Exams</button>
+</div>

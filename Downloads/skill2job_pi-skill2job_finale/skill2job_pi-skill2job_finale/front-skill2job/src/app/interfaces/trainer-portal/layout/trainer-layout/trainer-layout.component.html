@@ -1,0 +1,29 @@
+<header class="nav">
+  <div class="brand" routerLink="/trainer-portal">Skill2Job • Trainer</div>
+
+  <nav class="links">
+    <a
+      routerLink="/trainer-portal"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      >Home</a
+    >
+    <a routerLink="/trainer-portal/apply" routerLinkActive="active">Apply</a>
+    <a routerLink="/trainer-portal/my-application" routerLinkActive="active"
+      >My Application</a
+    >
+    <a routerLink="/trainer-portal/my-profile" routerLinkActive="active"
+      >My Profile</a
+    >
+    <a routerLink="/trainer-portal/help" routerLinkActive="active">Help</a>
+    <a routerLink="/trainer-portal/messages" routerLinkActive="active">
+      💬 Messages
+      <span class="notif-dot" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+    </a>
+  </nav>
+</header>
+
+<main class="content">
+  <router-outlet></router-outlet>
+  <!-- ✅ IMPORTANT -->
+</main>

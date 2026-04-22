@@ -1,0 +1,139 @@
+<div class="page">
+  <div class="top">
+    <div>
+      <h2>Partner Details</h2>
+      <p class="subtitle" *ngIf="partner">
+        <span class="dot"></span>
+        {{ partner.companyName }}
+      </p>
+    </div>
+
+    <a class="back" routerLink="/admin/partners">← Back</a>
+  </div>
+
+  <p *ngIf="loading" class="loading">Loading...</p>
+  <p class="msg" *ngIf="message">{{ message }}</p>
+
+  <div *ngIf="partner && !loading" class="grid">
+    <!-- Partner Info -->
+    <div class="card partner-card">
+      <div class="card-head">
+        <div class="title-wrap">
+          <h3 class="company">{{ partner.companyName }}</h3>
+
+          <span
+            class="status-badge"
+            [ngClass]="{
+              'st-approved': partner.status === 'APPROVED',
+              'st-pending': partner.status === 'PENDING',
+              'st-suspended': partner.status === 'SUSPENDED'
+            }"
+          >
+            {{ partner.status }}
+          </span>
+        </div>
+
+        <p class="muted">
+          <span class="label">Industry</span>
+          <span class="value">{{ partner.industry || "—" }}</span>
+        </p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info">
+          <span class="label">Email</span>
+          <span class="value">{{ partner.companyEmail || "—" }}</span>
+        </div>
+
+        <div class="info">
+          <span class="label">Phone</span>
+          <span class="value">{{ partner.phone || "—" }}</span>
+        </div>
+
+        <div class="info">
+          <span class="label">Address</span>
+          <span class="value">{{ partner.address || "—" }}</span>
+        </div>
+
+        <div class="info">
+          <span class="label">Website</span>
+
+          <a
+            class="value link"
+            *ngIf="partner.website"
+            [href]="
+              partner.website.startsWith('http')
+                ? partner.website
+                : 'https://' + partner.website
+            "
+            target="_blank"
+          >
+            {{ partner.website }}
+          </a>
+
+          <span class="value" *ngIf="!partner.website">—</span>
+        </div>
+      </div>
+
+      <div class="desc-block">
+        <span class="label">Description</span>
+        <p class="desc">{{ partner.description || "—" }}</p>
+      </div>
+    </div>
+
+    <!-- Offers List -->
+    <div class="card offers-card">
+      <div class="offers-head">
+        <h3>Offers</h3>
+        <span class="count">{{ offers.length }} offer(s)</span>
+      </div>
+
+      <div class="offers-list" *ngIf="offers.length > 0; else empty">
+        <div class="offer" *ngFor="let o of offers">
+          <div class="offer-top">
+            <div class="offer-title">
+              <b>{{ o.title }}</b>
+
+              <div class="chips">
+                <span class="chip">{{ o.type }}</span>
+                <span class="chip">{{ o.mode }}</span>
+                <span class="chip" *ngIf="o.location">{{ o.location }}</span>
+              </div>
+            </div>
+
+            <span
+              class="offer-status"
+              [ngClass]="{
+                'os-open': o.status === 'OPEN',
+                'os-closed': o.status === 'CLOSED'
+              }"
+            >
+              {{ o.status }}
+            </span>
+          </div>
+
+          <p class="offer-desc">{{ o.description }}</p>
+
+          <div class="offer-meta">
+            <div class="meta-item">
+              <span class="label">Deadline</span>
+              <span class="value">{{ o.deadline || "—" }}</span>
+            </div>
+
+            <div class="meta-item">
+              <span class="label">Requirements</span>
+              <span class="value">{{ o.requirements || "—" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #empty>
+        <div class="empty">
+          <div class="empty-icon">📄</div>
+          <p>No offers for this partner.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

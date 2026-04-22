@@ -1,0 +1,225 @@
+.page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+}
+
+.sub {
+  margin: 6px 0 0;
+  color: #666;
+  font-weight: 600;
+}
+
+.loading {
+  margin-top: 10px;
+  font-weight: 700;
+  color: #333;
+}
+
+.msg {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 800;
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
+  color: #0a7;
+}
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+}
+
+/* Card */
+.partner-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
+  transition: 0.18s ease;
+}
+
+.partner-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1);
+  border-color: rgba(196, 22, 28, 0.18);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f1f1;
+  margin-bottom: 12px;
+}
+
+.title h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #777;
+  font-weight: 700;
+}
+
+.status {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  white-space: nowrap;
+}
+
+.approved {
+  background: rgba(40, 167, 69, 0.12);
+  color: #28a745;
+}
+.pending {
+  background: rgba(255, 193, 7, 0.18);
+  color: #a26b00;
+}
+.suspended {
+  background: rgba(220, 53, 69, 0.12);
+  color: #dc3545;
+}
+
+.card-body {
+  display: grid;
+  gap: 10px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #888;
+  font-weight: 900;
+}
+
+.value {
+  font-size: 14px;
+  color: #222;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* ✅ empêcher overflow email / url / description */
+.break {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ✅ description pro : coupe proprement + scroll si trop long */
+.desc-row .value.desc {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+
+  max-height: 60px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+/* Actions */
+.card-actions {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 10px;
+  border-radius: 10px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 13px;
+  text-align: center;
+  text-decoration: none;
+  transition: 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.success {
+  background: #28a745;
+  color: #fff;
+}
+
+.danger {
+  background: #dc3545;
+  color: #fff;
+}
+
+.dark {
+  background: #2c3e50;
+  color: #fff;
+}
+
+.ghost {
+  background: #f2f2f2;
+  color: #222;
+}
+
+.btn:hover:not(:disabled) {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+}
+
+.empty {
+  margin-top: 18px;
+  text-align: center;
+  color: #666;
+  background: #fafafa;
+  border: 1px dashed #e6e6e6;
+  padding: 18px;
+  border-radius: 16px;
+  font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+  .card-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}

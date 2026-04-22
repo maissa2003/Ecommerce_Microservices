@@ -1,0 +1,431 @@
+<div class="blocs-page">
+  <!-- HEADER -->
+  <div class="blocs-header">
+    <h2>Blocs</h2>
+
+    <div class="header-actions">
+      <button class="add-btn" (click)="openAddModal()">
+        + Add Bloc
+      </button>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div *ngIf="loading" class="loading-state">
+    <span class="loading-spinner"></span>
+    Loading blocs...
+  </div>
+
+  <!-- ERROR STATE -->
+  <div *ngIf="error" class="error-state">
+    <p>{{ error }}</p>
+    <button class="add-btn" (click)="retry()">
+      ⟳ Retry
+    </button>
+  </div>
+
+  <!-- MAP -->
+  <div id="blocsMap" class="blocs-map" *ngIf="!loading && !error"></div>
+
+  <!-- GRID -->
+  <div class="blocs-grid" *ngIf="!loading && !error">
+    <div class="bloc-card" *ngFor="let bloc of blocs">
+      <!-- CARD HEADER with gradient background -->
+      <div class="card-header">
+        <div class="card-header-content">
+          <h3>{{ bloc.nom }}</h3>
+          <span
+            class="location-badge"
+            (click)="openLocationModal(bloc)"
+            title="Click to view on map"
+            style="cursor: pointer;"
+            >📍 {{ bloc.location }}</span
+          >
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="card-actions">
+          <button
+            class="edit-btn"
+            (click)="openEditModal(bloc)"
+            title="Edit Bloc"
+          >
+            ✏️
+          </button>
+          <button
+            class="delete-btn"
+            (click)="openDeleteModal(bloc)"
+            title="Delete Bloc"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <!-- CARD BODY -->
+      <div class="card-body">
+        <div class="salles-section">
+          <div class="salles-label">
+            🏫 Salles: {{ bloc.salles?.length || 0 }}
+            <button
+              class="add-salle-btn"
+              (click)="openAddSalleModal(bloc)"
+              title="Add Salle to this Bloc"
+            >
+              + Add
+            </button>
+          </div>
+
+          <div *ngIf="bloc.salles && bloc.salles.length > 0; else noRooms">
+            <div class="salle-item" *ngFor="let salle of bloc.salles">
+              <div class="salle-left">
+                <span class="salle-name">{{ salle.name }}</span>
+                <span class="salle-capacity"> 👥 {{ salle.capacity }} </span>
+              </div>
+
+              <div class="salle-right">
+                <span
+                  class="status-badge"
+                  [ngClass]="{
+                    available: salle.status === 'available',
+                    maintenance: salle.status === 'maintenance'
+                  }"
+                >
+                  {{ salle.status }}
+                </span>
+
+                <button
+                  class="salle-edit-btn"
+                  (click)="openEditSalleModal(salle, bloc)"
+                  title="Edit Salle"
+                >
+                  ✏️
+                </button>
+
+                <button
+                  class="salle-delete-btn"
+                  (click)="openDeleteSalleModal(salle)"
+                  title="Delete Salle"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noRooms>
+            <p class="no-salles">
+              No salles assigned
+            </p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" *ngIf="blocs.length === 0">
+      <p>No blocs found</p>
+      <button class="add-btn" (click)="openAddModal()">
+        Add your first bloc
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- ADD/EDIT BLOC MODAL -->
+<!-- ========================= -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <!-- CLOSE BUTTON -->
+    <button class="close-btn" (click)="closeModal()">
+      ✕
+    </button>
+
+    <!-- MODAL TITLE -->
+    <h2>{{ modalTitle }}</h2>
+
+    <!-- FORM -->
+    <form #blocForm="ngForm">
+      <div class="form-group">
+        <label for="nom">Bloc Name</label>
+        <input
+          type="text"
+          id="nom"
+          class="form-control"
+          [(ngModel)]="currentBloc.nom"
+          name="nom"
+          #nom="ngModel"
+          required
+          minlength="3"
+          placeholder="Enter bloc name"
+        />
+        <div class="error-message" *ngIf="nom.invalid && nom.touched">
+          <span *ngIf="nom.errors?.['required']">Bloc name is required</span>
+          <span *ngIf="nom.errors?.['minlength']"
+            >Minimum 3 characters required</span
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="location">Location</label>
+        <input
+          type="text"
+          id="location"
+          class="form-control"
+          [(ngModel)]="currentBloc.location"
+          name="location"
+          #location="ngModel"
+          required
+          minlength="3"
+          placeholder="Click on map to set location"
+          readonly
+        />
+        <div class="error-message" *ngIf="location.invalid && location.touched">
+          <span *ngIf="location.errors?.['required']"
+            >Location is required</span
+          >
+          <span *ngIf="location.errors?.['minlength']"
+            >Minimum 3 characters required</span
+          >
+        </div>
+      </div>
+
+      <!-- Modal Map (pick location) -->
+      <div class="form-group">
+        <label>Pick Location on Map</label>
+        <div id="modalMap" class="modal-map"></div>
+        <div class="hint">
+          📍 Click on the map to set the bloc location. The address will be
+          filled automatically.
+        </div>
+      </div>
+    </form>
+
+    <!-- MODAL ACTIONS -->
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeModal()">
+        Cancel
+      </button>
+      <button
+        class="save-btn"
+        (click)="saveBloc()"
+        [disabled]="!currentBloc.nom || !currentBloc.location"
+      >
+        {{ isEditMode ? "Update Bloc" : "Create Bloc" }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- DELETE CONFIRMATION MODAL -->
+<!-- ========================= -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal-card delete-modal" (click)="$event.stopPropagation()">
+    <!-- CLOSE BUTTON -->
+    <button class="close-btn" (click)="closeDeleteModal()">
+      ✕
+    </button>
+
+    <!-- WARNING ICON -->
+    <div class="warning-icon">
+      <i>⚠️</i>
+    </div>
+
+    <!-- WARNING MESSAGE -->
+    <div class="warning-message">
+      Delete <strong>{{ blocToDelete?.nom }}</strong
+      >?
+    </div>
+
+    <div class="warning-hint">
+      This action cannot be undone. All associated salles will be affected.
+    </div>
+
+    <!-- MODAL ACTIONS -->
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeDeleteModal()">
+        Cancel
+      </button>
+      <button class="confirm-btn" (click)="deleteBloc()">
+        Delete Permanently
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- VIEW LOCATION MODAL (Read-Only Map) -->
+<!-- ========================= -->
+<div
+  class="modal-overlay"
+  *ngIf="showLocationModal"
+  (click)="closeLocationModal()"
+>
+  <div class="modal-card location-modal" (click)="$event.stopPropagation()">
+    <!-- CLOSE BUTTON -->
+    <button class="close-btn" (click)="closeLocationModal()">
+      ✕
+    </button>
+
+    <!-- MODAL TITLE -->
+    <h2>📍 {{ locationViewBloc?.nom }}</h2>
+
+    <!-- READ-ONLY MAP -->
+    <div id="locationViewMap" class="location-view-map"></div>
+
+    <!-- LOCATION TEXT -->
+    <div class="location-text">
+      <p>{{ locationViewBloc?.location }}</p>
+    </div>
+
+    <!-- CLOSE BUTTON AT BOTTOM -->
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeLocationModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- ADD/EDIT SALLE MODAL -->
+<!-- ========================= -->
+<div class="modal-overlay" *ngIf="showSalleModal" (click)="closeSalleModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <!-- CLOSE BUTTON -->
+    <button class="close-btn" (click)="closeSalleModal()">
+      ✕
+    </button>
+
+    <!-- MODAL TITLE -->
+    <h2>{{ salleModalTitle }}</h2>
+
+    <!-- FORM -->
+    <form #salleForm="ngForm">
+      <div class="form-group">
+        <label for="salleName"
+          >Salle Name <span class="required">*</span></label
+        >
+        <input
+          type="text"
+          id="salleName"
+          class="form-control"
+          [(ngModel)]="currentSalle.name"
+          name="salleName"
+          #salleName="ngModel"
+          required
+          minlength="2"
+          placeholder="Enter salle name (e.g., Room A1)"
+        />
+        <div
+          class="error-message"
+          *ngIf="salleName.invalid && salleName.touched"
+        >
+          <span *ngIf="salleName.errors?.['required']"
+            >Salle name is required</span
+          >
+          <span *ngIf="salleName.errors?.['minlength']"
+            >Minimum 2 characters required</span
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="capacity">Capacity <span class="required">*</span></label>
+        <input
+          type="number"
+          id="capacity"
+          class="form-control"
+          [(ngModel)]="currentSalle.capacity"
+          name="capacity"
+          #capacity="ngModel"
+          required
+          min="1"
+          placeholder="Number of seats"
+        />
+        <div class="error-message" *ngIf="capacity.invalid && capacity.touched">
+          <span *ngIf="capacity.errors?.['required']"
+            >Capacity is required</span
+          >
+          <span *ngIf="capacity.errors?.['min']"
+            >Capacity must be at least 1</span
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status <span class="required">*</span></label>
+        <select
+          id="status"
+          class="form-control"
+          [(ngModel)]="currentSalle.status"
+          name="status"
+          #status="ngModel"
+          required
+        >
+          <option value="available">Available</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="occupied">Occupied</option>
+        </select>
+      </div>
+    </form>
+
+    <!-- MODAL ACTIONS -->
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeSalleModal()">
+        Cancel
+      </button>
+      <button
+        class="save-btn"
+        (click)="saveSalle()"
+        [disabled]="!currentSalle.name || !currentSalle.capacity"
+      >
+        {{ isEditSalleMode ? "Update Salle" : "Add Salle" }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- DELETE SALLE CONFIRMATION MODAL -->
+<!-- ========================= -->
+<div
+  class="modal-overlay"
+  *ngIf="showDeleteSalleModal"
+  (click)="closeDeleteSalleModal()"
+>
+  <div class="modal-card delete-modal" (click)="$event.stopPropagation()">
+    <!-- CLOSE BUTTON -->
+    <button class="close-btn" (click)="closeDeleteSalleModal()">
+      ✕
+    </button>
+
+    <!-- WARNING ICON -->
+    <div class="warning-icon">
+      <i>⚠️</i>
+    </div>
+
+    <!-- WARNING MESSAGE -->
+    <div class="warning-message">
+      Delete <strong>{{ salleToDelete?.name }}</strong
+      >?
+    </div>
+
+    <div class="warning-hint">
+      This action cannot be undone.
+    </div>
+
+    <!-- MODAL ACTIONS -->
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeDeleteSalleModal()">
+        Cancel
+      </button>
+      <button class="confirm-btn" (click)="deleteSalle()">
+        Delete Permanently
+      </button>
+    </div>
+  </div>
+</div>

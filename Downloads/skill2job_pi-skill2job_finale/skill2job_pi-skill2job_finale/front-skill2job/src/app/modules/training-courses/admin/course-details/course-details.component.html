@@ -1,0 +1,329 @@
+<div class="cd-page">
+  <!-- ═══════════ TOPBAR ═══════════ -->
+  <div class="cd-topbar">
+    <button class="cd-back-btn" (click)="goBack()">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+      >
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+      Back to Courses
+    </button>
+  </div>
+
+  <!-- ═══════════ LOADING ═══════════ -->
+  <div *ngIf="loading" class="cd-loader">
+    <div class="cd-spinner"></div>
+    <p>Loading course…</p>
+  </div>
+
+  <!-- ═══════════ ERROR ═══════════ -->
+  <div *ngIf="error" class="cd-error">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+    {{ error }}
+  </div>
+
+  <!-- ═══════════ CONTENT ═══════════ -->
+  <div *ngIf="!loading && course" class="cd-body">
+    <!-- ══════════════════════════════════════════════════
+         COURSE HEADER CARD  (matches screenshot top block)
+         ══════════════════════════════════════════════════ -->
+    <div class="cd-header-card">
+      <img class="cd-thumb" [src]="getImageUrl()" [alt]="course.title" />
+
+      <div class="cd-course-info">
+        <div class="cd-cat-tag">{{ course.category?.name || "General" }}</div>
+        <h1 class="cd-title">{{ course.title }}</h1>
+        <p class="cd-desc">{{ course.description }}</p>
+      </div>
+
+      <!-- Progress bar — shows how many PDFs have been opened -->
+      <div class="cd-progress-col">
+        <div class="cd-prog-meta">
+          <span>
+            <strong>{{ rawPdfUrls.length }}</strong>
+            document{{ rawPdfUrls.length !== 1 ? "s" : "" }} available
+          </span>
+          <button
+            class="cd-collapse-all"
+            *ngIf="openedIndex !== null"
+            (click)="openedIndex = null"
+            title="Collapse"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+          </button>
+        </div>
+        <div class="cd-prog-bar">
+          <div
+            class="cd-prog-fill"
+            [style.width.%]="rawPdfUrls.length ? 100 : 0"
+          ></div>
+        </div>
+      </div>
+    </div>
+    <!-- /cd-header-card -->
+
+    <!-- ══════════════════════════════════════════════════
+         DOCUMENT LIST  (Blackboard rows)
+         ══════════════════════════════════════════════════ -->
+    <ng-container *ngIf="rawPdfUrls.length > 0; else noDocs">
+      <div class="cd-list">
+        <div
+          *ngFor="let pdf of pdfUrls; let i = index"
+          class="cd-item"
+          [class.cd-item--open]="openedIndex === i"
+        >
+          <!-- ── Row header (clickable) ── -->
+          <div class="cd-row" (click)="toggleAccordion(i)">
+            <!-- Status circle -->
+            <div
+              class="cd-status-dot"
+              [class.cd-status-dot--filled]="openedIndex === i"
+            ></div>
+
+            <!-- Document icon -->
+            <div class="cd-file-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12
+                         a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="8" y1="13" x2="16" y2="13" />
+                <line x1="8" y1="17" x2="13" y2="17" />
+              </svg>
+            </div>
+
+            <!-- Title -->
+            <span class="cd-doc-name">{{ getLessonTitle(i) }}</span>
+
+            <!-- Right controls -->
+            <div class="cd-row-right">
+              <!-- Open / Download (stop propagation so they don't toggle) -->
+              <a
+                class="cd-icon-btn cd-icon-btn--ghost"
+                [href]="getRawUrl(i)"
+                target="_blank"
+                (click)="$event.stopPropagation()"
+                title="Open in new tab"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2
+                           V8a2 2 0 0 1 2-2h6"
+                  />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </a>
+              <a
+                class="cd-icon-btn cd-icon-btn--red"
+                [href]="getRawUrl(i)"
+                download
+                (click)="$event.stopPropagation()"
+                title="Download PDF"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </a>
+              <!-- Chevron -->
+              <div
+                class="cd-chevron"
+                [class.cd-chevron--up]="openedIndex === i"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <!-- /cd-row -->
+
+          <!-- ── PDF Viewer (accordion body) ── -->
+          <div class="cd-viewer" *ngIf="openedIndex === i">
+            <!-- Toolbar -->
+            <div class="cd-viewer-bar">
+              <div class="cd-vb-info">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="color:var(--red); flex-shrink:0"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12
+                           a2 2 0 0 0 2-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                <span>{{ getLessonTitle(i) }}</span>
+              </div>
+              <div class="cd-vb-actions">
+                <a
+                  class="cd-vb-btn cd-vb-btn--ghost"
+                  [href]="getRawUrl(i)"
+                  target="_blank"
+                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2
+                             V8a2 2 0 0 1 2-2h6"
+                    />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                  Open
+                </a>
+                <a
+                  class="cd-vb-btn cd-vb-btn--red"
+                  [href]="getRawUrl(i)"
+                  download
+                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download
+                </a>
+              </div>
+            </div>
+            <!-- /cd-viewer-bar -->
+
+            <!-- iframe -->
+            <div class="cd-iframe-wrap">
+              <iframe
+                [src]="pdfUrls[i]"
+                class="cd-iframe"
+                frameborder="0"
+                allowfullscreen
+                loading="lazy"
+              >
+              </iframe>
+              <!-- Fallback hint always visible below -->
+              <div class="cd-iframe-fallback">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="color:#9ca3af"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <span>
+                  If the PDF doesn't display,&nbsp;
+                  <a [href]="getRawUrl(i)" target="_blank"
+                    >open it in a new tab</a
+                  >
+                  &nbsp;or&nbsp;
+                  <a [href]="getRawUrl(i)" download>download it</a>.
+                </span>
+              </div>
+            </div>
+          </div>
+          <!-- /cd-viewer -->
+        </div>
+        <!-- /cd-item -->
+      </div>
+      <!-- /cd-list -->
+    </ng-container>
+
+    <!-- ══ No documents ══ -->
+    <ng-template #noDocs>
+      <div class="cd-empty">
+        <svg
+          width="52"
+          height="52"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+        >
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+        <h3>No materials yet</h3>
+        <p>This course has no PDF documents attached.</p>
+      </div>
+    </ng-template>
+  </div>
+  <!-- /cd-body -->
+</div>

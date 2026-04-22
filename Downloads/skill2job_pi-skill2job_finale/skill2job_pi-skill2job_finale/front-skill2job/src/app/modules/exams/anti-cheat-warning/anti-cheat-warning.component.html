@@ -1,0 +1,14 @@
+<div class="warning-overlay" *ngIf="visible">
+  <div class="warning-box">
+    <div class="warning-icon">⚠️</div>
+    <h2>Violation Detected</h2>
+    <p class="violation-type">{{ violationMessage }}</p>
+    <p class="violation-count">
+      Warning <strong>{{ count }}</strong> of <strong>{{ max }}</strong>
+    </p>
+    <p *ngIf="count >= max" class="auto-submit-msg">
+      🚨 Maximum violations reached. Your exam is being submitted.
+    </p>
+    <button (click)="dismiss()" [disabled]="count >= max">I Understand</button>
+  </div>
+</div>

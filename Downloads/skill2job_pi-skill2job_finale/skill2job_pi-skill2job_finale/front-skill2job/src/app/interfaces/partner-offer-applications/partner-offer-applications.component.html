@@ -1,0 +1,297 @@
+<div class="partner-apps">
+  <div class="header">
+    <div>
+      <h2>Applications — {{ offerTitle }}</h2>
+      <p class="muted">Manage candidate applications and update their status</p>
+    </div>
+
+    <div class="filters">
+      <!-- Status filter -->
+      <select [(ngModel)]="statusFilter" (ngModelChange)="applyFilter()">
+        <option value="ALL">All</option>
+        <option value="SENT">Sent</option>
+        <option value="SHORTLISTED">Shortlisted</option>
+        <option value="INTERVIEW">Interview</option>
+        <option value="ACCEPTED">Accepted</option>
+        <option value="REJECTED">Rejected</option>
+      </select>
+
+      <!-- Sort -->
+      <select [(ngModel)]="sortMode" (ngModelChange)="applyFilter()">
+        <option value="NEWEST">Newest</option>
+        <option value="OLDEST">Oldest</option>
+        <option value="SCORE">Top Score</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading...</div>
+  <div *ngIf="error" class="alert error">⚠️ {{ error }}</div>
+
+  <div class="grid one-col" *ngIf="!loading && filtered.length > 0">
+    <div class="card" *ngFor="let a of filtered">
+      <div class="top">
+        <div class="title">
+          <div class="name-row">
+            <h3>{{ a.studentUsername }}</h3>
+
+            <!-- ✅ TOP CANDIDATE BADGE -->
+            <span class="top-badge" *ngIf="isTopCandidate(a.score)"
+              >🏆 Top Candidate</span
+            >
+            <span
+              class="top-badge auto"
+              *ngIf="a.status === 'SHORTLISTED' && a.autoShortlisted"
+            >
+              ✅ Auto-Shortlisted
+            </span>
+          </div>
+
+          <div class="muted">{{ a.studentEmail }}</div>
+        </div>
+
+        <span class="status" [ngClass]="badgeClass(a.status)">
+          {{ a.status }}
+        </span>
+      </div>
+
+      <div class="meta">
+        <div><b>Applied On:</b> {{ a.appliedAt | date: "medium" }}</div>
+        <!-- ✅ SCORE -->
+        <div
+          class="score-row"
+          *ngIf="a.score !== null && a.score !== undefined"
+        >
+          <div class="score-top">
+            <b>Score:</b>
+            <span class="score-badge" [ngClass]="scoreClass(a.score)">
+              {{ a.score }}/100
+            </span>
+
+            <!-- ✅ LEVEL TAG (include Low) -->
+            <span class="score-level" [ngClass]="scoreClass(a.score)">
+              {{ scoreLevel(a.score) }}
+            </span>
+          </div>
+
+          <div class="score-bar">
+            <div
+              class="score-fill"
+              [ngClass]="scoreClass(a.score)"
+              [style.width.%]="a.score"
+            ></div>
+          </div>
+
+          <div class="score-hint">{{ scoreLabel(a.score) }}</div>
+        </div>
+
+        <!-- Interview info (leave as is; backend already fixed) -->
+        <div
+          *ngIf="a.status === 'INTERVIEW' && (a.interviewAt || a.meetLink)"
+          class="interview-box"
+        >
+          <div>
+            <b>Interview:</b>
+            {{ a.interviewAt ? (a.interviewAt | date: "medium") : "-" }}
+          </div>
+          <div *ngIf="a.meetLink">
+            <b>Meet:</b>
+            <a [href]="a.meetLink" target="_blank" rel="noopener noreferrer">{{
+              a.meetLink
+            }}</a>
+          </div>
+          <div *ngIf="a.interviewNote" class="muted">
+            <b>Note:</b> {{ a.interviewNote }}
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+          *ngIf="isValidUrl(a.cvUrl)"
+          class="btn ghost"
+          type="button"
+          (click)="openCv(a.cvUrl)"
+        >
+          View CV
+        </button>
+
+        <button
+          class="btn ghost"
+          type="button"
+          (click)="openMotivation(a.motivation)"
+        >
+          View Motivation
+        </button>
+
+        <button
+          *ngIf="canShortlist(a.status)"
+          class="btn"
+          type="button"
+          (click)="shortlist(a)"
+        >
+          Shortlist
+        </button>
+
+        <button
+          *ngIf="canScheduleInterview(a.status)"
+          class="btn primary"
+          type="button"
+          (click)="openInterview(a)"
+        >
+          Schedule Interview
+        </button>
+
+        <button
+          *ngIf="canAccept(a.status)"
+          class="btn success"
+          type="button"
+          (click)="accept(a)"
+        >
+          Accept
+        </button>
+
+        <button
+          *ngIf="canReject(a.status)"
+          class="btn danger"
+          type="button"
+          (click)="reject(a)"
+        >
+          Reject
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && filtered.length === 0" class="empty">
+    No applications found.
+  </div>
+</div>
+
+<!-- ✅ PREVIEW MODAL + INTERVIEW MODAL : keep your existing code unchanged -->
+
+<!-- ✅ PREVIEW MODAL (PDF / TEXT) -->
+<div class="modal-overlay" *ngIf="previewOpen" (click)="closePreview()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <h3>{{ previewTitle }}</h3>
+      <button class="btn ghost" type="button" (click)="closePreview()">
+        ✕
+      </button>
+    </div>
+
+    <!-- PDF Preview -->
+    <div *ngIf="previewType === 'pdf'" class="pdf-box">
+      <iframe
+        *ngIf="previewUrl"
+        [src]="previewUrl"
+        width="100%"
+        height="520"
+        style="border:0; border-radius: 12px;"
+      >
+      </iframe>
+
+      <div class="modal-actions">
+        <button class="btn primary" type="button" (click)="openInNewTab()">
+          Open in new tab
+        </button>
+      </div>
+    </div>
+
+    <!-- Text Preview -->
+    <div *ngIf="previewType === 'text'" class="text-box">
+      <p>{{ previewText }}</p>
+
+      <div class="modal-actions">
+        <button class="btn primary" type="button" (click)="closePreview()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ INTERVIEW MODAL -->
+<div class="modal-overlay" *ngIf="interviewOpen" (click)="closeInterview()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <h3>Schedule Interview</h3>
+      <button class="btn ghost" type="button" (click)="closeInterview()">
+        ✕
+      </button>
+    </div>
+
+    <div class="i-form">
+      <div class="i-candidate">
+        <div class="i-avatar">
+          {{ (interviewApp?.studentUsername || "U").charAt(0) | uppercase }}
+        </div>
+        <div class="i-candidate-info">
+          <div class="i-name">{{ interviewApp?.studentUsername }}</div>
+          <div class="i-email">{{ interviewApp?.studentEmail }}</div>
+        </div>
+      </div>
+
+      <div class="i-grid">
+        <div class="i-field">
+          <label class="i-label">Interview date & time <span>*</span></label>
+          <div class="i-control">
+            <span class="i-icon">🗓️</span>
+            <input
+              class="i-input"
+              type="datetime-local"
+              [(ngModel)]="interviewAtLocal"
+            />
+          </div>
+          <div class="i-hint">
+            Pick the exact time you want to meet the candidate.
+          </div>
+        </div>
+
+        <div class="i-field">
+          <label class="i-label">Google Meet link <span>*</span></label>
+          <div class="i-control">
+            <span class="i-icon">🔗</span>
+            <input
+              class="i-input"
+              type="text"
+              placeholder="https://meet.google.com/xxx-xxxx-xxx"
+              [(ngModel)]="meetLink"
+            />
+          </div>
+          <div class="i-hint">
+            Paste the Meet link you created in Google Meet.
+          </div>
+        </div>
+      </div>
+
+      <div class="i-field">
+        <label class="i-label"
+          >Message to candidate <span class="opt">(optional)</span></label
+        >
+        <textarea
+          class="i-textarea"
+          rows="4"
+          placeholder="Example: Please join 5 minutes earlier. Bring your portfolio..."
+          [(ngModel)]="interviewNote"
+        ></textarea>
+      </div>
+
+      <div *ngIf="interviewError" class="i-alert">⚠️ {{ interviewError }}</div>
+
+      <div class="i-actions">
+        <button class="i-btn ghost" type="button" (click)="closeInterview()">
+          Cancel
+        </button>
+        <button
+          class="i-btn primary"
+          type="button"
+          [disabled]="interviewSubmitting"
+          (click)="submitInterview()"
+        >
+          {{ interviewSubmitting ? "Saving..." : "Save interview" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

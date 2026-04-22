@@ -1,0 +1,235 @@
+<div class="apply-page">
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Apply as a Trainer</h1>
+      <p class="subtitle">
+        Submit your application. An automatic summary will be generated for the
+        HR team.
+      </p>
+      <div class="cta-row">
+        <button class="btn primary" (click)="submit()" [disabled]="!canSubmit">
+          <span *ngIf="!loading">✅ Submit Application</span>
+          <span *ngIf="loading">⏳ Submitting...</span>
+        </button>
+        <a class="btn ghost" routerLink="/trainer-portal/my-application"
+          >📌 View My Application</a
+        >
+      </div>
+    </div>
+
+    <div class="steps-card">
+      <div class="steps-head">
+        <div class="title">Quick steps</div>
+        <div class="badge neutral">3 steps</div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div>
+            <div class="s-title">CV Link</div>
+            <div class="s-desc">Public URL (Drive / PDF / Portfolio)</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div>
+            <div class="s-title">Motivation</div>
+            <div class="s-desc">Your skills + why you want to teach</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div>
+            <div class="s-title">Tracking</div>
+            <div class="s-desc">Follow the status in "My Application"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM + SCORE ROW -->
+  <div class="form-score-row">
+    <!-- FORM -->
+    <section class="section">
+      <div class="section-head">
+        <h2>📋 Application Form</h2>
+        <p>Provide a valid CV link and a detailed motivation.</p>
+      </div>
+
+      <div class="alert error" *ngIf="!isLoggedIn">
+        You are not logged in. Please sign in to apply.
+      </div>
+      <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+      <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <div class="form">
+        <label class="label">
+          <span class="label-row">
+            <span>📄 CV Link (URL)</span>
+            <span
+              class="hint"
+              [class.bad]="cvUrl && !isCvValid"
+              [class.good]="isCvValid"
+            >
+              {{
+                isCvValid ? "✅ Valid" : cvUrl ? "❌ Invalid URL" : "Required"
+              }}
+            </span>
+          </span>
+          <input
+            class="input"
+            type="url"
+            placeholder="https://drive.google.com/... or https://my-portfolio.com"
+            [(ngModel)]="cvUrl"
+          />
+        </label>
+
+        <label class="label">
+          <span class="label-row">
+            <span>📝 Motivation</span>
+            <span
+              class="hint"
+              [class.good]="isMotivationValid"
+              [class.bad]="motivation && !isMotivationValid"
+            >
+              {{ motivation.length || 0 }}/50 min
+            </span>
+          </span>
+          <textarea
+            class="textarea"
+            rows="8"
+            placeholder="Describe your specialty, your experience, and why you want to teach..."
+            [(ngModel)]="motivation"
+          ></textarea>
+        </label>
+
+        <div class="actions">
+          <button class="btn solid" (click)="submit()" [disabled]="!canSubmit">
+            <span *ngIf="!loading">✅ Submit Application</span>
+            <span *ngIf="loading">⏳ Submitting...</span>
+          </button>
+          <a class="btn outline" routerLink="/trainer-portal/my-application"
+            >📌 View My Application</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE SCORE PANEL -->
+    <div class="score-panel">
+      <div class="score-header">
+        <div class="score-title">🧠 Live Profile Score</div>
+        <div class="score-badge" [ngClass]="scoreClass">{{ scoreLabel }}</div>
+      </div>
+
+      <!-- Score circle -->
+      <div class="score-circle-wrap">
+        <svg viewBox="0 0 120 120" width="120" height="120">
+          <circle
+            cx="60"
+            cy="60"
+            r="50"
+            fill="none"
+            stroke="#e5e7eb"
+            stroke-width="10"
+          />
+          <circle
+            cx="60"
+            cy="60"
+            r="50"
+            fill="none"
+            [attr.stroke]="
+              totalScore >= 80
+                ? '#22c55e'
+                : totalScore >= 60
+                ? '#f59e0b'
+                : totalScore >= 40
+                ? '#f97316'
+                : '#ef4444'
+            "
+            stroke-width="10"
+            stroke-linecap="round"
+            stroke-dasharray="314"
+            [attr.stroke-dashoffset]="314 - (314 * totalScore) / 100"
+            transform="rotate(-90 60 60)"
+          />
+          <text
+            x="60"
+            y="56"
+            text-anchor="middle"
+            font-size="22"
+            font-weight="bold"
+            fill="#111827"
+          >
+            {{ totalScore }}
+          </text>
+          <text
+            x="60"
+            y="72"
+            text-anchor="middle"
+            font-size="11"
+            fill="#6b7280"
+          >
+            / 100
+          </text>
+        </svg>
+      </div>
+
+      <!-- Score breakdown -->
+      <div class="score-breakdown">
+        <div class="breakdown-item">
+          <div class="breakdown-label">📄 CV Link</div>
+          <div class="breakdown-bar">
+            <div
+              class="breakdown-fill"
+              [style.width.%]="cvScore"
+              [ngClass]="cvScore > 0 ? 'fill-good' : 'fill-bad'"
+            ></div>
+          </div>
+          <div class="breakdown-val">{{ cvScore }}/20</div>
+        </div>
+
+        <div class="breakdown-item">
+          <div class="breakdown-label">📝 Motivation Length</div>
+          <div class="breakdown-bar">
+            <div
+              class="breakdown-fill"
+              [style.width.%]="(lengthScore / 40) * 100"
+              [ngClass]="lengthScore >= 20 ? 'fill-good' : 'fill-avg'"
+            ></div>
+          </div>
+          <div class="breakdown-val">{{ lengthScore }}/40</div>
+        </div>
+
+        <div class="breakdown-item">
+          <div class="breakdown-label">🛠️ Tech Keywords</div>
+          <div class="breakdown-bar">
+            <div
+              class="breakdown-fill"
+              [style.width.%]="(keywordsScore / 40) * 100"
+              [ngClass]="keywordsScore >= 20 ? 'fill-good' : 'fill-avg'"
+            ></div>
+          </div>
+          <div class="breakdown-val">{{ keywordsScore }}/40</div>
+        </div>
+      </div>
+
+      <!-- Detected keywords -->
+      <div class="keywords-section" *ngIf="detectedKeywords.length > 0">
+        <div class="keywords-title">✅ Detected Keywords</div>
+        <div class="keywords-list">
+          <span class="keyword-tag" *ngFor="let k of detectedKeywords">{{
+            k
+          }}</span>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="tips-section" *ngIf="tips.length > 0">
+        <div class="tips-title">💡 Suggestions</div>
+        <div class="tip-item" *ngFor="let tip of tips">{{ tip }}</div>
+      </div>
+    </div>
+  </div>
+</div>

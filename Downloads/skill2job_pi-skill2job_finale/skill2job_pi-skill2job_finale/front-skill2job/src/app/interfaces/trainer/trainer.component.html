@@ -1,0 +1,29 @@
+<div class="trainer-container">
+  <nav class="trainer-navbar">
+    <div class="nav-content">
+      <div class="nav-left">
+        <h2 class="trainer-brand">👨‍🏫 TRAINER DASHBOARD</h2>
+      </div>
+      <div class="nav-right">
+        <a
+          routerLink="/trainer"
+          routerLinkActive="nav-link-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          >Dashboard</a
+        >
+        <a
+          routerLink="/trainer/my-courses"
+          routerLinkActive="nav-link-active"
+          class="nav-link"
+          >My Courses</a
+        >
+        <button type="button" class="nav-btn" (click)="logout()">
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <router-outlet></router-outlet>
+</div>

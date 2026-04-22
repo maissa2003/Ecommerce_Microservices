@@ -1,0 +1,139 @@
+<div class="certificate-details-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="btn-back" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Back to Certificates
+    </button>
+    <h1>Certificate Details</h1>
+    <div class="header-actions">
+      <button
+        class="btn-verify"
+        (click)="verifyCertificate()"
+        [disabled]="!certificate"
+      >
+        <i class="fas fa-check-circle"></i> Verify
+      </button>
+      <button
+        class="btn-download"
+        (click)="downloadCertificate()"
+        [disabled]="!certificate"
+      >
+        <i class="fas fa-download"></i> Download
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading certificate details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage" class="error-state">
+    <i class="fas fa-exclamation-circle"></i>
+    <p>{{ errorMessage }}</p>
+    <button class="btn-retry" (click)="loadCertificate()">Retry</button>
+  </div>
+
+  <!-- Certificate Display -->
+  <div
+    *ngIf="!loading && !errorMessage && certificate"
+    class="certificate-card"
+    id="certificate-print"
+  >
+    <!-- Red Accent Bar -->
+    <div class="accent-bar"></div>
+
+    <!-- Certificate Content -->
+    <div class="certificate-content">
+      <!-- Logo / Icon -->
+      <div class="certificate-icon">
+        <i class="fas fa-certificate"></i>
+      </div>
+
+      <!-- Title -->
+      <h1 class="certificate-title">CERTIFICATE OF ACHIEVEMENT</h1>
+
+      <!-- Certificate Code -->
+      <div class="certificate-code">
+        <span class="label">Certificate #:</span>
+        <span class="value">{{ certificate.certificateCode }}</span>
+      </div>
+
+      <!-- Issued To -->
+      <div class="info-section">
+        <div class="info-item">
+          <span class="label">Issued To:</span>
+          <span class="value">{{ issuedToName }}</span>
+        </div>
+      </div>
+
+      <!-- Exam Details -->
+      <div class="exam-details">
+        <h3>Exam Details</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="label">Exam:</span>
+            <span class="value">{{
+              certificate.evaluation?.exam?.title || "N/A"
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Score:</span>
+            <span class="value">{{ certificate.evaluation?.score }}%</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Passing Score:</span>
+            <span class="value"
+              >{{ certificate.evaluation?.exam?.passScore }}%</span
+            >
+          </div>
+          <div class="detail-item">
+            <span class="label">Result:</span>
+            <span class="value passed" *ngIf="certificate.evaluation?.passed">
+              <i class="fas fa-check-circle"></i> PASSED
+            </span>
+            <span class="value failed" *ngIf="!certificate.evaluation?.passed">
+              <i class="fas fa-times-circle"></i> FAILED
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issue Date -->
+      <div class="issue-date">
+        <span class="label">Issue Date:</span>
+        <span class="value">{{
+          certificate.issueDate | date: "MMMM d, yyyy"
+        }}</span>
+      </div>
+
+      <!-- Signature -->
+      <div class="signature">
+        <div class="signature-line"></div>
+        <p>Authorized Signature</p>
+      </div>
+
+      <!-- Verification Badge -->
+      <div class="verification-badge">
+        <i class="fas fa-qrcode"></i>
+        <span
+          >Verify at: skill2job.com/verify/{{
+            certificate.certificateCode
+          }}</span
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Not Found State -->
+  <div *ngIf="!loading && !errorMessage && !certificate" class="not-found">
+    <i class="fas fa-certificate"></i>
+    <h3>Certificate Not Found</h3>
+    <p>The certificate you're looking for doesn't exist or has been removed.</p>
+    <button class="btn-back-home" routerLink="/admin/exams/certificates">
+      View All Certificates
+    </button>
+  </div>
+</div>

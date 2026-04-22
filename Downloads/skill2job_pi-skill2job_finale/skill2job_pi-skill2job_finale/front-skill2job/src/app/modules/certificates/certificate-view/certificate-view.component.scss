@@ -1,0 +1,238 @@
+/* Page wrapper lets global logo background show through */
+.certificate-view {
+  min-height: 100vh;
+  background: transparent;
+  padding: 100px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+}
+
+/* Main certificate card – white with red/black brand colors */
+.certificate-display {
+  max-width: 900px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 36px 40px;
+  margin-bottom: 30px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+  border: 2px solid #c22b33;
+  position: relative;
+}
+
+/* Header: red title on white card */
+.certificate-header {
+  text-align: center;
+  margin-bottom: 24px;
+
+  h1 {
+    color: #c22b33;
+    font-size: 2rem;
+    margin: 0;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 3px;
+      background: #c22b33;
+      border-radius: 2px;
+    }
+  }
+}
+
+.certificate-body {
+  text-align: center;
+
+  .exam-title {
+    font-size: 1.7rem;
+    color: #111111;
+    margin: 28px 0 12px;
+    font-weight: 700;
+  }
+
+  .awarded-to {
+    margin: 24px 0 10px;
+
+    p {
+      color: #666666;
+      margin: 4px 0;
+      font-size: 0.98rem;
+    }
+
+    h3 {
+      color: #111111;
+      font-size: 1.3rem;
+      margin: 10px 0;
+      font-weight: 600;
+    }
+  }
+
+  .certificate-details {
+    background: #fafafa;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 26px 0;
+    border: 1px solid #e0e0e0;
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eeeeee;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .label {
+        color: #666666;
+        font-size: 0.9rem;
+      }
+
+      .code {
+        color: #c22b33;
+        font-family: monospace;
+        font-weight: 600;
+      }
+
+      .score-badge {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        &.passed {
+          background: #e8f5e9;
+          color: #2e7d32;
+        }
+        &.failed {
+          background: #ffebee;
+          color: #c62828;
+        }
+      }
+    }
+  }
+
+  .signature {
+    margin-top: 30px;
+
+    .signature-image {
+      max-width: 220px;
+      max-height: 80px;
+      display: block;
+      margin: 0 auto 10px;
+    }
+
+    p {
+      color: #111111;
+      font-size: 1rem;
+      font-style: italic;
+      border-top: 1px solid #dddddd;
+      padding-top: 16px;
+      display: inline-block;
+    }
+
+    .year {
+      color: #777777;
+      font-size: 0.9rem;
+      border-top: none;
+      padding-top: 0;
+      margin-left: 8px;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 15px;
+}
+
+.btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &-primary {
+    background: #b71c1c;
+    color: white;
+
+    &:hover {
+      background: #d32f2f;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(183, 28, 28, 0.4);
+    }
+  }
+
+  &-secondary {
+    background: #333333;
+    color: white;
+
+    &:hover {
+      background: #444444;
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.loading-container,
+.error-container {
+  min-height: 100vh;
+  background: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 20px;
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #333333;
+    border-top-color: #b71c1c;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+
+  .error-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    color: #b71c1c;
+    margin-bottom: 10px;
+  }
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 20px;
+  color: #888888;
+  font-size: 0.9rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

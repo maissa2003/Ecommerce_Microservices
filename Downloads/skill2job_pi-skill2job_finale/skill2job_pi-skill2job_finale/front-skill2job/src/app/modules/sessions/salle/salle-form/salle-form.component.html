@@ -1,0 +1,128 @@
+<div class="page">
+  <div class="card">
+    <!-- HEADER -->
+    <div class="card-header">
+      <div class="icon">🏫</div>
+      <div>
+        <h2>{{ isEdit ? "Edit Salle" : "Add New Salle" }}</h2>
+        <p>Manage training room information</p>
+      </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div *ngIf="loading" class="loading-state">
+      <span class="loading-spinner"></span>
+      Loading...
+    </div>
+
+    <!-- ERROR STATE -->
+    <div *ngIf="error" class="error-state">
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- FORM -->
+    <div class="card-body" *ngIf="!loading">
+      <!-- NAME -->
+      <div class="input-group">
+        <label>Salle Name <span class="required">*</span></label>
+        <input
+          type="text"
+          [(ngModel)]="salle.name"
+          placeholder="Example: Room A1"
+          [class.invalid]="salle.name && salle.name.length < 3"
+        />
+        <small class="hint" *ngIf="salle.name && salle.name.length < 3">
+          Minimum 3 characters required
+        </small>
+      </div>
+
+      <!-- CAPACITY -->
+      <div class="input-group">
+        <label>Capacity <span class="required">*</span></label>
+        <input
+          type="number"
+          [(ngModel)]="salle.capacity"
+          placeholder="Number of seats"
+          min="1"
+          [class.invalid]="salle.capacity && salle.capacity <= 0"
+        />
+        <small class="hint" *ngIf="salle.capacity && salle.capacity <= 0">
+          Capacity must be greater than 0
+        </small>
+      </div>
+
+      <!-- BLOC SELECTION -->
+      <div class="input-group">
+        <label>Select Bloc <span class="required">*</span></label>
+
+        <div class="select-wrapper">
+          <select
+            [(ngModel)]="selectedBlocId"
+            (ngModelChange)="onBlocChange()"
+            [class.invalid]="!selectedBlocId"
+          >
+            <option [ngValue]="undefined" disabled>
+              -- Choose a bloc --
+            </option>
+
+            <option *ngFor="let bloc of blocs" [ngValue]="bloc.id">
+              {{ bloc.nom }} - {{ bloc.location }}
+            </option>
+          </select>
+
+          <span class="select-arrow">▼</span>
+        </div>
+
+        <small class="hint" *ngIf="!selectedBlocId">
+          Please select a bloc
+        </small>
+      </div>
+
+      <!-- STATUS (Optional) -->
+      <div class="input-group">
+        <label>Status</label>
+        <div class="status-options">
+          <label class="status-option">
+            <input
+              type="radio"
+              [(ngModel)]="salle.status"
+              value="available"
+              name="status"
+            />
+            <span class="status-badge available">Available</span>
+          </label>
+
+          <label class="status-option">
+            <input
+              type="radio"
+              [(ngModel)]="salle.status"
+              value="maintenance"
+              name="status"
+            />
+            <span class="status-badge maintenance">Maintenance</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- SELECTED BLOC INFO (if editing and bloc data exists) -->
+      <div class="selected-bloc-info" *ngIf="isEdit && salle.bloc">
+        <h4>Current Bloc</h4>
+        <div class="bloc-details">
+          <span class="bloc-name">{{ salle.bloc.nom }}</span>
+          <span class="bloc-location">{{ salle.bloc.location }}</span>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="actions">
+        <button class="btn-save" (click)="save()" [disabled]="!isFormValid()">
+          💾 {{ isEdit ? "Update Salle" : "Create Salle" }}
+        </button>
+
+        <button class="btn-cancel" routerLink="/trainer-sessions/rooms">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,178 @@
+<header class="navbar">
+  <div class="nav-left">
+    <span class="brand">SKILL2JOB</span>
+  </div>
+
+  <div class="nav-center">
+    <nav class="nav-links">
+      <a routerLink="/user/courses" routerLinkActive="active">Courses</a>
+      <a (click)="scrollTo('joboffers')">Job Offers</a>
+      <a routerLink="/user/exams" routerLinkActive="active">Exams</a>
+      <a routerLink="/user/sessions" routerLinkActive="active">Sessions</a>
+      <a routerLink="/user/certificates" routerLinkActive="active"
+        >Certificates</a
+      >
+      <button class="trainer-btn" routerLink="/trainer-portal">
+        Become Trainer
+      </button>
+    </nav>
+  </div>
+
+  <div class="nav-right">
+    <!-- Profile Icon with Magical Dropdown -->
+    <div class="profile-menu" (click)="toggleProfileMenu()">
+      <div class="profile-icon-wrapper">
+        <div class="profile-circle">
+          {{ getInitials(currentUser?.name || "Learner") }}
+        </div>
+        <span class="profile-name">{{ currentUser?.name || "Learner" }}</span>
+        <i class="fas fa-chevron-down" [class.rotate]="isProfileMenuOpen"></i>
+      </div>
+
+      <!-- Magical Dropdown Menu -->
+      <div
+        class="profile-dropdown"
+        *ngIf="isProfileMenuOpen"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- ... dropdown content ... -->
+        <div class="dropdown-header">
+          <div class="dropdown-user-avatar">
+            <div class="profile-circle large">
+              {{ getInitials(currentUser?.name || "Guest User") }}
+            </div>
+          </div>
+          <div class="dropdown-user-info">
+            <strong>{{ currentUser?.name || "Guest User" }}</strong>
+            <span>{{ currentUser?.email || "guest@skill2job.com" }}</span>
+          </div>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <div class="dropdown-item" routerLink="/profile">
+          <i class="fas fa-user menu-icon"></i>
+          <span>My Profile</span>
+          <div class="item-glow"></div>
+        </div>
+
+        <div class="dropdown-item" routerLink="/dashboard">
+          <i class="fas fa-tachometer-alt menu-icon"></i>
+          <span>Dashboard</span>
+          <div class="item-glow"></div>
+        </div>
+
+        <div class="dropdown-item" routerLink="/my-courses">
+          <i class="fas fa-book menu-icon"></i>
+          <span>My Courses</span>
+          <div class="item-glow"></div>
+        </div>
+
+        <div class="dropdown-item" routerLink="/user/exams">
+          <i class="fas fa-file-alt menu-icon"></i>
+          <span>My Exams</span>
+          <div class="item-glow"></div>
+        </div>
+
+        <div class="dropdown-item" routerLink="/user/sessions">
+          <i class="fas fa-chalkboard-teacher menu-icon"></i>
+          <span>My Sessions</span>
+          <div class="item-glow"></div>
+        </div>
+
+        <div class="dropdown-item" routerLink="/settings">
+          <i class="fas fa-cog menu-icon"></i>
+          <span>Settings</span>
+          <div class="item-glow"></div>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <div class="dropdown-item" routerLink="/help">
+          <i class="fas fa-question-circle menu-icon"></i>
+          <span>Help & Support</span>
+          <div class="item-glow"></div>
+        </div>
+
+        <div class="dropdown-item logout" (click)="logout()">
+          <i class="fas fa-sign-out-alt menu-icon"></i>
+          <span>Logout</span>
+          <div class="item-glow"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN CONTENT AREA WITH ROUTER-OUTLET -->
+<main>
+  <router-outlet></router-outlet>
+</main>
+
+<!-- HERO SECTION - Only show when NOT on exams or sessions page -->
+<section
+  *ngIf="
+    !router.url.startsWith('/user/exams') &&
+    !router.url.startsWith('/user/sessions')
+  "
+  class="hero"
+>
+  <div class="hero-text">
+    <h1>
+      Welcome Home User!
+      <span>Continue learning </span>
+    </h1>
+    <p>
+      Modern learning platform designed to help students gain real skills and
+      connect with career opportunities.
+    </p>
+    <button class="btn-primary big">Explore more training courses</button>
+  </div>
+  <img src="assets/logo.png" class="hero-image floating-logo" />
+</section>
+
+<!-- COURSES SECTION - Only show when NOT on exams or sessions page -->
+<section
+  *ngIf="
+    !router.url.startsWith('/user/exams') &&
+    !router.url.startsWith('/user/sessions')
+  "
+  id="courses"
+  class="section grey"
+>
+  <h2 class="section-title">My Courses</h2>
+  <div class="grid">
+    <div class="course-card">
+      <h3>Java Spring Boot</h3>
+      <p>Backend development with Spring Boot.</p>
+      <button class="btn-primary small">Continue Course</button>
+    </div>
+    <div class="course-card">
+      <h3>Angular Development</h3>
+      <p>Frontend development with Angular.</p>
+      <button class="btn-primary small">Continue Course</button>
+    </div>
+    <div class="course-card">
+      <h3>DevOps & Docker</h3>
+      <p>Learn Docker, CI/CD, Kubernetes.</p>
+      <button class="btn-primary small">Continue Course</button>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT SECTION - Only show when NOT on exams or sessions page -->
+<section
+  *ngIf="
+    !router.url.startsWith('/user/exams') &&
+    !router.url.startsWith('/user/sessions')
+  "
+  id="contact"
+  class="section"
+>
+  <h2 class="section-title">Contact Us</h2>
+  <div class="contact">
+    <p><strong>Address:</strong> ESPRIT, Ariana, Tunisia</p>
+    <p><strong>Phone:</strong> +216 55 300 799</p>
+    <p><strong>Email:</strong> contactskill2job.com</p>
+  </div>
+</section>

@@ -1,0 +1,315 @@
+<div class="equipment-page">
+  <!-- HEADER -->
+  <div class="equipment-header">
+    <h2>Equipments</h2>
+
+    <div style="display:flex; gap:10px">
+      <button class="add-btn" (click)="openAddEquipmentModal()">
+        + Add Equipment
+      </button>
+
+      <button
+        class="add-btn"
+        style="background:#c22b33"
+        routerLink="/trainer-sessions/pcsearch"
+      >
+        💻 Out of Laptops ?
+      </button>
+    </div>
+  </div>
+
+  <!-- GRID -->
+  <div class="equipment-grid">
+    <div
+      class="equipment-card"
+      *ngFor="let e of equipments"
+      (click)="openDetails(e)"
+    >
+      <!-- IMAGE -->
+      <div class="image-container">
+        <img
+          *ngIf="e.photo"
+          [src]="getPhotoUrl(e.photo)"
+          (error)="onImageError($event)"
+          class="equipment-img"
+        />
+
+        <div *ngIf="!e.photo" class="no-image">
+          No Image
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="card-body">
+        <h3>{{ e.name }}</h3>
+
+        <p class="qty">Available: {{ e.quantity }}</p>
+      </div>
+    </div>
+
+    <!-- EMPTY -->
+    <div class="empty-state" *ngIf="equipments.length === 0">
+      <p>No equipment found</p>
+
+      <button class="add-btn" (click)="openAddEquipmentModal()">
+        Add your first equipment
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- EQUIPMENT DETAILS MODAL -->
+<!-- ========================= -->
+
+<div class="modal-overlay" *ngIf="selectedEquipment" (click)="closeDetails()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <!-- CLOSE -->
+    <button class="close-btn" (click)="closeDetails()">
+      ✕
+    </button>
+
+    <!-- IMAGE -->
+    <img
+      *ngIf="selectedEquipment.photo"
+      [src]="getPhotoUrl(selectedEquipment.photo)"
+      (error)="onImageError($event)"
+      class="modal-image"
+    />
+
+    <!-- INFO -->
+    <h2>
+      {{ selectedEquipment.name }}
+    </h2>
+
+    <p class="modal-qty">
+      Available Quantity:
+      <strong>{{ selectedEquipment.quantity }}</strong>
+    </p>
+
+    <!-- ACTION BUTTONS -->
+    <div class="modal-actions">
+      <button
+        class="edit-btn"
+        (click)="openEditEquipmentModal(selectedEquipment); closeDetails()"
+      >
+        Edit
+      </button>
+
+      <button
+        class="delete-btn"
+        (click)="openDeleteEquipmentModal(selectedEquipment); closeDetails()"
+      >
+        Delete
+      </button>
+    </div>
+
+    <!-- NEW BUTTON -->
+    <div style="margin-top:15px">
+      <button
+        class="add-btn"
+        style="background:#16a34a"
+        (click)="openReservations(selectedEquipment.id!)"
+      >
+        View Reservations
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- RESERVATIONS MODAL -->
+<!-- ========================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="showReservationsModal"
+  (click)="closeReservations()"
+>
+  <div
+    class="modal-card"
+    (click)="$event.stopPropagation()"
+    style="width:600px"
+  >
+    <button class="close-btn" (click)="closeReservations()">
+      ✕
+    </button>
+
+    <h2>Reservations — {{ selectedEquipment?.name }}</h2>
+
+    <!-- EMPTY -->
+    <div *ngIf="reservations.length === 0">
+      <p>No reservations found</p>
+    </div>
+
+    <div *ngFor="let r of reservations" class="reservation-card">
+      <div class="reservation-title">
+        {{ r.session.name }}
+      </div>
+
+      <div class="reservation-line">
+        Quantity used:
+        <strong>{{ r.quantityUsed }}</strong>
+      </div>
+
+      <div class="reservation-line">
+        Start:
+        <strong>
+          {{ r.session.startAt | date: "medium" }}
+        </strong>
+      </div>
+
+      <div class="reservation-line">
+        End:
+        <strong>
+          {{ r.session.endAt | date: "medium" }}
+        </strong>
+      </div>
+
+      <div class="reservation-line">
+        Duration:
+        <strong>
+          {{ getDurationHours(r.session.startAt, r.session.endAt) }}
+          hours
+        </strong>
+      </div>
+
+      <div class="reservation-line">
+        Salle:
+        <strong>
+          {{ r.session.salle?.name }}
+        </strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- ADD/EDIT EQUIPMENT MODAL -->
+<!-- ========================= -->
+<div
+  class="modal-overlay"
+  *ngIf="showEquipmentModal"
+  (click)="closeEquipmentModal()"
+>
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <!-- CLOSE BUTTON -->
+    <button class="close-btn" (click)="closeEquipmentModal()">
+      ✕
+    </button>
+
+    <!-- MODAL TITLE -->
+    <h2>{{ equipmentModalTitle }}</h2>
+
+    <!-- ERROR MESSAGE -->
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+
+    <!-- FORM -->
+    <form class="equipment-form">
+      <div class="form-group">
+        <label for="name">Equipment Name</label>
+        <input
+          type="text"
+          id="name"
+          class="form-control"
+          [(ngModel)]="currentEquipment.name"
+          name="name"
+          required
+          placeholder="Enter equipment name"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <input
+          type="number"
+          id="quantity"
+          class="form-control"
+          [(ngModel)]="currentEquipment.quantity"
+          name="quantity"
+          required
+          min="1"
+          placeholder="Enter quantity"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="photo">Photo</label>
+        <input
+          type="file"
+          id="photo"
+          class="form-control"
+          (change)="onFileSelected($event)"
+          accept="image/*"
+        />
+      </div>
+
+      <!-- Image Preview -->
+      <div *ngIf="previewImage" class="preview-container">
+        <img [src]="previewImage" class="preview-image" />
+      </div>
+    </form>
+
+    <!-- MODAL ACTIONS -->
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeEquipmentModal()">
+        Cancel
+      </button>
+      <button
+        class="save-btn"
+        (click)="saveEquipment()"
+        [disabled]="
+          !currentEquipment.name ||
+          currentEquipment.quantity === undefined ||
+          currentEquipment.quantity === null ||
+          (!isEditEquipmentMode && !selectedFile)
+        "
+      >
+        {{ isEditEquipmentMode ? "Update Equipment" : "Create Equipment" }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- DELETE EQUIPMENT MODAL -->
+<!-- ========================= -->
+<div
+  class="modal-overlay"
+  *ngIf="showDeleteEquipmentModal"
+  (click)="closeDeleteEquipmentModal()"
+>
+  <div class="modal-card delete-modal" (click)="$event.stopPropagation()">
+    <!-- CLOSE BUTTON -->
+    <button class="close-btn" (click)="closeDeleteEquipmentModal()">
+      ✕
+    </button>
+
+    <!-- WARNING ICON -->
+    <div class="warning-icon">
+      ⚠️
+    </div>
+
+    <!-- WARNING MESSAGE -->
+    <div class="warning-message">
+      Delete <strong>{{ equipmentToDelete?.name }}</strong
+      >?
+    </div>
+
+    <div class="warning-hint">
+      This action cannot be undone.
+    </div>
+
+    <!-- MODAL ACTIONS -->
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeDeleteEquipmentModal()">
+        Cancel
+      </button>
+      <button class="confirm-btn" (click)="deleteEquipment()">
+        Delete Permanently
+      </button>
+    </div>
+  </div>
+</div>

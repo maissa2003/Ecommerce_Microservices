@@ -1,0 +1,487 @@
+<div class="checkout-page">
+  <!-- Header -->
+  <div class="checkout-header">
+    <div class="logo">skill2job</div>
+    <button class="btn-cancel" (click)="cancel()">Cancel</button>
+  </div>
+
+  <div class="checkout-container">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- LEFT: CHECKOUT FORM                                         -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="checkout-left">
+      <h1 class="checkout-title">Checkout</h1>
+
+      <!-- ── Billing Address ──────────────────────────────────── -->
+      <div class="checkout-section">
+        <h2 class="section-title">Billing address</h2>
+        <div class="form-group">
+          <label class="form-label">Country</label>
+          <div class="select-wrapper">
+            <select
+              class="form-select"
+              [(ngModel)]="billingCountry"
+              [disabled]="isSubmitting"
+            >
+              <option *ngFor="let country of countries" [value]="country">{{
+                country
+              }}</option>
+            </select>
+          </div>
+          <p class="form-hint">
+            We are required by law to collect applicable transaction taxes for
+            purchases made in certain tax jurisdictions.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── Coupon Code ─────────────────────────────────────── -->
+      <div class="checkout-section">
+        <h2 class="section-title">Coupon / Promo code</h2>
+
+        <div class="coupon-row" *ngIf="!couponApplied">
+          <input
+            type="text"
+            class="form-input coupon-input"
+            [(ngModel)]="couponCode"
+            placeholder="Enter coupon code"
+            [disabled]="couponLoading || isSubmitting"
+            (keyup.enter)="applyCoupon()"
+          />
+          <button
+            class="btn-apply-coupon"
+            (click)="applyCoupon()"
+            [disabled]="couponLoading || isSubmitting || !couponCode.trim()"
+          >
+            <span *ngIf="!couponLoading">Apply</span>
+            <span *ngIf="couponLoading" class="spinner-sm"></span>
+          </button>
+        </div>
+
+        <!-- Applied state -->
+        <div class="coupon-applied-row" *ngIf="couponApplied">
+          <div class="coupon-tag">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <strong>{{ couponCode.toUpperCase() }}</strong> applied
+          </div>
+          <button
+            class="btn-remove-coupon"
+            (click)="removeCoupon()"
+            [disabled]="isSubmitting"
+          >
+            Remove
+          </button>
+        </div>
+
+        <p class="coupon-success" *ngIf="couponSuccess">{{ couponSuccess }}</p>
+        <p class="coupon-error" *ngIf="couponError">{{ couponError }}</p>
+      </div>
+
+      <!-- ── Payment Method ─────────────────────────────────── -->
+      <div class="checkout-section">
+        <div class="section-header">
+          <h2 class="section-title">Payment method</h2>
+          <div class="secure-badge">
+            <svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor">
+              <path
+                d="M10.5 5h-.75V3.5C9.75 1.57 8.18 0 6.25 0S2.75 1.57 2.75 3.5V5H2c-.55 0-1 .45-1 1v7c0 .55.45 1 1 1h8.5c.55 0 1-.45 1-1V6c0-.55-.45-1-1-1zM4.25 3.5c0-1.1.9-2 2-2s2 .9 2 2V5h-4V3.5z"
+              />
+            </svg>
+            Secured and encrypted
+          </div>
+        </div>
+
+        <!-- Credit Card -->
+        <div
+          class="payment-option"
+          [class.active]="selectedMethod === 'CREDIT_CARD'"
+        >
+          <div
+            class="payment-option-header"
+            (click)="selectMethod('CREDIT_CARD')"
+          >
+            <div
+              class="radio-btn"
+              [class.checked]="selectedMethod === 'CREDIT_CARD'"
+            >
+              <div class="radio-inner"></div>
+            </div>
+            <div class="payment-option-icon">
+              <svg width="24" height="18" viewBox="0 0 24 18" fill="none">
+                <rect width="24" height="18" rx="2" fill="#1c1d1f" />
+                <rect y="4" width="24" height="3" fill="#6a6f73" />
+              </svg>
+            </div>
+            <span class="payment-option-label">Cards</span>
+            <div class="card-logos">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
+                alt="Visa"
+              />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                alt="Mastercard"
+              />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg"
+                alt="Amex"
+              />
+            </div>
+          </div>
+
+          <div
+            class="payment-option-body"
+            *ngIf="selectedMethod === 'CREDIT_CARD'"
+          >
+            <div class="form-group">
+              <label class="form-label">Card number</label>
+              <div class="card-input-wrapper">
+                <input
+                  type="text"
+                  class="form-input card-number-input"
+                  [(ngModel)]="cardNumber"
+                  (input)="formatCardNumber($event)"
+                  placeholder="1234 5678 9012 3456"
+                  maxlength="19"
+                  [disabled]="isSubmitting"
+                />
+                <div class="card-brand-icons">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
+                    alt="Visa"
+                  />
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                    alt="Mastercard"
+                  />
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg"
+                    alt="Amex"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Expiry date</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="cardExpiry"
+                  (input)="formatExpiry($event)"
+                  placeholder="MM/YY"
+                  maxlength="5"
+                  [disabled]="isSubmitting"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">CVC/CVV</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="cardCVC"
+                  (input)="formatCVC($event)"
+                  placeholder="CVC"
+                  maxlength="3"
+                  [disabled]="isSubmitting"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Name on card</label>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="cardHolderName"
+                placeholder="Full name as shown on card"
+                [disabled]="isSubmitting"
+              />
+            </div>
+
+            <label class="checkbox-container">
+              <input type="checkbox" class="checkbox-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label"
+                >Securely save this card for later purchases</span
+              >
+            </label>
+
+            <p class="payment-disclaimer">
+              By providing your card information, you allow Skill2Job to charge
+              your card for future payments in accordance with their terms.
+            </p>
+          </div>
+        </div>
+
+        <!-- Wallet -->
+        <div
+          class="payment-option"
+          [class.active]="selectedMethod === 'WALLET'"
+        >
+          <div class="payment-option-header" (click)="selectMethod('WALLET')">
+            <div
+              class="radio-btn"
+              [class.checked]="selectedMethod === 'WALLET'"
+            >
+              <div class="radio-inner"></div>
+            </div>
+            <div class="payment-option-icon wallet-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
+                />
+              </svg>
+            </div>
+            <span class="payment-option-label">Points Wallet</span>
+            <span class="wallet-balance"
+              >Balance: {{ walletBalance | number: "1.0-0" }} pts</span
+            >
+          </div>
+
+          <div class="payment-option-body" *ngIf="selectedMethod === 'WALLET'">
+            <div class="wallet-info">
+              <p>
+                Your current balance is
+                <strong>{{ walletBalance | number: "1.0-0" }} points</strong>.
+              </p>
+              <p *ngIf="!course?.pointsPrice" class="wallet-insufficient">
+                ⚠️ This course is not available for points payment.
+              </p>
+              <ng-container *ngIf="course?.pointsPrice">
+                <p
+                  *ngIf="walletBalance < course.pointsPrice"
+                  class="wallet-insufficient"
+                >
+                  ⚠️ Insufficient points. You need
+                  {{ course.pointsPrice | number: "1.0-0" }} pts.
+                </p>
+                <p
+                  *ngIf="walletBalance >= course.pointsPrice"
+                  class="wallet-sufficient"
+                >
+                  ✓ You have enough points to complete this purchase ({{
+                    course.pointsPrice | number: "1.0-0"
+                  }}
+                  pts).
+                </p>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bank Transfer -->
+        <div
+          class="payment-option"
+          [class.active]="selectedMethod === 'BANK_TRANSFER'"
+        >
+          <div
+            class="payment-option-header"
+            (click)="selectMethod('BANK_TRANSFER')"
+          >
+            <div
+              class="radio-btn"
+              [class.checked]="selectedMethod === 'BANK_TRANSFER'"
+            >
+              <div class="radio-inner"></div>
+            </div>
+            <div class="payment-option-icon bank-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"
+                />
+              </svg>
+            </div>
+            <span class="payment-option-label">Bank Transfer</span>
+          </div>
+
+          <div
+            class="payment-option-body"
+            *ngIf="selectedMethod === 'BANK_TRANSFER'"
+          >
+            <div class="bank-info">
+              <p><strong>Bank:</strong> XYZ Bank</p>
+              <p><strong>IBAN:</strong> TN59 1234 5678 9012 3456 7890</p>
+              <p><strong>Account:</strong> 123456789</p>
+              <p class="bank-note">
+                📋 Please complete the transfer. Your payment will be reviewed
+                by our team within 24 hours.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Error ──────────────────────────────────────────── -->
+      <div class="error-alert" *ngIf="errorMessage">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path
+            d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm1 15H9v-2h2v2zm0-4H9V5h2v6z"
+          />
+        </svg>
+        {{ errorMessage }}
+      </div>
+
+      <!-- ── Complete order button ──────────────────────────── -->
+      <div class="order-actions">
+        <button
+          class="btn-complete-order"
+          (click)="submitPayment()"
+          [disabled]="isSubmitting"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            *ngIf="!isSubmitting"
+          >
+            <path
+              d="M12.5 3.5c.28 0 .5.22.5.5v8c0 .28-.22.5-.5.5h-9c-.28 0-.5-.22-.5-.5V4c0-.28.22-.5.5-.5h9z"
+            />
+          </svg>
+          <span *ngIf="!isSubmitting">Complete checkout</span>
+          <span *ngIf="isSubmitting">Processing…</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- RIGHT: ORDER SUMMARY                                        -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="checkout-right">
+      <div class="order-summary">
+        <h2 class="summary-title">Order summary</h2>
+
+        <div class="summary-row">
+          <span class="summary-label">Original price:</span>
+          <span class="summary-value"
+            >{{ getCurrencySymbol()
+            }}{{ originalPrice | number: "1.2-2" }}</span
+          >
+        </div>
+
+        <div class="summary-row discount-row">
+          <span class="summary-label">Promotional discount (76%):</span>
+          <span class="summary-value discount"
+            >−{{ getCurrencySymbol() }}{{ discount | number: "1.2-2" }}</span
+          >
+        </div>
+
+        <!-- Coupon discount row (shown only when applied + backend returns percentage) -->
+        <div class="summary-row discount-row" *ngIf="couponApplied">
+          <span class="summary-label">
+            Coupon
+            <span class="coupon-badge-sm">{{ couponCode.toUpperCase() }}</span
+            >:
+          </span>
+          <span class="summary-value discount">
+            {{
+              couponDiscount > 0
+                ? "−" +
+                  getCurrencySymbol() +
+                  ((finalPrice * couponDiscount) / 100 | number: "1.2-2")
+                : "applied at checkout"
+            }}
+          </span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-row total-row">
+          <span class="summary-label"
+            ><strong>Total{{ course ? " (1 course)" : "" }}:</strong></span
+          >
+          <span class="summary-value total">
+            <strong
+              >{{ getCurrencySymbol()
+              }}{{ finalPrice | number: "1.2-2" }}</strong
+            >
+          </span>
+        </div>
+
+        <div class="terms-notice">
+          By completing your purchase you agree to these
+          <a href="#">Terms of Use</a>.
+        </div>
+
+        <button
+          class="btn-pay-now"
+          (click)="submitPayment()"
+          [disabled]="isSubmitting"
+        >
+          <span *ngIf="!isSubmitting"
+            >Pay {{ getCurrencySymbol()
+            }}{{ finalPrice | number: "1.2-2" }}</span
+          >
+          <span *ngIf="isSubmitting">Processing…</span>
+        </button>
+
+        <div class="money-back">
+          <h3>30-Day Money-Back Guarantee</h3>
+          <p>
+            Not satisfied? Get a full refund within 30 days. Simple and
+            straightforward!
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Success Modal ───────────────────────────────────────────── -->
+  <div
+    class="modal-overlay"
+    *ngIf="showSuccessModal"
+    (click)="showSuccessModal = false"
+  >
+    <div class="modal-content success-modal" (click)="$event.stopPropagation()">
+      <div class="success-icon">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="32" fill="#4BB543" />
+          <path
+            d="M20 32l8 8 16-16"
+            stroke="white"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+      <h2>Payment Submitted Successfully!</h2>
+      <p>Your payment is now pending approval.</p>
+      <p class="transaction-id">
+        Transaction ID: <strong>{{ transactionId }}</strong>
+      </p>
+      <p *ngIf="couponApplied" class="coupon-applied-note">
+        Coupon <strong>{{ couponCode.toUpperCase() }}</strong> was applied.
+      </p>
+      <p class="info-text">
+        Our admin team will review your payment within 24 hours. You will
+        receive an email once your payment is approved.
+      </p>
+      <button class="btn-modal-close" (click)="cancel()">
+        Go to My Courses
+      </button>
+    </div>
+  </div>
+</div>

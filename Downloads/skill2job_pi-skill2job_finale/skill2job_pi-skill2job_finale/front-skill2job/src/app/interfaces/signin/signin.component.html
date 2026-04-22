@@ -1,0 +1,47 @@
+<div class="auth-page">
+  <!-- Background watermark -->
+  <div class="watermark-bg"></div>
+
+  <div class="auth-card">
+    <!-- Logo -->
+    <div class="auth-logo">
+      <span class="brand-red">SKILL</span><span class="brand-black">2JOB</span>
+    </div>
+
+    <h2 class="auth-title">Welcome Back</h2>
+    <p class="auth-subtitle">Sign in to continue learning</p>
+
+    <div class="form-group">
+      <label>Username</label>
+      <input
+        type="text"
+        placeholder="Enter your username"
+        [(ngModel)]="username"
+        name="username"
+        class="auth-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input
+        type="password"
+        placeholder="Enter your password"
+        [(ngModel)]="password"
+        name="password"
+        class="auth-input"
+      />
+    </div>
+
+    <p *ngIf="error" class="auth-error">{{ error }}</p>
+
+    <button class="auth-btn" (click)="login()" [disabled]="isLoading">
+      {{ isLoading ? "Signing in..." : "SIGN IN" }}
+    </button>
+
+    <div class="auth-footer">
+      Don't have an account?
+      <a routerLink="/signup">Sign Up</a>
+    </div>
+  </div>
+</div>

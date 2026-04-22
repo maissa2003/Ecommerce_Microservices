@@ -1,0 +1,234 @@
+<div class="sessions-container">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <i class="fas fa-chalkboard-user"></i>
+        <span>Live Learning Sessions</span>
+      </div>
+      <h1 class="hero-title">
+        Transform Your Skills
+        <span class="title-highlight">With Expert Trainers</span>
+      </h1>
+      <p class="hero-description">
+        Join interactive sessions designed to accelerate your learning journey.
+        Connect with industry professionals and grow your expertise.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">{{ filteredSessions.length }}</span>
+          <span class="stat-label">Available Sessions</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getTotalParticipants() }}</span>
+          <span class="stat-label">Active Learners</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">24/7</span>
+          <span class="stat-label">Access</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="visual-circle"></div>
+      <div class="visual-circle-2"></div>
+      <div class="visual-circle-3"></div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <div class="filter-tabs">
+      <button
+        *ngFor="let filter of filters"
+        class="filter-tab"
+        [class.active]="activeFilter === filter.value"
+        (click)="setFilter(filter.value)"
+      >
+        <i class="fas" [class]="filter.icon"></i>
+        <span>{{ filter.label }}</span>
+        <span class="filter-count" *ngIf="filter.count > 0">{{
+          filter.count
+        }}</span>
+      </button>
+    </div>
+    <div class="search-wrapper">
+      <i class="fas fa-search search-icon"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="applyFilters()"
+        placeholder="Search sessions..."
+        class="search-input"
+      />
+    </div>
+  </div>
+
+  <!-- Sessions Grid -->
+  <div class="sessions-grid">
+    <div
+      *ngFor="let session of filteredSessions"
+      class="session-card"
+      [class.ended]="getSessionStatus(session) === 'ENDED'"
+      [class.ongoing]="getSessionStatus(session) === 'ONGOING'"
+      [class.upcoming]="getSessionStatus(session) === 'UPCOMING'"
+    >
+      <div class="card-glow"></div>
+
+      <div class="card-header">
+        <div class="card-type-badge" [class.online]="session.type === 'ONLINE'">
+          <i
+            class="fas"
+            [class]="session.type === 'ONLINE' ? 'fa-video' : 'fa-building'"
+          ></i>
+          <span>{{ session.type === "ONLINE" ? "Virtual" : "On-site" }}</span>
+        </div>
+        <div
+          class="status-indicator"
+          [class]="getSessionStatus(session).toLowerCase()"
+        >
+          <span class="status-dot"></span>
+          <span class="status-text">{{ getSessionStatus(session) }}</span>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <h3 class="session-title">{{ session.name }}</h3>
+
+        <div class="trainer-section">
+          <div class="trainer-avatar">
+            <div class="avatar-placeholder">
+              {{ session.user?.username?.charAt(0)?.toUpperCase() || "T" }}
+            </div>
+          </div>
+          <div class="trainer-details">
+            <span class="trainer-label">Lead Trainer</span>
+            <span class="trainer-name">{{
+              session.user?.username || "Expert Trainer"
+            }}</span>
+            <span class="trainer-badge">
+              <i class="fas fa-certificate"></i> Certified Expert
+            </span>
+          </div>
+        </div>
+
+        <div class="schedule-section">
+          <div class="schedule-item">
+            <i class="fas fa-calendar-alt schedule-icon"></i>
+            <div>
+              <span class="schedule-label">Starts</span>
+              <span class="schedule-value">{{
+                formatDate(session.startAt)
+              }}</span>
+              <span class="schedule-time">{{
+                formatTime(session.startAt)
+              }}</span>
+            </div>
+          </div>
+          <div class="schedule-divider"></div>
+          <div class="schedule-item">
+            <i class="fas fa-clock schedule-icon"></i>
+            <div>
+              <span class="schedule-label">Ends</span>
+              <span class="schedule-value">{{
+                formatDate(session.endAt)
+              }}</span>
+              <span class="schedule-time">{{ formatTime(session.endAt) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="capacity-section">
+          <div class="capacity-header">
+            <span class="capacity-label">
+              <i class="fas fa-users"></i> Participation
+            </span>
+            <span class="capacity-stats">
+              {{ session.participants?.length || 0 }} /
+              {{ session.capacity }} enrolled
+            </span>
+          </div>
+          <div class="capacity-bar">
+            <div
+              class="capacity-fill"
+              [style.width.%]="getProgressPercentage(session)"
+            ></div>
+          </div>
+        </div>
+
+        <div class="action-section">
+          <button
+            *ngIf="
+              !isJoined(session) &&
+              !isFull(session) &&
+              getSessionStatus(session) !== 'ENDED'
+            "
+            (click)="joinSession(session)"
+            class="btn-primary"
+            [class.loading]="loading"
+          >
+            <span class="btn-content">
+              <i class="fas fa-plus-circle"></i>
+              Join Session
+            </span>
+          </button>
+
+          <button
+            *ngIf="
+              isJoined(session) &&
+              session.type === 'ONLINE' &&
+              getSessionStatus(session) === 'ONGOING'
+            "
+            (click)="enterRoom(session)"
+            class="btn-secondary"
+          >
+            <span class="btn-content">
+              <i class="fas fa-video"></i>
+              Enter Virtual Room
+            </span>
+          </button>
+
+          <div
+            *ngIf="
+              isJoined(session) &&
+              !(
+                session.type === 'ONLINE' &&
+                getSessionStatus(session) === 'ONGOING'
+              )
+            "
+            class="joined-badge"
+          >
+            <i class="fas fa-check-circle"></i>
+            <span>Enrolled</span>
+          </div>
+
+          <div *ngIf="isFull(session) && !isJoined(session)" class="full-badge">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Session Full</span>
+          </div>
+
+          <div
+            *ngIf="getSessionStatus(session) === 'ENDED'"
+            class="ended-badge"
+          >
+            <i class="fas fa-clock"></i>
+            <span>Session Ended</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="filteredSessions.length === 0" class="empty-state">
+    <div class="empty-state-content">
+      <i class="fas fa-chalkboard empty-icon"></i>
+      <h3>No Sessions Available</h3>
+      <p>Check back later for upcoming learning opportunities</p>
+      <button class="btn-outline" (click)="clearFilters()">
+        <i class="fas fa-eraser"></i> Clear Filters
+      </button>
+    </div>
+  </div>
+</div>

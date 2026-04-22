@@ -1,0 +1,89 @@
+<!-- Loading -->
+<div *ngIf="loading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Loading certificates...</p>
+</div>
+
+<!-- Error -->
+<div *ngIf="error && !loading" class="error-container">
+  <p>{{ error }}</p>
+  <button (click)="loadCertificates()">Retry</button>
+</div>
+
+<!-- Empty state -->
+<div
+  *ngIf="!loading && !error && certificates.length === 0"
+  class="empty-container"
+>
+  <div class="empty-icon">📜</div>
+  <h2>No Certificates Yet</h2>
+  <p>Complete and pass an exam to earn your first certificate.</p>
+  <button class="btn-primary" (click)="goToExams()">Browse Exams</button>
+</div>
+
+<!-- Certificate grid -->
+<div
+  *ngIf="!loading && !error && certificates.length > 0"
+  class="certificates-page"
+>
+  <div class="page-header">
+    <h1 class="page-title">My Certificates</h1>
+    <span class="cert-count">{{ certificates.length }} earned</span>
+  </div>
+
+  <div class="certificates-grid">
+    <div
+      class="certificate-card"
+      *ngFor="let cert of certificates"
+      [class]="getLevelClass(cert)"
+    >
+      <!-- Level badge top-right -->
+      <div class="level-badge" [class]="getLevelClass(cert)">
+        {{ getLevelLabel(cert) }}
+      </div>
+
+      <!-- Card header -->
+      <div class="card-header">
+        <div class="medal-icon">
+          <span *ngIf="getCertificateLevel(cert) === 'GOLD'">🥇</span>
+          <span *ngIf="getCertificateLevel(cert) === 'SILVER'">🥈</span>
+          <span *ngIf="getCertificateLevel(cert) === 'BRONZE'">🥉</span>
+        </div>
+        <h2 class="exam-title">{{ getExamTitle(cert) }}</h2>
+      </div>
+
+      <!-- Score bar -->
+      <div class="score-section">
+        <div class="score-bar-track">
+          <div
+            class="score-bar-fill"
+            [class]="getLevelClass(cert)"
+            [style.width.%]="getCertificateScore(cert)"
+          ></div>
+        </div>
+        <div class="score-labels">
+          <span class="score-value" [class]="getLevelClass(cert)">
+            {{ getCertificateScore(cert).toFixed(1) }}%
+          </span>
+          <span class="pass-score">Pass: {{ getExamPassScore(cert) }}%</span>
+        </div>
+      </div>
+
+      <!-- Certificate code -->
+      <div class="cert-code">
+        <span class="code-label">CODE</span>
+        <span class="code-value">{{ cert.certificateCode }}</span>
+      </div>
+
+      <!-- Issue date -->
+      <div class="cert-date">Issued: {{ formatDate(cert.issueDate) }}</div>
+
+      <!-- Actions -->
+      <div class="card-actions">
+        <button class="btn-view" (click)="viewCertificate(cert)">
+          View
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

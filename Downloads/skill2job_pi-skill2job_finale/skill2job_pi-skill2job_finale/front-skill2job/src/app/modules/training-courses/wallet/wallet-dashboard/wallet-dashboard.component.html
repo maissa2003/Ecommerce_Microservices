@@ -1,0 +1,180 @@
+<div class="wallet-page">
+  <!-- Header -->
+  <div class="wallet-header">
+    <button class="btn-back" (click)="goBack()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10 18l-8-8 8-8 1.4 1.4L5.8 9H18v2H5.8l5.6 5.6z" />
+      </svg>
+      Back to Courses
+    </button>
+    <h1 class="page-title">My Wallet</h1>
+  </div>
+
+  <div class="wallet-container">
+    <!-- Balance Card -->
+    <div class="balance-card">
+      <div class="balance-icon">🏆</div>
+      <div class="balance-content">
+        <p class="balance-label">Total Balance</p>
+        <h2 class="balance-amount">
+          {{ balance | number: "1.0-0" }} <span class="balance-unit">pts</span>
+        </h2>
+        <p class="balance-currency">Points Balance</p>
+      </div>
+      <div class="balance-decoration">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+      </div>
+    </div>
+
+    <!-- Spin Wheel Section -->
+    <div class="spin-section">
+      <div class="spin-card">
+        <h3 class="spin-title">Daily Spin Wheel</h3>
+        <p class="spin-subtitle">Spin once per day and win points!</p>
+
+        <div class="wheel-container">
+          <div class="wheel-wrapper">
+            <div class="wheel-pointer">▼</div>
+            <div
+              class="wheel"
+              [style.transform]="'rotate(' + wheelRotation + 'deg)'"
+            >
+              <div class="wheel-segment segment-1">
+                <span class="segment-text">5</span>
+              </div>
+              <div class="wheel-segment segment-2">
+                <span class="segment-text">10</span>
+              </div>
+              <div class="wheel-segment segment-3">
+                <span class="segment-text">15</span>
+              </div>
+              <div class="wheel-segment segment-4">
+                <span class="segment-text">20</span>
+              </div>
+              <div class="wheel-segment segment-5">
+                <span class="segment-text">25</span>
+              </div>
+              <div class="wheel-segment segment-6">
+                <span class="segment-text">50</span>
+              </div>
+              <div class="wheel-segment segment-7">
+                <span class="segment-text">100</span>
+              </div>
+              <div class="wheel-segment segment-8">
+                <span class="segment-text">5</span>
+              </div>
+              <div class="wheel-center"><span>SPIN</span></div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          class="btn-spin"
+          (click)="spinTheWheel()"
+          [disabled]="!canSpin || isSpinning"
+          [class.spinning]="isSpinning"
+        >
+          <span *ngIf="!isSpinning && canSpin"> Spin Now!</span>
+          <span *ngIf="isSpinning">🔄 Spinning...</span>
+          <span *ngIf="!canSpin && !isSpinning">✓ Already Spun Today</span>
+        </button>
+
+        <p class="spin-note" *ngIf="!canSpin && !isSpinning">
+          Come back tomorrow for another spin!
+        </p>
+      </div>
+
+      <!-- Spin History -->
+      <div class="spin-history-card" *ngIf="spinHistory.length > 0">
+        <h3 class="history-title">Recent Spins</h3>
+        <div class="history-list">
+          <div
+            class="history-item"
+            *ngFor="let spin of spinHistory.slice(0, 5)"
+          >
+            <div class="history-icon">🎰</div>
+            <div class="history-details">
+              <p class="history-points">+{{ spin.pointsWon }} pts</p>
+              <p class="history-date">{{ formatDate(spin.createdAt) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions Section -->
+    <div class="transactions-section">
+      <h3 class="section-title">Recent Transactions</h3>
+
+      <div class="transactions-list" *ngIf="transactions.length > 0">
+        <div class="transaction-item" *ngFor="let transaction of transactions">
+          <div
+            class="transaction-icon"
+            [class]="getTransactionColor(transaction.type)"
+          >
+            {{ getTransactionIcon(transaction.type) }}
+          </div>
+          <div class="transaction-details">
+            <p class="transaction-description">{{ transaction.description }}</p>
+            <p class="transaction-date">
+              {{ formatDate(transaction.createdAt) }}
+            </p>
+          </div>
+          <!-- ✅ Points instead of currency -->
+          <div
+            class="transaction-amount"
+            [class]="getTransactionColor(transaction.type)"
+          >
+            <span
+              *ngIf="
+                ['CREDIT', 'WELCOME_BONUS', 'REFUND'].includes(transaction.type)
+              "
+              >+</span
+            >
+            <span *ngIf="['DEBIT', 'PAYMENT'].includes(transaction.type)"
+              >-</span
+            >
+            {{ transaction.amount | number: "1.0-0" }} pts
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="transactions.length === 0">
+        <div class="empty-icon">📭</div>
+        <p class="empty-text">No transactions yet</p>
+        <p class="empty-subtext">
+          Start by spinning the wheel or purchasing courses!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" *ngIf="showSpinModal" (click)="closeSpinModal()">
+    <div class="modal-content spin-modal" (click)="$event.stopPropagation()">
+      <div class="modal-confetti">🎉</div>
+      <div class="success-icon">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+          <circle cx="40" cy="40" r="40" fill="#4BB543" />
+          <path
+            d="M25 40l10 10 20-20"
+            stroke="white"
+            stroke-width="6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+      <h2 class="modal-title">Congratulations! 🎊</h2>
+      <p class="modal-points">
+        You won <strong>{{ pointsWon }} pts!</strong>
+      </p>
+      <p class="modal-message">{{ spinMessage }}</p>
+      <button class="btn-modal-close" (click)="closeSpinModal()">
+        Awesome!
+      </button>
+    </div>
+  </div>
+</div>

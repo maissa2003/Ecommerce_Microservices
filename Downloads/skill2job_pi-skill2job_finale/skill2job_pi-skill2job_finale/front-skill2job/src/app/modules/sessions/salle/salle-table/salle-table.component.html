@@ -1,0 +1,72 @@
+<div class="equipment-page">
+  <!-- HEADER -->
+  <div class="equipment-header">
+    <h2>Rooms</h2>
+
+    <button class="add-btn" routerLink="/trainer-sessions/rooms/add">
+      + Add Salle
+    </button>
+  </div>
+
+  <!-- GRID -->
+  <div class="equipment-grid">
+    <!-- CARD -->
+    <div
+      class="equipment-card"
+      *ngFor="let s of salles"
+      (click)="openDetails(s)"
+      style="cursor:pointer"
+    >
+      <div class="card-body">
+        <h3>{{ s.name }}</h3>
+
+        <p class="status">Status: {{ s.status }}</p>
+
+        <p class="capacity">Capacity: {{ s.capacity }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- MODAL POPUP -->
+<!-- ========================= -->
+
+<div class="modal-overlay" *ngIf="selectedSalle" (click)="closeDetails()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="closeDetails()">✕</button>
+
+    <h2>{{ selectedSalle.name }}</h2>
+
+    <p class="modal-info">
+      Status:
+      <strong>{{ selectedSalle.status }}</strong>
+    </p>
+
+    <p class="modal-info">
+      Capacity:
+      <strong>{{ selectedSalle.capacity }}</strong>
+    </p>
+    <p class="modal-info">
+      Location:
+      <strong>📍 {{ selectedSalle.location }}</strong>
+    </p>
+
+    <div class="modal-actions">
+      <button
+        class="edit-btn"
+        [routerLink]="['/trainer-sessions/rooms/edit', selectedSalle.id]"
+        (click)="closeDetails()"
+      >
+        Edit
+      </button>
+
+      <button
+        class="delete-btn"
+        (click)="deleteSalle(selectedSalle.id!); closeDetails()"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

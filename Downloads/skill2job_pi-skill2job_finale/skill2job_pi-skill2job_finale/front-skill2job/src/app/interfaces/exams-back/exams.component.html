@@ -1,0 +1,59 @@
+<div class="exams-container">
+  <div class="page-header">
+    <h1>Exams Management</h1>
+    <p>Manage your exams, questions, and evaluations</p>
+  </div>
+
+  <!-- Navigation Cards -->
+  <div class="navigation-cards">
+    <div class="card" routerLink="/admin/exams/exam-table">
+      <div class="card-icon">📋</div>
+      <h3>View All Exams</h3>
+      <p>List, edit, and manage all exams</p>
+    </div>
+
+    <div class="card" routerLink="/admin/exams/exam-form">
+      <div class="card-icon">➕</div>
+      <h3>Create New Exam</h3>
+      <p>Add a new exam to the system</p>
+    </div>
+
+    <div class="card" routerLink="/admin/exams/evaluation-table">
+      <div class="card-icon">📊</div>
+      <h3>Evaluations</h3>
+      <p>View all exam evaluations and results</p>
+    </div>
+
+    <div class="card" routerLink="/admin/exams/question-table">
+      <div class="card-icon">❓</div>
+      <h3>Manage Questions</h3>
+      <p>View, add, edit, and delete exam questions</p>
+    </div>
+  </div>
+
+  <!-- Quick Stats Section -->
+  <div class="stats-section">
+    <h2>Quick Overview</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Total Exams</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Total Questions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0%</div>
+        <div class="stat-label">Average Pass Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Certificates Issued</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Router outlet for nested routes (optional) -->
+  <router-outlet></router-outlet>
+</div>

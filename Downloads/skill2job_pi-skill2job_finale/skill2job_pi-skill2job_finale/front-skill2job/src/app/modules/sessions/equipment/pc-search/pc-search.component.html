@@ -1,0 +1,66 @@
+<div class="pc-container">
+  <h2 class="title">💻 PC Price Comparison</h2>
+
+  <!-- FILTER SECTION -->
+  <div class="filter-box">
+    <input type="number" placeholder="Max Price (DT)" [(ngModel)]="maxPrice" />
+
+    <select [(ngModel)]="minRam">
+      <option value="">Min RAM</option>
+      <option [value]="4">4 Go</option>
+      <option [value]="8">8 Go</option>
+      <option [value]="16">16 Go</option>
+      <option [value]="32">32 Go</option>
+    </select>
+
+    <button class="find-btn" (click)="search()">
+      🔎 Find Laptops
+    </button>
+  </div>
+</div>
+
+<!-- ================= MODAL ================= -->
+
+<div class="modal-overlay" *ngIf="showResults">
+  <div class="modal-card">
+    <button class="close-btn" (click)="closeModal()">
+      ✕
+    </button>
+
+    <h3 class="modal-title">Results</h3>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading">
+      ⏳ Scraping laptops, please wait...
+    </div>
+
+    <!-- ERROR -->
+    <div *ngIf="!loading && errorMessage" class="error">
+      ⚠️ {{ errorMessage }}
+    </div>
+
+    <!-- EMPTY -->
+    <div *ngIf="!loading && !errorMessage && offers.length === 0" class="empty">
+      No offers found matching your criteria.
+    </div>
+
+    <!-- RESULTS -->
+    <div class="cards" *ngIf="!loading && offers.length > 0">
+      <div class="card" *ngFor="let pc of offers">
+        <h3 class="name">{{ pc.name }}</h3>
+
+        <div class="specs">
+          <p><strong>CPU:</strong> {{ pc.cpu || "N/A" }}</p>
+          <p><strong>GPU:</strong> {{ pc.gpu || "N/A" }}</p>
+          <p><strong>RAM:</strong> {{ pc.ram ? pc.ram + " Go" : "N/A" }}</p>
+        </div>
+
+        <div class="price">{{ pc.price | number: "1.0-3" }} DT</div>
+
+        <div class="website">
+          {{ pc.website }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

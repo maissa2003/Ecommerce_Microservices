@@ -1,0 +1,478 @@
+<div class="enrolled-page">
+  <!-- ── Loading ── -->
+  <div *ngIf="isLoading" class="loading-screen">
+    <div class="spinner"></div>
+    <p>Loading course...</p>
+  </div>
+
+  <!-- ── Access Denied ── -->
+  <div *ngIf="!isLoading && !hasAccess" class="error-screen">
+    <div class="error-icon">🔒</div>
+    <h2>Access Denied</h2>
+    <p>{{ errorMessage }}</p>
+    <button class="btn-back" (click)="goBack()">← Back to Courses</button>
+  </div>
+
+  <!-- ── 🎉 Completion Banner ── -->
+  <div *ngIf="showCompletionBanner" class="completion-banner">
+    <div class="completion-banner-inner">
+      <div class="completion-confetti">🎉</div>
+      <div class="completion-text">
+        <h2>Course Completed!</h2>
+        <p>
+          You've finished <strong>{{ course?.title }}</strong>
+        </p>
+        <p class="completion-points">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="#f59e0b"
+            stroke="none"
+          >
+            <path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+            />
+          </svg>
+          +{{ pointsAwarded }} points added to your wallet!
+        </p>
+      </div>
+      <button class="completion-cta" (click)="goBack()">
+        ← Back to Courses
+      </button>
+      <button class="completion-close" (click)="showCompletionBanner = false">
+        ×
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Course Content ── -->
+  <div *ngIf="!isLoading && hasAccess && course" class="course-viewer">
+    <!-- Header -->
+    <div class="course-header">
+      <button class="btn-back-header" (click)="goBack()">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to Courses
+      </button>
+      <div class="course-header-info">
+        <h1 class="course-header-title">{{ course.title }}</h1>
+        <p class="course-header-cat">
+          {{ course.category?.name || "General" }}
+        </p>
+      </div>
+      <div class="course-header-progress">
+        <span class="progress-label">Progress:</span>
+        <span
+          class="progress-percent"
+          [class.progress-complete]="getProgressPercentage() === 100"
+        >
+          {{ getProgressPercentage() }}%
+        </span>
+      </div>
+    </div>
+
+    <div class="course-container">
+      <!-- ═══════════════════════════════════════
+           SIDEBAR — PDF Lessons List
+      ════════════════════════════════════════ -->
+      <div class="course-sidebar">
+        <div class="sidebar-header">
+          <h3>Course Content</h3>
+          <span class="lessons-count">{{ lessons.length }} lessons</span>
+        </div>
+
+        <div class="lessons-list">
+          <div
+            *ngFor="let lesson of lessons; let i = index"
+            class="lesson-item"
+            [class.active]="isLessonActive(i)"
+            [class.completed]="isLessonCompleted(i)"
+            [class.locked]="isLessonLocked(i)"
+            (click)="selectLesson(i)"
+          >
+            <!-- Status icon -->
+            <div class="lesson-icon">
+              <!-- Completed -->
+              <svg
+                *ngIf="isLessonCompleted(i)"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#28a745"
+                stroke-width="2.5"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <!-- Active / current -->
+              <svg
+                *ngIf="isLessonActive(i) && !isLessonCompleted(i)"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#667eea"
+                stroke-width="2"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <!-- Locked -->
+              <svg
+                *ngIf="isLessonLocked(i)"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#bbb"
+                stroke-width="2"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+
+            <div class="lesson-details">
+              <span class="lesson-title">{{ lesson.title }}</span>
+              <span class="lesson-type-tag">
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                PDF
+              </span>
+            </div>
+
+            <!-- Mini completion indicator -->
+            <span class="lesson-check-mini" *ngIf="isLessonCompleted(i)"
+              >✓</span
+            >
+            <span class="lesson-locked-mini" *ngIf="isLessonLocked(i)">🔒</span>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="sidebar-progress">
+          <div class="sidebar-progress-header">
+            <span>Overall Progress</span>
+            <span class="sidebar-progress-percent"
+              >{{ getProgressPercentage() }}%</span
+            >
+          </div>
+          <div class="sidebar-progress-bar">
+            <div
+              class="sidebar-progress-fill"
+              [style.width.%]="getProgressPercentage()"
+            ></div>
+          </div>
+          <div class="sidebar-progress-sub">
+            {{ progress?.completedLessons || 0 }} / {{ lessons.length }} lessons
+            completed
+          </div>
+          <div
+            class="sidebar-reward-hint"
+            *ngIf="getProgressPercentage() < 100"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="#f59e0b"
+              stroke="none"
+            >
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              />
+            </svg>
+            Complete all to earn +{{ pointsAwarded }} pts
+          </div>
+          <div
+            class="sidebar-reward-earned"
+            *ngIf="getProgressPercentage() === 100"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="#28a745"
+              stroke="none"
+            >
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              />
+            </svg>
+            +{{ pointsAwarded }} pts earned! 🎉
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════
+           MAIN CONTENT — Current Lesson
+      ════════════════════════════════════════ -->
+      <div class="course-main">
+        <ng-container *ngIf="getCurrentLesson() as lesson">
+          <!-- Lesson Header -->
+          <div class="lesson-content-header">
+            <div>
+              <h2 class="lesson-content-title">{{ lesson.title }}</h2>
+              <p class="lesson-content-meta">
+                Lesson {{ currentLessonIndex + 1 }} of {{ lessons.length }}
+                <span class="lesson-meta-sep">•</span>
+                <span class="lesson-meta-type">📄 PDF Lesson</span>
+              </p>
+            </div>
+
+            <!-- Manual complete button (if not yet checked the PDF) -->
+            <button
+              class="btn-complete-lesson"
+              *ngIf="
+                !isLessonCompleted(currentLessonIndex) &&
+                !isLessonLocked(currentLessonIndex)
+              "
+              (click)="manualCompleteLesson()"
+              [class.btn-complete--ready]="allPdfsChecked(currentLessonIndex)"
+              [disabled]="!progress"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              {{
+                allPdfsChecked(currentLessonIndex)
+                  ? "Complete Lesson ✓"
+                  : "Mark as Complete"
+              }}
+            </button>
+
+            <div
+              class="lesson-already-complete"
+              *ngIf="isLessonCompleted(currentLessonIndex)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#28a745"
+                stroke-width="2.5"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Lesson Completed
+            </div>
+          </div>
+
+          <!-- About -->
+          <div class="lesson-description">
+            <h4>About this lesson</h4>
+            <p>{{ course.description }}</p>
+          </div>
+
+          <!-- ═══════════════════════════════════
+               PDF TRACKING AREA
+               Each PDF = read + check to complete
+          ════════════════════════════════════ -->
+          <div class="pdf-lesson-area">
+            <div class="pdf-lesson-header">
+              <span class="pdf-lesson-icon">📄</span>
+              <h4>Lesson Material</h4>
+              <span
+                class="pdf-progress-pill"
+                [class.pdf-progress-pill--done]="
+                  allPdfsChecked(currentLessonIndex)
+                "
+              >
+                {{ getCheckedCountInLesson(currentLessonIndex) }} /
+                {{ getTotalPdfsInLesson(currentLessonIndex) }} read
+              </span>
+            </div>
+
+            <!-- No PDF case -->
+            <div *ngIf="!lesson.pdfUrl" class="pdf-no-content">
+              <p>No PDF material for this lesson.</p>
+            </div>
+
+            <!-- PDF Card -->
+            <div
+              *ngIf="lesson.pdfUrl"
+              class="pdf-track-card"
+              [class.pdf-track-card--checked]="
+                isPdfChecked(currentLessonIndex, 0)
+              "
+            >
+              <!-- Left: icon + info -->
+              <div class="pdf-track-left">
+                <div
+                  class="pdf-track-icon"
+                  [class.pdf-track-icon--opened]="lesson.opened"
+                  [class.pdf-track-icon--checked]="
+                    isPdfChecked(currentLessonIndex, 0)
+                  "
+                >
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                  </svg>
+                </div>
+                <div class="pdf-track-info">
+                  <span class="pdf-track-name">{{ lesson.pdfName }}</span>
+                  <span class="pdf-track-status" *ngIf="!lesson.opened"
+                    >Click "Open PDF" to read</span
+                  >
+                  <span
+                    class="pdf-track-status opened"
+                    *ngIf="
+                      lesson.opened && !isPdfChecked(currentLessonIndex, 0)
+                    "
+                  >
+                    ✓ Opened — check the box when done reading
+                  </span>
+                  <span
+                    class="pdf-track-status done"
+                    *ngIf="isPdfChecked(currentLessonIndex, 0)"
+                  >
+                    ✅ Read and marked complete
+                  </span>
+                </div>
+              </div>
+
+              <!-- Right: Open + Checkbox -->
+              <div class="pdf-track-right">
+                <button class="btn-open-pdf" (click)="openPdf(lesson)">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                    />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                  Open PDF
+                </button>
+
+                <label
+                  class="pdf-check-label"
+                  [class.pdf-check-label--disabled]="
+                    isLessonCompleted(currentLessonIndex)
+                  "
+                  [title]="
+                    isLessonCompleted(currentLessonIndex)
+                      ? 'Already completed'
+                      : 'Mark as read'
+                  "
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="isPdfChecked(currentLessonIndex, 0)"
+                    (change)="togglePdfChecked(currentLessonIndex, 0)"
+                    [disabled]="isLessonCompleted(currentLessonIndex)"
+                  />
+                  <span class="pdf-check-box">
+                    <svg
+                      *ngIf="isPdfChecked(currentLessonIndex, 0)"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span class="pdf-check-text">I've read this</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Auto-complete notice -->
+            <div
+              class="pdf-autocomplete-notice"
+              *ngIf="
+                allPdfsChecked(currentLessonIndex) &&
+                !isLessonCompleted(currentLessonIndex)
+              "
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#667eea"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              All PDFs read! Marking lesson as complete…
+            </div>
+          </div>
+
+          <!-- Navigation -->
+          <div class="lesson-navigation">
+            <button
+              class="btn-nav btn-prev"
+              (click)="selectLesson(currentLessonIndex - 1)"
+              [disabled]="currentLessonIndex === 0"
+            >
+              ← Previous Lesson
+            </button>
+            <button
+              class="btn-nav btn-next"
+              (click)="selectLesson(currentLessonIndex + 1)"
+              [disabled]="
+                currentLessonIndex >= lessons.length - 1 ||
+                isLessonLocked(currentLessonIndex + 1)
+              "
+            >
+              Next Lesson →
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

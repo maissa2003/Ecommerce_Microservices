@@ -1,0 +1,184 @@
+.exam-detail-platform {
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 100px 24px 40px;
+  color: #111111;
+}
+
+.detail-header {
+  margin-bottom: 32px;
+  h1 {
+    color: #111111;
+    margin-bottom: 8px;
+  }
+  .exam-description {
+    color: #555555;
+    margin-bottom: 16px;
+  }
+  .summary-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    .score-badge {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      &.passed {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      &.failed {
+        background: #ffebee;
+        color: #b71c1c;
+      }
+    }
+    .pass-score {
+      color: #555555;
+    }
+  }
+}
+
+.questions-section {
+  margin-bottom: 32px;
+  h2 {
+    color: #111111;
+    margin-bottom: 16px;
+  }
+  .hint {
+    color: #555555;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+  }
+}
+
+.question-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.question-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  &.correct {
+    border-left: 4px solid #2e7d32;
+  }
+  &.incorrect {
+    border-left: 4px solid #b71c1c;
+  }
+  .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    .question-num {
+      color: #b71c1c;
+      font-weight: bold;
+    }
+    .result-badge {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      &.correct {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      &.incorrect {
+        background: #ffebee;
+        color: #b71c1c;
+      }
+    }
+  }
+  .question-content {
+    color: #111111;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .answers-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 8px;
+    .answer-item {
+      .label {
+        color: #555555;
+        margin-right: 6px;
+      }
+      .value {
+        color: #111111;
+        &.wrong {
+          color: #b71c1c;
+        }
+        &.correct-ans {
+          color: #2e7d32;
+        }
+      }
+    }
+  }
+  .options-list {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #555555;
+    .opt {
+      display: block;
+      margin: 4px 0;
+    }
+  }
+}
+
+.summary-footer {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f7f7f7;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  p {
+    color: #111111;
+    margin: 0;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .btn-secondary {
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid #e0e0e0;
+  }
+  .btn-primary {
+    background: #b71c1c;
+    color: #fff;
+  }
+}
+
+.loading-container,
+.error-container {
+  text-align: center;
+  padding: 48px 24px;
+  color: #555555;
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #b71c1c;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

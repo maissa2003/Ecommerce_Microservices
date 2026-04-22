@@ -1,0 +1,94 @@
+<div class="certificate-container">
+  <div class="header">
+    <h2><i class="fas fa-certificate"></i> All Certificates</h2>
+  </div>
+
+  <div class="signature-settings">
+    <label>Global certificate signature (drawn)</label>
+    <div class="controls">
+      <canvas
+        #signatureCanvas
+        class="signature-canvas"
+        (pointerdown)="startDrawing($event)"
+        (pointermove)="drawMove($event)"
+        (pointerup)="stopDrawing()"
+        (pointerleave)="stopDrawing()"
+      ></canvas>
+      <button (click)="saveSignature()">Save</button>
+      <button type="button" class="btn-clear" (click)="clearSignature()">
+        Clear
+      </button>
+      <span class="saved" *ngIf="signatureSaved">Saved</span>
+    </div>
+    <p class="hint">
+      Draw your handwritten signature. It will be printed on all certificates
+      (stored locally, no API).
+    </p>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <i class="fas fa-spinner fa-spin"></i> Loading certificates...
+  </div>
+
+  <div *ngIf="!loading && certificates.length === 0" class="no-data">
+    <i class="fas fa-folder-open"></i>
+    <p>No certificates found.</p>
+  </div>
+
+  <div class="table-wrapper" *ngIf="!loading && certificates.length > 0">
+    <table class="certificate-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Certificate Code</th>
+          <th>Exam</th>
+          <th>Score</th>
+          <th>Level</th>
+          <th>Issue Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cert of certificates">
+          <td>
+            <span class="student-name">{{ getUserName(cert) }}</span>
+          </td>
+          <td class="cert-code">{{ cert.certificateCode }}</td>
+          <td>{{ cert.evaluation?.exam?.title || "N/A" }}</td>
+          <td>
+            <strong>{{ cert.evaluation?.score ?? cert.score }}%</strong>
+          </td>
+          <td>
+            <span
+              class="level-badge"
+              [class.gold]="getLevel(cert) === 'GOLD'"
+              [class.silver]="getLevel(cert) === 'SILVER'"
+              [class.bronze]="getLevel(cert) === 'BRONZE'"
+            >
+              <span *ngIf="getLevel(cert) === 'GOLD'">🥇 Gold</span>
+              <span *ngIf="getLevel(cert) === 'SILVER'">🥈 Silver</span>
+              <span *ngIf="getLevel(cert) === 'BRONZE'">🥉 Bronze</span>
+            </span>
+          </td>
+          <td>{{ cert.issueDate | date: "MMM d, yyyy" }}</td>
+          <td class="actions">
+            <button
+              class="action-btn btn-view"
+              [routerLink]="['/admin/exams/certificates', cert.id]"
+              title="View"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+            <button
+              class="action-btn btn-delete"
+              (click)="deleteCertificate(cert.id)"
+              title="Delete"
+            >
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

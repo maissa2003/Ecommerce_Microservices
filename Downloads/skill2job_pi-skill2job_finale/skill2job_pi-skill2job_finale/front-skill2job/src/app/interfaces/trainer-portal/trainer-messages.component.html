@@ -1,0 +1,115 @@
+<div class="page">
+  <div class="page-header">
+    <h1>💬 Messages</h1>
+    <p class="subtitle">
+      Direct communication with the HR team about your application.
+    </p>
+  </div>
+
+  <!-- Loading -->
+  <div class="state-card" *ngIf="loading">
+    <div class="state-icon">⏳</div>
+    <div class="state-title">Loading...</div>
+  </div>
+
+  <!-- Not logged in -->
+  <div class="state-card" *ngIf="!loading && !userId">
+    <div class="state-icon">🔒</div>
+    <div class="state-title">Not logged in</div>
+    <div class="state-desc">Please sign in to access your messages.</div>
+  </div>
+
+  <!-- No application -->
+  <div class="state-card" *ngIf="!loading && userId && !application">
+    <div class="state-icon">📭</div>
+    <div class="state-title">No Application Found</div>
+    <div class="state-desc">
+      You need to submit an application before messaging HR.
+    </div>
+    <a routerLink="/trainer-portal/apply" class="btn primary">📩 Apply Now</a>
+  </div>
+
+  <!-- ✅ CHAT -->
+  <div class="chat-wrap" *ngIf="!loading && application">
+    <!-- Chat info bar -->
+    <div class="chat-info">
+      <div class="chat-info-left">
+        <div class="hr-avatar">HR</div>
+        <div>
+          <div class="hr-name">HR Team · Skill2Job</div>
+          <div class="hr-sub">
+            Application #{{ application.id }} ·
+            <span
+              class="status-dot"
+              [ngClass]="application.status?.toLowerCase()"
+            >
+              {{ application.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-info-right">
+        <span class="online-badge">🟢 Online</span>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-list">
+      <div class="no-messages" *ngIf="messages.length === 0">
+        <div class="no-msg-icon">💬</div>
+        <div class="no-msg-text">No messages yet.</div>
+        <div class="no-msg-sub">
+          Send a message to the HR team about your application.
+        </div>
+      </div>
+
+      <div
+        *ngFor="let msg of messages"
+        class="msg-row"
+        [ngClass]="isTrainer(msg) ? 'row-right' : 'row-left'"
+      >
+        <div class="msg-avatar" *ngIf="!isTrainer(msg)">HR</div>
+
+        <div
+          class="msg-bubble"
+          [ngClass]="isTrainer(msg) ? 'bubble-trainer' : 'bubble-hr'"
+        >
+          <div class="msg-role">
+            {{ isTrainer(msg) ? "👤 You" : "🛡️ HR Team" }}
+          </div>
+          <div class="msg-text">{{ msg.content }}</div>
+          <div class="msg-time">
+            {{ msg.createdAt | date: "HH:mm · MMM d" }}
+          </div>
+          <div class="msg-read" *ngIf="isTrainer(msg)">
+            {{ msg.read ? "✓✓" : "✓" }}
+          </div>
+        </div>
+
+        <div class="msg-avatar trainer-av" *ngIf="isTrainer(msg)">
+          T{{ userId }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-row">
+      <textarea
+        class="msg-input"
+        [(ngModel)]="newMessage"
+        (keydown)="handleKey($event)"
+        placeholder="Type your message to HR... (Enter to send)"
+        rows="2"
+      >
+      </textarea>
+      <button
+        class="send-btn"
+        (click)="send()"
+        [disabled]="!newMessage.trim() || sending"
+      >
+        <span *ngIf="!sending">📨</span>
+        <span *ngIf="sending">⏳</span>
+      </button>
+    </div>
+  </div>
+</div>

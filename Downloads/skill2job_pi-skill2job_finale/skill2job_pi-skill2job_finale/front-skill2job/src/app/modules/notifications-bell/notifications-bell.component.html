@@ -1,0 +1,51 @@
+<div class="notif">
+  <button class="bell" type="button" (click)="toggle()">
+    🔔
+    <span class="badge" *ngIf="unread > 0">{{ unread }}</span>
+  </button>
+
+  <div class="panel" *ngIf="open">
+    <div class="panel-head">
+      <div class="title">Notifications</div>
+
+      <div class="panel-actions">
+        <button class="btn-ghost" type="button" (click)="readAll()">
+          Mark all as read
+        </button>
+
+        <!-- ✅ NEW -->
+        <button class="btn-danger" type="button" (click)="clearAll()">
+          Clear all
+        </button>
+      </div>
+    </div>
+
+    <div class="loading" *ngIf="loading">Loading...</div>
+
+    <div class="empty" *ngIf="!loading && list.length === 0">
+      Aucune notification.
+    </div>
+
+    <div
+      class="item"
+      *ngFor="let n of list"
+      (click)="openNotif(n)"
+      [class.unread]="!n.read"
+    >
+      <div class="left">
+        <div class="msg">{{ n.message }}</div>
+        <div class="time">{{ n.createdAt | date: "short" }}</div>
+      </div>
+
+      <!-- ✅ NEW delete button (stop click propagation) -->
+      <button
+        class="icon-btn"
+        type="button"
+        title="Delete"
+        (click)="deleteOne(n, $event)"
+      >
+        🗑️
+      </button>
+    </div>
+  </div>
+</div>

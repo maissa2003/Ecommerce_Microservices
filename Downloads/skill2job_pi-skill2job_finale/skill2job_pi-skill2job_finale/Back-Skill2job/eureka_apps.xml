@@ -1,0 +1,41 @@
+<applications>
+  <versions__delta>1</versions__delta>
+  <apps__hashcode>UP_1_</apps__hashcode>
+  <application>
+    <name>API_GATEWAY_PI</name>
+    <instance>
+      <instanceId>b105e914b306:api_gateway_pi:8090</instanceId>
+      <hostName>b105e914b306</hostName>
+      <app>API_GATEWAY_PI</app>
+      <ipAddr>172.19.0.4</ipAddr>
+      <status>UP</status>
+      <overriddenstatus>UNKNOWN</overriddenstatus>
+      <port enabled="true">8090</port>
+      <securePort enabled="false">443</securePort>
+      <countryId>1</countryId>
+      <dataCenterInfo class="com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo">
+        <name>MyOwn</name>
+      </dataCenterInfo>
+      <leaseInfo>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1775088552807</registrationTimestamp>
+        <lastRenewalTimestamp>1775088552807</lastRenewalTimestamp>
+        <evictionTimestamp>0</evictionTimestamp>
+        <serviceUpTimestamp>1775088552295</serviceUpTimestamp>
+      </leaseInfo>
+      <metadata>
+        <management.port>8090</management.port>
+      </metadata>
+      <homePageUrl>http://b105e914b306:8090/</homePageUrl>
+      <statusPageUrl>http://b105e914b306:8090/actuator/info</statusPageUrl>
+      <healthCheckUrl>http://b105e914b306:8090/actuator/health</healthCheckUrl>
+      <vipAddress>api_gateway_pi</vipAddress>
+      <secureVipAddress>api_gateway_pi</secureVipAddress>
+      <isCoordinatingDiscoveryServer>false</isCoordinatingDiscoveryServer>
+      <lastUpdatedTimestamp>1775088552807</lastUpdatedTimestamp>
+      <lastDirtyTimestamp>1775088552208</lastDirtyTimestamp>
+      <actionType>ADDED</actionType>
+    </instance>
+  </application>
+</applications>

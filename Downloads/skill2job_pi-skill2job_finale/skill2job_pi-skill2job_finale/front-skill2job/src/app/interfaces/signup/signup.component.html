@@ -1,0 +1,70 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="brand-red">SKILL</span><span class="brand-black">2JOB</span>
+    </div>
+
+    <h2 class="auth-title">Create Account</h2>
+    <p class="auth-subtitle">Start your learning journey today</p>
+
+    <div class="form-group">
+      <label>Username</label>
+      <input
+        type="text"
+        placeholder="Choose a username"
+        [(ngModel)]="username"
+        name="username"
+        class="auth-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input
+        type="email"
+        placeholder="Enter your email"
+        [(ngModel)]="email"
+        name="email"
+        class="auth-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input
+        type="password"
+        placeholder="Create a password"
+        [(ngModel)]="password"
+        name="password"
+        class="auth-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <input
+        type="password"
+        placeholder="Confirm your password"
+        [(ngModel)]="confirmPassword"
+        name="confirmPassword"
+        class="auth-input"
+      />
+    </div>
+
+    <!-- ✅ Un seul bloc warning (jaune) -->
+    <div *ngIf="error" class="auth-warning">⚠️ {{ error }}</div>
+
+    <!-- ✅ Un seul bloc succès (vert) -->
+    <div *ngIf="success" class="auth-success">
+      {{ success }}
+    </div>
+
+    <button class="auth-btn" (click)="signup()" [disabled]="isLoading">
+      {{ isLoading ? "Creating account..." : "SIGN UP" }}
+    </button>
+
+    <div class="auth-footer">
+      Already have an account? <a routerLink="/signin">Sign In</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,556 @@
+/* =========================
+   Trainer Details (SCSS)
+   ========================= */
+
+.page {
+  padding: 18px 18px 28px;
+}
+
+/* ---------- Header ---------- */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+
+  h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  .subtitle {
+    margin: 6px 0 0;
+    opacity: 0.7;
+    font-size: 13px;
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---------- Search ---------- */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e7e7e7;
+  border-radius: 10px;
+  padding: 8px 10px;
+  min-width: 320px;
+
+  .icon {
+    opacity: 0.6;
+  }
+
+  input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 13px;
+    background: transparent;
+  }
+}
+
+/* ---------- Card ---------- */
+.card {
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.table-wrap {
+  overflow: auto; /* ✅ keep everything accessible with horizontal scroll */
+}
+
+/* =========================
+     ✅ TABLE FIX (important)
+     ========================= */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* ✅ force fixed columns */
+
+  th {
+    text-align: left;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    padding: 14px 14px;
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 14px 14px;
+    border-bottom: 1px solid #f1f1f1;
+    vertical-align: top;
+    overflow: hidden; /* ✅ prevent cell from expanding */
+  }
+
+  tr:hover td {
+    background: #fcfcfc;
+  }
+}
+
+/* ✅ Force widths by column index (your table has 7 columns in this component) */
+/* 1: ID */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 70px;
+}
+
+/* 2: Application */
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 130px;
+}
+
+/* 3: Level */
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 110px;
+}
+
+/* 4: Skills */
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 260px;
+}
+
+/* 5: Experience */
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 120px;
+}
+
+/* 6: AI Summary (was exploding) */
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 520px; /* ✅ adjust if you want 420/480/560 */
+  max-width: 520px;
+}
+
+/* 7: Actions */
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 140px;
+  white-space: nowrap;
+}
+
+/* ---------- Helpers ---------- */
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+.pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  border: 1px solid #e6e8ee;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  border: 1px solid transparent;
+
+  &.junior {
+    background: #fff7d6;
+    border-color: #ffe9a1;
+  }
+  &.mid {
+    background: #e9f4ff;
+    border-color: #cfe8ff;
+  }
+  &.senior {
+    background: #eafff1;
+    border-color: #c7f6d7;
+  }
+}
+
+/* ---------- Skills chips ---------- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 100%; /* ✅ don't overflow cell */
+
+  .chip {
+    background: #f5f5f7;
+    border: 1px solid #e8e8ec;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    max-width: 100%;
+  }
+}
+
+.exp {
+  display: inline-block;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: #f7f7f7;
+  border: 1px solid #eee;
+}
+
+.muted {
+  opacity: 0.6;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn.ghost {
+  background: #f2f2f2;
+}
+
+.btn.danger {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* stack buttons in actions column */
+.actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .btn {
+    width: 100%;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 18px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+/* =========================
+     AI Summary Card
+     ========================= */
+.ai-card {
+  border: 1px solid #e6ecff;
+  background: linear-gradient(135deg, #fbfcff, #f2f6ff);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  max-width: 100%; /* ✅ critical */
+}
+
+.ai-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.ai-title {
+  font-weight: 800;
+  font-size: 14px;
+  color: #203047;
+  letter-spacing: 0.2px;
+}
+
+.ai-badge {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.ai-badge.ok {
+  background: #eafff1;
+  color: #116a33;
+  border-color: #bfead0;
+}
+.ai-badge.warn {
+  background: #fff7e6;
+  color: #7a4a00;
+  border-color: #ffe2b8;
+}
+.ai-badge.risk {
+  background: #fff0f0;
+  color: #7a1f1f;
+  border-color: #ffd0d0;
+}
+
+.ai-body .summary {
+  white-space: pre-line;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #2c3e50;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #f1f4ff;
+
+  max-height: 200px; /* ✅ keep row stable */
+  overflow: auto;
+  word-break: break-word;
+}
+
+/* small scrollbar */
+.ai-body .summary::-webkit-scrollbar {
+  width: 8px;
+}
+.ai-body .summary::-webkit-scrollbar-thumb {
+  background: #d6ddff;
+  border-radius: 999px;
+}
+
+/* =========================
+     HR Review (if used later)
+     ========================= */
+.review-box {
+  border: 1px solid #e9e9ef;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  max-width: 100%;
+}
+
+.review-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.review-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.prio {
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.prio-high {
+  background: #fff0f0;
+  color: #7a1f1f;
+  border-color: #ffd0d0;
+}
+.prio-med {
+  background: #fff7e6;
+  color: #7a4a00;
+  border-color: #ffe2b8;
+}
+.prio-low {
+  background: #eef2ff;
+  color: #1e3a8a;
+  border-color: #c7d2fe;
+}
+
+.review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+
+  .tag {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #374151;
+  }
+}
+
+.review-notes {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #111827;
+  background: #fafafa;
+  border: 1px solid #efefef;
+  border-radius: 10px;
+  padding: 8px 10px;
+  white-space: pre-line;
+  margin-bottom: 8px;
+}
+
+.review-history {
+  .h {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 11.5px;
+    padding: 6px 0;
+    border-top: 1px dashed #eee;
+  }
+  .ht {
+    font-weight: 800;
+    color: #111827;
+  }
+  .hd {
+    opacity: 0.7;
+    white-space: nowrap;
+  }
+}
+
+.review-empty {
+  display: grid;
+  gap: 8px;
+  max-width: 100%;
+}
+
+/* =========================
+     Modal (if used later)
+     ========================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  z-index: 9998;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(680px, calc(100vw - 28px));
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #eee;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #f0f0f0;
+
+  .modal-title {
+    font-weight: 1000;
+    font-size: 18px;
+    color: #111827;
+  }
+  .modal-sub {
+    margin-top: 4px;
+    font-weight: 700;
+    opacity: 0.7;
+    font-size: 12.5px;
+  }
+
+  .x {
+    border: none;
+    background: #f3f4f6;
+    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    cursor: pointer;
+    font-weight: 1000;
+  }
+}
+
+.modal-body {
+  padding: 14px 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+
+  span {
+    font-weight: 900;
+    font-size: 12.5px;
+    opacity: 0.85;
+  }
+
+  input,
+  textarea,
+  select {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 10px 12px;
+    outline: none;
+    font-weight: 700;
+    font-size: 13px;
+
+    &:focus {
+      border-color: #111827;
+      box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.08);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1000px) {
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .search {
+    min-width: 100%;
+  }
+}

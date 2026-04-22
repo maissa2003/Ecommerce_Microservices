@@ -1,0 +1,1137 @@
+/* ============================================ */
+/* Sessions Component Styles – Trainer View     */
+/* ============================================ */
+
+/* ---------- Main Layout ---------- */
+.equipment-page {
+  margin-left: 80px;
+  margin-top: 90px;
+  width: calc(100% - 260px);
+  min-height: calc(100vh - 90px);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ---------- Header ---------- */
+.equipment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #1e1e1e;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.equipment-header h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #000000;
+  margin: 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-left: 6px solid #000000;
+  padding-left: 16px;
+}
+
+/* ---------- Add Button ---------- */
+.add-btn {
+  background: #000000;
+  color: white;
+  padding: 12px 22px;
+  border-radius: 40px;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.3px;
+}
+
+.add-btn:hover {
+  background: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.add-btn:active {
+  transform: translateY(0);
+}
+
+/* ---------- Session Cards Grid ---------- */
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1200px) {
+  .equipment-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+  }
+}
+
+@media (max-width: 768px) {
+  .equipment-grid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+  }
+}
+
+.equipment-card {
+  position: relative;
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+}
+
+.equipment-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Session banner & badge */
+.session-banner {
+  height: 140px;
+  background: linear-gradient(135deg, #000000, #333333);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.session-type {
+  background: white;
+  color: #000000;
+  padding: 8px 18px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.session-type.online {
+  background: white;
+  color: #000000;
+  border: 2px solid white;
+}
+
+.session-type.onsite {
+  background: #000000;
+  color: white;
+  border: 2px solid white;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-body h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #000000;
+}
+
+.card-body p {
+  margin: 4px 0;
+  color: #333333;
+  font-size: 14px;
+}
+
+/* ---------- Card Actions (edit/delete) ---------- */
+.card-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.small-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.small-btn.edit-btn {
+  color: #000000;
+}
+.small-btn.edit-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.small-btn.delete-btn {
+  color: #000000;
+}
+.small-btn.delete-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* ---------- Modal Overlay ---------- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Larger modal for the create form */
+.modal-card.large-modal {
+  width: 650px;
+  max-width: 96%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  background: white;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  animation: modalZoom 0.3s cubic-bezier(0.17, 0.67, 0.21, 1);
+  position: relative;
+}
+
+/* Black glowing border */
+.modal-card.large-modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 32px;
+  padding: 1px;
+  background: linear-gradient(135deg, #000000, #666666, #000000);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+/* Modal Header Enhancement */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f1f5f9;
+  position: relative;
+}
+
+.modal-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-icon {
+  font-size: 28px;
+  background: linear-gradient(135deg, #00000020, #00000005);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+}
+
+.modal-card h2 {
+  color: #000000;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  text-align: left;
+}
+
+/* Progress Steps */
+.modal-steps {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.02));
+  border-radius: 12px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #94a3b8;
+  flex: 1;
+}
+
+.step.active {
+  color: #000000;
+}
+
+.step.completed .step-number {
+  background: #000000;
+  color: white;
+  font-weight: 700;
+}
+
+.step.completed .step-label {
+  color: #000000;
+  font-weight: 600;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+  background: #000000;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
+}
+
+.step-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-label {
+  font-weight: 700;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 12px;
+  margin-bottom: 22px;
+  transition: all 0.3s ease;
+}
+
+.step-line.active {
+  background: #000000;
+  height: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- Close Button ---------- */
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  border: none;
+  background: white;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  color: #000000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  background: #000000;
+  color: white;
+  transform: rotate(90deg) scale(1.1);
+}
+
+/* ---------- Form Layout ---------- */
+.session-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-step-container {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.form-section {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.form-section label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: #000000;
+  margin-bottom: 6px;
+}
+
+/* Required Field Indicator */
+.required {
+  color: #000000;
+  margin-left: 4px;
+}
+
+/* Form Cards */
+.form-card {
+  background: #f8fafc;
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid #edf2f7;
+  transition: all 0.2s;
+}
+
+.form-card:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.section-title h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  flex: 1;
+}
+
+.title-icon {
+  font-size: 20px;
+}
+
+.section-badge {
+  background: #e2e8f0;
+  color: #000000;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+/* Input Enhancements */
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  font-size: 14px;
+  transition: all 0.2s;
+  background: white;
+  box-sizing: border-box;
+  color: #000000;
+}
+
+.input-wrapper input:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.input-focus-border {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #000000;
+  transition: all 0.3s;
+}
+
+.input-wrapper input:focus ~ .input-focus-border {
+  left: 0;
+  width: 100%;
+}
+
+/* Error State for Input */
+.input-wrapper.error input {
+  border-color: #000000;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.error-message {
+  display: block;
+  color: #000000;
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* Select Enhancements */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  font-size: 14px;
+  background: white;
+  appearance: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  color: #000000;
+}
+
+.select-wrapper select:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+/* Error State for Select */
+.select-wrapper.error select {
+  border-color: #000000;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Material form field inside modal */
+.form-section mat-form-field {
+  width: 100%;
+}
+
+/* Error state for Material datepicker */
+mat-form-field.error ::ng-deep .mat-form-field-outline {
+  color: #000000 !important;
+}
+
+mat-form-field.error ::ng-deep .mat-form-field-outline-thick {
+  color: #000000 !important;
+}
+
+mat-form-field.error ::ng-deep .mat-form-field-wrapper {
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Override Material's default styles */
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  color: #e2e8f0;
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-thick {
+  color: #000000;
+}
+
+::ng-deep .mat-form-field-label {
+  color: #64748b !important;
+}
+
+::ng-deep .mat-input-element {
+  color: #000000 !important;
+}
+
+::ng-deep .mat-form-field-flex {
+  background: white !important;
+  border-radius: 16px !important;
+  padding: 0 12px !important;
+}
+
+::ng-deep .mat-form-field-infix {
+  padding: 12px 0 !important;
+  border-top: 0 !important;
+}
+
+::ng-deep .mat-datepicker-toggle {
+  color: #000000 !important;
+}
+
+/* Time Input Enhancement */
+.time-input-wrapper {
+  position: relative;
+}
+
+.time-input {
+  width: 100%;
+  padding: 14px 16px 14px 40px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  font-size: 14px;
+  background: white;
+  box-sizing: border-box;
+  color: #000000;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #94a3b8;
+}
+
+/* Duration Hint */
+.duration-hint {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #000000;
+  transition: all 0.2s;
+}
+
+.duration-hint.error-hint {
+  background: rgba(0, 0, 0, 0.1);
+  color: #000000;
+  border-left: 3px solid #000000;
+  padding-left: 11px;
+}
+
+.hint-icon {
+  font-size: 16px;
+  display: inline-flex;
+}
+
+.duration-hint strong {
+  color: #000000;
+}
+
+/* ---------- Equipment Section ---------- */
+.equipment-card {
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+}
+
+.equipment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.equipment-hint {
+  color: #000000;
+  font-size: 13px;
+  margin: 0;
+}
+
+.add-equipment-btn {
+  background: #000000;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.add-equipment-btn:hover {
+  background: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.btn-icon {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.empty-equipment {
+  text-align: center;
+  padding: 24px;
+  background: #f1f5f9;
+  border-radius: 16px;
+  color: #000000;
+}
+
+.empty-icon {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.equipment-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.equipment-select-wrapper {
+  flex: 2;
+}
+
+.equipment-select-wrapper select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  background: white;
+  font-size: 14px;
+  color: #000000;
+}
+
+.equipment-select-wrapper select:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.quantity-wrapper {
+  flex: 1;
+}
+
+.quantity-wrapper input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 14px;
+  box-sizing: border-box;
+  color: #000000;
+}
+
+.quantity-wrapper input:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.remove-btn {
+  background: #000000;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.remove-btn:hover {
+  background: #333333;
+  transform: scale(1.05);
+}
+
+/* ---------- Form Actions ---------- */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  background: white;
+  color: #000000;
+  border: 2px solid #000000;
+  padding: 12px 20px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.cancel-btn:hover {
+  background: #000000;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.prev-btn {
+  background: white;
+  color: #000000;
+  border: 2px solid #e2e8f0;
+  padding: 12px 18px;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.prev-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #000000;
+  transform: translateY(-2px);
+}
+
+.next-btn {
+  background: #000000;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+.next-btn:hover {
+  background: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.create-btn {
+  background: #000000;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+.create-btn:hover:not(:disabled) {
+  background: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.create-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Button Text and Icons */
+.btn-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Online Session Message */
+.online-message {
+  color: #000000;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 12px 0 0 0;
+}
+
+/* Loading Spinner */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ffffff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Ensure Datepicker Overlay Is Above Modal ---------- */
+::ng-deep .cdk-overlay-container {
+  z-index: 10000 !important;
+}
+
+::ng-deep .mat-datepicker-popup {
+  z-index: 10001 !important;
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ---------- Scrollbar Styling ---------- */
+.modal-card.large-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-card.large-modal::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.modal-card.large-modal::-webkit-scrollbar-thumb {
+  background: #000000;
+  border-radius: 10px;
+}
+
+.modal-card.large-modal::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .equipment-page {
+    margin-left: 0;
+    width: 100%;
+    margin-top: 80px;
+    padding: 20px;
+  }
+
+  .equipment-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .equipment-header h2 {
+    font-size: 24px;
+  }
+
+  .equipment-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .modal-card.large-modal {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modal-steps {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .step {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .step-label {
+    display: none;
+  }
+
+  .equipment-row {
+    flex-wrap: wrap;
+  }
+
+  .equipment-select-wrapper {
+    flex: 1 1 100%;
+  }
+
+  .quantity-wrapper {
+    flex: 1;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+}
+
+/* ---------- Small Mobile Adjustments ---------- */
+@media (max-width: 480px) {
+  .modal-card.large-modal {
+    padding: 16px;
+  }
+
+  .modal-title-wrapper {
+    gap: 8px;
+  }
+
+  .modal-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .modal-card h2 {
+    font-size: 20px;
+  }
+
+  .form-card {
+    padding: 16px;
+  }
+
+  .section-title h3 {
+    font-size: 15px;
+  }
+
+  .equipment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .add-equipment-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Empty State Styling */
+.no-sessions {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f8fafc;
+  border-radius: 24px;
+  border: 2px dashed #000000;
+  width: 100%;
+  max-width: 400px;
+  margin: 40px auto;
+}
+
+.no-sessions-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.no-sessions h3 {
+  font-size: 24px;
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.no-sessions p {
+  color: #666666;
+  margin-bottom: 20px;
+}
+
+.no-sessions .add-btn {
+  display: inline-block;
+  margin-top: 10px;
+}

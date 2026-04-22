@@ -1,0 +1,292 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2>Trainer Profiles</h2>
+      <p class="subtitle">
+        Manage approved trainers (activation, suspension, moderation)
+      </p>
+    </div>
+    <div class="header-actions">
+      <div class="search">
+        <span class="icon">🔎</span>
+        <input
+          type="text"
+          placeholder="Search (user id, level, speciality, status...)"
+          [(ngModel)]="search"
+          (input)="applyFilters()"
+        />
+      </div>
+      <button class="btn ghost" (click)="load()">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-title">Total</div>
+      <div class="stat-value">{{ totalCount }}</div>
+      <div class="stat-hint">All trainer profiles</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-title">Active ✅</div>
+      <div class="stat-value">{{ activeCount }}</div>
+      <div class="stat-hint">Can publish / participate</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-title">Suspended ⛔</div>
+      <div class="stat-value">{{ suspendedCount }}</div>
+      <div class="stat-hint">Temporarily disabled</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter">
+      <label>Status</label>
+      <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
+        <option value="">ALL</option>
+        <option value="ACTIVE">ACTIVE</option>
+        <option value="SUSPENDED">SUSPENDED</option>
+      </select>
+    </div>
+    <div class="filter">
+      <label>Level</label>
+      <select [(ngModel)]="selectedLevel" (change)="applyFilters()">
+        <option value="">ALL</option>
+        <option value="JUNIOR">JUNIOR</option>
+        <option value="MID">MID</option>
+        <option value="SENIOR">SENIOR</option>
+      </select>
+    </div>
+    <div class="muted" *ngIf="loading">⏳ Loading...</div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:70px">ID</th>
+            <th style="width:90px">User</th>
+            <th>Speciality</th>
+            <th style="width:120px">Level</th>
+            <th style="width:140px">Status</th>
+            <th style="width:160px">Activated</th>
+            <th style="width:260px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filteredProfiles">
+            <td>
+              <span class="mono">{{ p.id }}</span>
+            </td>
+            <td>
+              <span class="pill">#{{ p.userId }}</span>
+            </td>
+            <td>
+              <span class="chip">{{ p.mainSpeciality || "General" }}</span>
+            </td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  junior: p.level === 'JUNIOR',
+                  mid: p.level === 'MID',
+                  senior: p.level === 'SENIOR'
+                }"
+              >
+                {{ p.level || "—" }}
+              </span>
+            </td>
+            <td>
+              <span
+                class="status"
+                [ngClass]="{
+                  active: p.status === 'ACTIVE',
+                  suspended: p.status === 'SUSPENDED'
+                }"
+              >
+                {{ p.status }}
+              </span>
+            </td>
+            <td class="muted">
+              {{
+                p.activatedAt ? (p.activatedAt | date: "yyyy-MM-dd HH:mm") : "—"
+              }}
+            </td>
+            <td class="actions">
+              <button class="btn small" (click)="openProfile(p)">👁 View</button>
+              <button
+                class="btn small success"
+                [disabled]="p.status === 'ACTIVE'"
+                (click)="changeStatus(p.id, 'ACTIVE')"
+              >
+                ✅ Activate
+              </button>
+              <button
+                class="btn small warn"
+                [disabled]="p.status === 'SUSPENDED'"
+                (click)="changeStatus(p.id, 'SUSPENDED')"
+              >
+                ⛔ Suspend
+              </button>
+              <button class="btn small danger" (click)="delete(p.id)">
+                🗑 Delete
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredProfiles.length === 0 && !loading">
+            <td colspan="7" class="empty">No trainer profiles found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ✅ MODAL ENRICHIE -->
+  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <div class="modal-avatar">T{{ selectedProfile?.userId }}</div>
+          <div>
+            <h3>Trainer #{{ selectedProfile?.userId }}</h3>
+            <p class="muted">
+              {{ selectedProfile?.mainSpeciality || "General" }} ·
+              {{ selectedProfile?.level }}
+            </p>
+          </div>
+        </div>
+        <button class="icon-btn" (click)="closeModal()">✖</button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedProfile as p">
+        <!-- Profile Info Grid -->
+        <div class="section-title">👤 Profile Information</div>
+        <div class="grid">
+          <div class="info">
+            <div class="label">Speciality</div>
+            <div class="value">{{ p.mainSpeciality || "General" }}</div>
+          </div>
+          <div class="info">
+            <div class="label">Level</div>
+            <div class="value">
+              <span
+                class="badge"
+                [ngClass]="{
+                  junior: p.level === 'JUNIOR',
+                  mid: p.level === 'MID',
+                  senior: p.level === 'SENIOR'
+                }"
+              >
+                {{ p.level || "—" }}
+              </span>
+            </div>
+          </div>
+          <div class="info">
+            <div class="label">Status</div>
+            <div class="value">
+              <span
+                class="status"
+                [ngClass]="{
+                  active: p.status === 'ACTIVE',
+                  suspended: p.status === 'SUSPENDED'
+                }"
+              >
+                {{ p.status }}
+              </span>
+            </div>
+          </div>
+          <div class="info">
+            <div class="label">Activated At</div>
+            <div class="value">
+              {{ p.activatedAt ? (p.activatedAt | date: "mediumDate") : "—" }}
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Section -->
+        <div class="ai-section" *ngIf="!loadingDetails && selectedDetails">
+          <div class="section-title">🤖 AI Evaluation Report</div>
+
+          <div class="ai-kpis">
+            <!-- Score -->
+            <div class="ai-kpi" [ngClass]="scoreColor">
+              <div class="ai-kpi-label">Confidence Score</div>
+              <div class="ai-kpi-value">{{ extractConfidence() }}%</div>
+              <div class="ai-bar">
+                <div
+                  class="ai-bar-fill"
+                  [style.width.%]="extractConfidence()"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="ai-kpi">
+              <div class="ai-kpi-label">Experience</div>
+              <div class="ai-kpi-value">
+                {{ selectedDetails.yearsExperience || 0 }} yrs
+              </div>
+            </div>
+
+            <!-- Skills count -->
+            <div class="ai-kpi">
+              <div class="ai-kpi-label">Skills Detected</div>
+              <div class="ai-kpi-value">{{ skillsList.length }}</div>
+            </div>
+          </div>
+
+          <!-- Skills tags -->
+          <div class="skills-row" *ngIf="skillsList.length > 0">
+            <div class="skills-label">Detected Skills</div>
+            <div class="skills-list">
+              <span class="skill-tag" *ngFor="let s of skillsList">{{
+                s
+              }}</span>
+            </div>
+          </div>
+
+          <!-- Recommendation -->
+          <div class="recommendation" [ngClass]="scoreColor">
+            <div class="rec-label">💡 HR Recommendation</div>
+            <div class="rec-text">{{ recommendation }}</div>
+          </div>
+        </div>
+
+        <!-- Loading details -->
+        <div class="ai-loading" *ngIf="loadingDetails">
+          <span>⏳ Loading AI report...</span>
+        </div>
+
+        <!-- No details -->
+        <div class="ai-empty" *ngIf="!loadingDetails && !selectedDetails">
+          <span
+            >🔍 No AI analysis available yet. Run analysis from Applications
+            page.</span
+          >
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="modal-footer">
+          <button class="btn ghost" (click)="closeModal()">Close</button>
+          <button
+            class="btn warn"
+            [disabled]="p.status === 'SUSPENDED'"
+            (click)="changeStatus(p.id, 'SUSPENDED'); closeModal()"
+          >
+            ⛔ Suspend
+          </button>
+          <button
+            class="btn success"
+            [disabled]="p.status === 'ACTIVE'"
+            (click)="changeStatus(p.id, 'ACTIVE'); closeModal()"
+          >
+            ✅ Activate
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

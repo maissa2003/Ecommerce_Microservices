@@ -1,0 +1,77 @@
+<div class="pp-page">
+  <div class="pp-header">
+    <div>
+      <h2>Company Profile</h2>
+      <p>Manage your company information.</p>
+    </div>
+
+    <div class="pp-badge" *ngIf="partner">
+      <span
+        class="pp-status"
+        [ngClass]="{
+          approved: partner.status === 'APPROVED',
+          pending: partner.status === 'PENDING',
+          suspended: partner.status === 'SUSPENDED'
+        }"
+      >
+        {{ partner.status }}
+      </span>
+    </div>
+  </div>
+
+  <p class="pp-msg" *ngIf="msg">{{ msg }}</p>
+  <p class="pp-loading" *ngIf="loading">Loading...</p>
+
+  <div class="pp-card">
+    <div class="pp-grid">
+      <div class="pp-field">
+        <label>Company Name</label>
+        <input [(ngModel)]="form.companyName" />
+      </div>
+
+      <div class="pp-field">
+        <label>Industry</label>
+        <input [(ngModel)]="form.industry" />
+      </div>
+
+      <div class="pp-field">
+        <label>Email</label>
+        <input [(ngModel)]="form.companyEmail" />
+      </div>
+
+      <div class="pp-field">
+        <label>Phone</label>
+        <input [(ngModel)]="form.phone" />
+      </div>
+
+      <div class="pp-field">
+        <label>Address</label>
+        <input [(ngModel)]="form.address" />
+      </div>
+
+      <div class="pp-field">
+        <label>Website</label>
+        <input [(ngModel)]="form.website" />
+      </div>
+
+      <div class="pp-field pp-full">
+        <label>Description</label>
+        <textarea [(ngModel)]="form.description" rows="4"></textarea>
+      </div>
+    </div>
+
+    <div class="pp-actions">
+      <button class="pp-btn primary" (click)="save()" [disabled]="loading">
+        Save
+      </button>
+
+      <button
+        class="pp-btn danger"
+        (click)="deleteMyPartner()"
+        [disabled]="loading"
+      >
+        Delete Partner Profile
+      </button>
+    </div>
+  </div>
+</div>

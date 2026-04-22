@@ -1,0 +1,210 @@
+<div class="help-page">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Help Center</h1>
+      <p class="subtitle">
+        Find answers fast, track your trainer journey, and contact support if
+        needed.
+      </p>
+
+      <div class="hero-meta">
+        <div class="pill">
+          <span class="dot" [ngClass]="statusBadge.cls"></span>
+          <span class="label">Status:</span>
+          <span class="value">{{ statusBadge.label }}</span>
+        </div>
+
+        <button
+          class="btn ghost"
+          (click)="refreshStatus()"
+          [disabled]="statusLoading"
+        >
+          {{ statusLoading ? "⏳ Checking..." : "🔄 Refresh status" }}
+        </button>
+      </div>
+    </div>
+
+    <!-- RECOMMENDED -->
+    <div class="rec-card">
+      <div class="rec-head">
+        <div class="title">Recommended for you</div>
+        <div class="badge" [ngClass]="statusBadge.cls">
+          {{ statusBadge.label }}
+        </div>
+      </div>
+
+      <div class="rec-list">
+        <a
+          class="rec-item"
+          *ngFor="let r of recommendations"
+          [routerLink]="r.link || null"
+          [class.clickable]="!!r.link"
+          (click)="!r.link ? $event.preventDefault() : null"
+        >
+          <div class="ico">{{ r.icon }}</div>
+          <div class="txt">
+            <div class="t">{{ r.title }}</div>
+            <div class="d">{{ r.desc }}</div>
+          </div>
+          <div class="go" *ngIf="r.link">→</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH + FILTERS -->
+  <div class="toolbar">
+    <div class="search">
+      <span class="s-ico">🔎</span>
+      <input
+        type="text"
+        [(ngModel)]="q"
+        placeholder="Search help articles (e.g., pending, AI score, create course)..."
+      />
+      <button class="s-clear" *ngIf="q" (click)="clearSearch()">✕</button>
+    </div>
+
+    <div class="cats">
+      <button
+        class="cat"
+        *ngFor="let c of categories"
+        [class.active]="selectedCategory === c"
+        (click)="setCategory(c)"
+      >
+        {{ c }}
+      </button>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <div class="faq-head">
+      <h2>Frequently Asked Questions</h2>
+      <p>{{ filteredFaq.length }} result(s)</p>
+    </div>
+
+    <div class="faq-list" *ngIf="filteredFaq.length > 0">
+      <div class="faq-item" *ngFor="let item of filteredFaq">
+        <button class="q" (click)="toggle(item.id)">
+          <div class="q-left">
+            <span class="tag">{{ item.category }}</span>
+            <span class="text">{{ item.question }}</span>
+          </div>
+          <span class="chev" [class.open]="openId === item.id">⌄</span>
+        </button>
+
+        <div class="a" *ngIf="openId === item.id">
+          <p>{{ item.answer }}</p>
+
+          <div class="a-actions">
+            <button
+              class="mini"
+              (click)="copy(item.question + ' - ' + item.answer)"
+            >
+              📋 Copy
+            </button>
+            <button class="mini" (click)="openId = null">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty" *ngIf="filteredFaq.length === 0">
+      <div class="emoji">🤷</div>
+      <div class="t">No results found</div>
+      <div class="d">Try different keywords or reset filters.</div>
+      <button class="btn primary" (click)="clearSearch()">Reset</button>
+    </div>
+  </div>
+
+  <!-- SUPPORT -->
+  <div class="support">
+    <div class="support-head">
+      <h2>Contact Support</h2>
+      <p>
+        Create a request (stored locally). You can also include screenshots and
+        steps in the message.
+      </p>
+    </div>
+
+    <div class="support-grid">
+      <div class="support-form">
+        <label class="field">
+          <span>Subject</span>
+          <input
+            [(ngModel)]="ticketSubject"
+            placeholder="Example: AI score not updating"
+          />
+        </label>
+
+        <label class="field">
+          <span>Category</span>
+          <select [(ngModel)]="ticketCategory">
+            <option>Application</option>
+            <option>Profile</option>
+            <option>Courses</option>
+            <option>Payments</option>
+            <option>Account</option>
+            <option>Other</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Message</span>
+          <textarea
+            rows="6"
+            [(ngModel)]="ticketMessage"
+            placeholder="Describe what happened, what you expected, and steps to reproduce..."
+          ></textarea>
+        </label>
+
+        <button
+          class="btn primary"
+          (click)="submitTicket()"
+          [disabled]="!ticketSubject.trim() || ticketMessage.trim().length < 10"
+        >
+          ✅ Submit request
+        </button>
+
+        <div class="hint">
+          Tip: Add your browser, time, and screenshots link for faster
+          resolution.
+        </div>
+      </div>
+
+      <div class="support-list">
+        <div class="list-title">My Requests</div>
+
+        <div class="ticket" *ngFor="let t of tickets">
+          <div class="ticket-top">
+            <div class="id">{{ t.id }}</div>
+            <span class="st" [ngClass]="t.status.toLowerCase()">{{
+              t.status
+            }}</span>
+          </div>
+
+          <div class="sub">{{ t.subject }}</div>
+          <div class="meta">
+            <span class="cat">{{ t.category }}</span>
+            <span class="dt">{{ t.createdAt | date: "medium" }}</span>
+          </div>
+
+          <div class="msg">{{ t.message }}</div>
+
+          <button
+            class="mini"
+            *ngIf="t.status !== 'RESOLVED'"
+            (click)="markResolved(t.id)"
+          >
+            ✅ Mark as resolved
+          </button>
+        </div>
+
+        <div class="empty-tickets" *ngIf="tickets.length === 0">
+          No requests yet. Submit one if you need help.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

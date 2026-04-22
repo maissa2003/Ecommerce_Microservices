@@ -1,0 +1,203 @@
+body {
+  font-family: "Segoe UI", "Roboto", Arial, sans-serif;
+  background: #f4f6fa;
+}
+
+.courses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.courses-header h2 {
+  color: #222;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.btn-add {
+  background: linear-gradient(90deg, #198754 60%, #28a745 100%);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px #19875422;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.btn-add:hover {
+  background: linear-gradient(90deg, #28a745 60%, #198754 100%);
+  box-shadow: 0 4px 16px #19875433;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 24px;
+}
+.course-card {
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  box-shadow: 0 2px 16px #0d6efd0a;
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+.course-card:hover {
+  box-shadow: 0 6px 32px #0d6efd22;
+  transform: translateY(-2px) scale(1.02);
+}
+.card-image {
+  width: 100%;
+  height: 170px;
+  background: linear-gradient(90deg, #f6f6f6 60%, #e9ecef 100%);
+  display: block;
+  overflow: hidden;
+}
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.card-body {
+  padding: 18px 16px 10px 16px;
+}
+.card-body h3 {
+  margin: 0 0 8px 0;
+  color: #0d6efd;
+  font-size: 1.18rem;
+  font-weight: 600;
+}
+.card-body .desc {
+  color: #444;
+  margin: 0 0 10px 0;
+  font-size: 0.98rem;
+}
+.muted {
+  color: #888;
+  font-size: 0.93rem;
+}
+.card-actions {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px 14px 16px;
+  border-top: 1px solid #f1f1f1;
+  background: #f8f9fa;
+}
+.card-actions button {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.98rem;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-edit {
+  background: #adb5bd;
+  color: #222;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-edit:hover {
+  background: #868e96;
+  color: #fff;
+}
+.btn-delete {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  transition: background 0.2s;
+}
+.btn-delete:hover {
+  background: #b02a37;
+  color: #fff;
+}
+
+input,
+textarea {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  width: 100%;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  background: #f8fafc;
+  transition: border 0.2s;
+}
+input:focus,
+textarea:focus {
+  border: 1.5px solid #0d6efd;
+  outline: none;
+}
+button {
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #0d6efd;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+button:hover {
+  background: #0b5ed7;
+}
+
+/* overlay form */
+.overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.form-panel {
+  background: #fff;
+  padding: 28px 28px 18px 28px;
+  border-radius: 14px;
+  width: 440px;
+  max-width: 98vw;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 32px #0d6efd22;
+}
+.form-panel h3 {
+  margin-bottom: 10px;
+  color: #198754;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.form-panel label {
+  font-weight: 500;
+  color: #222;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+.preview img {
+  max-width: 100%;
+  max-height: 160px;
+  display: block;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0d6efd11;
+  margin-bottom: 8px;
+}
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}

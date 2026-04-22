@@ -1,0 +1,154 @@
+<div class="details-page">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="btn ghost" (click)="back()">← Back</button>
+
+    <div class="mini-status" *ngIf="offer && !loading">
+      <span
+        class="dot"
+        [ngClass]="{
+          open: (offer.status || 'OPEN') === 'OPEN',
+          closed: (offer.status || 'OPEN') === 'CLOSED'
+        }"
+      ></span>
+      <span class="muted">{{ offer.status || "OPEN" }}</span>
+    </div>
+  </div>
+
+  <!-- STATES -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    Chargement...
+  </div>
+
+  <div *ngIf="error" class="alert error">⚠️ {{ error }}</div>
+
+  <!-- CONTENT -->
+  <div *ngIf="!loading && offer" class="card">
+    <!-- HEADER -->
+    <div class="head">
+      <div class="title-block">
+        <h2 class="title">{{ offer.title }}</h2>
+        <div class="subtitle muted">
+          <span class="company">{{ getCompanyName() }}</span>
+          <span class="sep">•</span>
+          <span class="location">{{ offer.location || "-" }}</span>
+        </div>
+      </div>
+
+      <div class="chips">
+        <span class="chip type">{{ offer.type }}</span>
+        <span class="chip mode">{{ offer.mode }}</span>
+        <span
+          class="chip status"
+          [ngClass]="{
+            open: (offer.status || 'OPEN') === 'OPEN',
+            closed: (offer.status || 'OPEN') === 'CLOSED'
+          }"
+        >
+          {{ offer.status || "OPEN" }}
+        </span>
+      </div>
+    </div>
+
+    <!-- BODY GRID -->
+    <div class="grid">
+      <!-- MAIN -->
+      <div class="panel">
+        <h3>Description</h3>
+        <p>{{ offer.description }}</p>
+
+        <div class="divider"></div>
+
+        <div *ngIf="offer.requirements">
+          <h3>Requirements</h3>
+          <p>{{ offer.requirements }}</p>
+        </div>
+      </div>
+
+      <!-- SIDE -->
+      <div class="side">
+        <div class="info-card">
+          <div class="info-title">Offer info</div>
+
+          <div class="info-row">
+            <span class="label">Company</span>
+            <span class="value">{{ getCompanyName() }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Location</span>
+            <span class="value">{{ offer.location || "-" }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Type</span>
+            <span class="value">{{ offer.type }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Mode</span>
+            <span class="value">{{ offer.mode }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Deadline</span>
+            <span class="value">
+              {{ offer.deadline ? (offer.deadline | date: "mediumDate") : "-" }}
+            </span>
+          </div>
+        </div>
+
+        <!-- APPLY STATUS -->
+        <div class="apply-state" *ngIf="alreadyApplied">
+          ✅ Vous avez déjà postulé à cette offre.
+        </div>
+
+        <!-- CTA -->
+        <button
+          class="btn primary full"
+          [disabled]="(offer.status || 'OPEN') !== 'OPEN' || alreadyApplied"
+          (click)="toggleApply()"
+        >
+          {{ alreadyApplied ? "Applied" : "Apply now" }}
+        </button>
+
+        <!-- APPLY FORM -->
+        <div class="apply-box" *ngIf="showApply && !alreadyApplied">
+          <div class="apply-title">Postuler</div>
+
+          <!-- CV FILE -->
+          <label class="field-label">CV (PDF obligatoire)</label>
+          <input
+            class="input"
+            type="file"
+            accept="application/pdf"
+            (change)="onCvSelected($event)"
+          />
+
+          <!-- MOTIVATION FILE -->
+          <label class="field-label">Motivation Letter (PDF obligatoire)</label>
+          <input
+            class="input"
+            type="file"
+            accept="application/pdf"
+            (change)="onMotivationSelected($event)"
+          />
+
+          <button
+            class="btn primary full"
+            [disabled]="submitting"
+            (click)="apply()"
+          >
+            {{ submitting ? "Envoi..." : "Envoyer ma candidature" }}
+          </button>
+        </div>
+
+        <!-- MESSAGE -->
+        <div class="alert success" *ngIf="applyMessage && !error">
+          {{ applyMessage }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

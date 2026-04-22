@@ -1,0 +1,334 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>My Trainer Profile</h1>
+      <p class="subtitle">
+        A professional profile to showcase your expertise to students and HR.
+      </p>
+    </div>
+
+    <div class="header-actions" *ngIf="profile">
+      <button class="btn ghost" (click)="toggleEdit()">
+        {{ editing ? "✖ Cancel" : "✏️ Edit profile" }}
+      </button>
+      <button class="btn primary" (click)="downloadProfile()">
+        📄 Download
+      </button>
+    </div>
+  </div>
+
+  <!-- Errors / loading -->
+  <div class="state" *ngIf="loading">
+    <div class="icon spin">⏳</div>
+    <div class="title">Loading profile...</div>
+  </div>
+
+  <div class="state danger" *ngIf="!loading && errorMsg">
+    <div class="icon">⚠️</div>
+    <div class="title">{{ errorMsg }}</div>
+    <a routerLink="/trainer-portal/my-application" class="btn primary"
+      >View My Application</a
+    >
+  </div>
+
+  <!-- Profile -->
+  <ng-container *ngIf="!loading && profile">
+    <!-- HERO -->
+    <div class="hero">
+      <div class="avatar">{{ initials }}</div>
+
+      <div class="hero-main">
+        <div class="top">
+          <div>
+            <div class="name">Trainer #{{ userId }}</div>
+            <div class="headline">
+              {{
+                draft.headline ||
+                  (profile.mainSpeciality
+                    ? profile.mainSpeciality + " Trainer"
+                    : "Professional Trainer")
+              }}
+            </div>
+          </div>
+
+          <div class="badges">
+            <span class="badge" [ngClass]="levelClass">{{ levelLabel }}</span>
+            <span class="badge" [ngClass]="statusClass">{{ statusLabel }}</span>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div class="meta-item">
+            <span class="m">Speciality</span>
+            <span class="v">{{ profile.mainSpeciality || "General" }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="m">Location</span>
+            <span class="v">{{ draft.location || "—" }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="m">Availability</span>
+            <span class="v">{{ draft.availability }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="m">Rate</span>
+            <span class="v">{{ draft.hourlyRate || "—" }}</span>
+          </div>
+        </div>
+
+        <div class="links">
+          <a
+            class="link"
+            *ngIf="draft.portfolioUrl"
+            [href]="draft.portfolioUrl"
+            target="_blank"
+            rel="noopener"
+            >🌐 Portfolio</a
+          >
+          <a
+            class="link"
+            *ngIf="draft.linkedinUrl"
+            [href]="draft.linkedinUrl"
+            target="_blank"
+            rel="noopener"
+            >💼 LinkedIn</a
+          >
+          <a
+            class="link"
+            *ngIf="draft.githubUrl"
+            [href]="draft.githubUrl"
+            target="_blank"
+            rel="noopener"
+            >🐙 GitHub</a
+          >
+          <span
+            class="hint"
+            *ngIf="
+              !draft.portfolioUrl && !draft.linkedinUrl && !draft.githubUrl
+            "
+            >Add links to strengthen your profile.</span
+          >
+        </div>
+      </div>
+
+      <!-- completeness -->
+      <div class="score">
+        <div class="score-top">
+          <div class="score-title">Profile completeness</div>
+          <div class="score-val">{{ completeness }}%</div>
+        </div>
+        <div class="bar">
+          <div class="fill" [style.width.%]="completeness"></div>
+        </div>
+        <div class="score-sub">{{ completenessLabel }}</div>
+        <div class="saved" *ngIf="savedMsg">{{ savedMsg }}</div>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid">
+      <!-- About -->
+      <div class="card">
+        <div class="card-title">About</div>
+
+        <div *ngIf="!editing" class="text">
+          {{
+            draft.bio ||
+              "No bio yet. Add a short description about your teaching style, experience, and topics."
+          }}
+        </div>
+
+        <div *ngIf="editing" class="form">
+          <label class="field">
+            <span>Headline</span>
+            <input
+              [(ngModel)]="draft.headline"
+              placeholder="e.g., Full-Stack Web Development Trainer"
+            />
+          </label>
+
+          <label class="field">
+            <span>Bio</span>
+            <textarea
+              rows="6"
+              [(ngModel)]="draft.bio"
+              placeholder="Write a short bio (experience, teaching style, outcomes)..."
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Location</span>
+            <input
+              [(ngModel)]="draft.location"
+              placeholder="e.g., Tunis, Remote"
+            />
+          </label>
+
+          <div class="row">
+            <label class="field">
+              <span>Availability</span>
+              <select [(ngModel)]="draft.availability">
+                <option>Flexible</option>
+                <option>Part-time</option>
+                <option>Full-time</option>
+                <option>Weekends</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Hourly rate</span>
+              <input
+                [(ngModel)]="draft.hourlyRate"
+                placeholder="e.g., 30 TND/h or Negotiable"
+              />
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" (click)="saveDraft()">💾 Save</button>
+            <button class="btn ghost" (click)="toggleEdit()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills / Expertise -->
+      <div class="card">
+        <div class="card-title">Expertise</div>
+
+        <div class="chips" *ngIf="!editing">
+          <span class="chip" *ngFor="let s of expertiseList">{{ s }}</span>
+          <span class="empty" *ngIf="expertiseList.length === 0"
+            >Add your expertise areas (comma-separated).</span
+          >
+        </div>
+
+        <div *ngIf="editing" class="form">
+          <label class="field">
+            <span>Expertise (comma-separated)</span>
+            <textarea
+              rows="3"
+              [(ngModel)]="draft.expertise"
+              placeholder="Angular, Spring Boot, DevOps, Data Science..."
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Tools (comma-separated)</span>
+            <textarea
+              rows="3"
+              [(ngModel)]="draft.tools"
+              placeholder="Git, Docker, Kubernetes, Postman..."
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Languages (comma-separated)</span>
+            <input
+              [(ngModel)]="draft.languages"
+              placeholder="English, French, Arabic..."
+            />
+          </label>
+        </div>
+
+        <div class="subgrid">
+          <div class="mini">
+            <div class="k">Tools</div>
+            <div class="chips">
+              <span class="chip" *ngFor="let t of toolsList">{{ t }}</span>
+              <span class="empty" *ngIf="toolsList.length === 0">—</span>
+            </div>
+          </div>
+
+          <div class="mini">
+            <div class="k">Languages</div>
+            <div class="chips">
+              <span class="chip" *ngFor="let l of languagesList">{{ l }}</span>
+              <span class="empty" *ngIf="languagesList.length === 0">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="card">
+        <div class="card-title">Links</div>
+
+        <div *ngIf="!editing" class="links-col">
+          <div class="link-row">
+            <span class="k">Portfolio</span>
+            <a
+              class="v"
+              *ngIf="draft.portfolioUrl"
+              [href]="draft.portfolioUrl"
+              target="_blank"
+              >{{ draft.portfolioUrl }}</a
+            >
+            <span class="v muted" *ngIf="!draft.portfolioUrl">—</span>
+          </div>
+          <div class="link-row">
+            <span class="k">LinkedIn</span>
+            <a
+              class="v"
+              *ngIf="draft.linkedinUrl"
+              [href]="draft.linkedinUrl"
+              target="_blank"
+              >{{ draft.linkedinUrl }}</a
+            >
+            <span class="v muted" *ngIf="!draft.linkedinUrl">—</span>
+          </div>
+          <div class="link-row">
+            <span class="k">GitHub</span>
+            <a
+              class="v"
+              *ngIf="draft.githubUrl"
+              [href]="draft.githubUrl"
+              target="_blank"
+              >{{ draft.githubUrl }}</a
+            >
+            <span class="v muted" *ngIf="!draft.githubUrl">—</span>
+          </div>
+        </div>
+
+        <div *ngIf="editing" class="form">
+          <label class="field">
+            <span>Portfolio URL</span>
+            <input
+              [(ngModel)]="draft.portfolioUrl"
+              placeholder="https://your-portfolio.com"
+            />
+          </label>
+          <label class="field">
+            <span>LinkedIn URL</span>
+            <input
+              [(ngModel)]="draft.linkedinUrl"
+              placeholder="https://linkedin.com/in/username"
+            />
+          </label>
+          <label class="field">
+            <span>GitHub URL</span>
+            <input
+              [(ngModel)]="draft.githubUrl"
+              placeholder="https://github.com/username"
+            />
+          </label>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card actions-card">
+        <div class="card-title">Quick Actions</div>
+        <div class="quick">
+          <a routerLink="/trainer-portal/my-application" class="btn primary"
+            >📋 My Application</a
+          >
+          <a routerLink="/trainer-portal/help" class="btn ghost"
+            >🆘 Help Center</a
+          >
+        </div>
+        <div class="note">
+          Keep your profile up to date to improve visibility and trust.
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

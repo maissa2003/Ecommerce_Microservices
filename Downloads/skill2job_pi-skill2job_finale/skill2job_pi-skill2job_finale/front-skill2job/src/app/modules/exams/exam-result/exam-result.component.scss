@@ -1,0 +1,304 @@
+.result-platform {
+  min-height: 100vh;
+  background: transparent;
+  padding: 100px 20px 40px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  color: #111111;
+}
+
+.result-card {
+  max-width: 600px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+
+  &.passed {
+    border-color: #b71c1c;
+    box-shadow: 0 18px 40px rgba(183, 28, 28, 0.18);
+  }
+
+  &.failed {
+    border-color: #444444;
+  }
+}
+
+.result-header {
+  text-align: center;
+  margin-bottom: 30px;
+
+  h1 {
+    font-size: 1.7rem;
+    color: #111111;
+    margin: 0 0 10px 0;
+  }
+
+  .exam-description {
+    color: #888888;
+    margin: 0;
+  }
+}
+
+.score-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f7f7f7;
+  border-radius: 16px;
+
+  .score-circle {
+    text-align: center;
+
+    .score-value {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #b71c1c;
+      line-height: 1;
+    }
+
+    .score-label {
+      color: #888888;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+  }
+
+  .pass-score {
+    text-align: center;
+
+    .label {
+      display: block;
+      color: #666666;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #111111;
+    }
+  }
+}
+
+.result-message {
+  text-align: center;
+  margin-bottom: 30px;
+
+  .success-message {
+    h2 {
+      color: #b71c1c;
+      margin: 0 0 10px 0;
+    }
+
+    p {
+      color: #555555;
+      margin: 0;
+    }
+  }
+
+  .fail-message {
+    h2 {
+      color: #b71c1c;
+      margin: 0 0 10px 0;
+    }
+
+    p {
+      color: #555555;
+      margin: 0;
+    }
+  }
+}
+
+.detail-link {
+  margin-bottom: 24px;
+  text-align: center;
+  .btn-outline {
+    background: transparent;
+    color: #b71c1c;
+    border: 2px solid #b71c1c;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    &:hover {
+      background: rgba(183, 28, 28, 0.15);
+    }
+  }
+}
+
+.certificate-section {
+  margin-bottom: 30px;
+}
+
+.certificate-card {
+  background: #fafafa;
+  border: 1px solid #b71c1c;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  .certificate-icon {
+    font-size: 2.5rem;
+  }
+
+  .certificate-info {
+    flex: 1;
+
+    h3 {
+      color: #b71c1c;
+      margin: 0 0 5px 0;
+    }
+
+    .cert-code {
+      color: #555555;
+      font-size: 0.9rem;
+      margin: 0 0 5px 0;
+      font-family: monospace;
+    }
+
+    .cert-date {
+      color: #777777;
+      font-size: 0.8rem;
+      margin: 0;
+    }
+  }
+}
+
+.generating-certificate {
+  text-align: center;
+  padding: 20px;
+
+  .spinner-small {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #333333;
+    border-top-color: #b71c1c;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+  }
+
+  p {
+    color: #888888;
+    margin: 0;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &-primary {
+    background: #b71c1c;
+    color: white;
+
+    &:hover {
+      background: #d32f2f;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(183, 28, 28, 0.4);
+    }
+  }
+
+  &-secondary {
+    background: #333333;
+    color: white;
+
+    &:hover {
+      background: #444444;
+      transform: translateY(-2px);
+    }
+  }
+
+  &-success {
+    background: #2e7d32;
+    color: white;
+
+    &:hover {
+      background: #388e3c;
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.loading-container,
+.error-container {
+  min-height: 100vh;
+  background: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #333333;
+    border-top-color: #b71c1c;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+
+  .error-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    color: #b71c1c;
+    margin: 0 0 10px 0;
+  }
+
+  p {
+    color: #888888;
+    margin-bottom: 20px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .result-card {
+    padding: 20px;
+  }
+
+  .score-section {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .certificate-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}
